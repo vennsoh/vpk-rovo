@@ -1,6 +1,15 @@
 ---
 name: vpk-git-ship
 description: "Use for VPK-rovo git shipping: create/update PRs, merge PRs back to main, or run the full create-PR -> wait/merge -> sync-main flow when the user invokes vpk-git-ship. For cleanup, use vpk-git-clean."
+purpose: Ship VPK changes through the PR, review, required-check, merge-back, and persistent-main sync flow without clobbering unrelated local edits.
+owner: VPK
+category: git-workflow
+inputs: Current diff, branch/PR state, GitHub checks, review conversations, persistent checkout state, and user shipping intent.
+outputs: Commit, pushed branch, PR, merged main, synced checkout, and clear handoff for any cleanup left to vpk-git-clean.
+required_tools: shell, git, gh, pnpm
+validation_command: pnpm run lint && pnpm run typecheck
+generated_artifacts: Git commits, branches, pull requests, and merge commits when approved.
+common_failure_modes: Shipping unrelated edits, opening duplicate PRs, bypassing unresolved reviews, merging before checks pass, or overwriting persistent-main work.
 ---
 
 # VPK Git Ship

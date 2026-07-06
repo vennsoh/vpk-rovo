@@ -6,6 +6,15 @@ description: This skill should be used when the user asks to "set up", "get star
   "env setup", "how do I start", "how do I set up the project", "get this working",
   or wants to set up a new VPK project from scratch. Also triggered by errors like
   "ASAP key not working", "credentials not found", "env not configured".
+purpose: Guide first-time or repaired VPK local setup for dependencies, credentials, env files, Rovo Serve, AI Gateway, and dev servers.
+owner: VPK
+category: setup
+inputs: Current checkout state, package manager state, env files, credentials, desired runtime mode, and dev-server requirements.
+outputs: Installed dependencies, configured env files, started or documented dev servers, Portless URL, and setup verification notes.
+required_tools: shell, pnpm, rovo, portless
+validation_command: pnpm run dev:tmux:status
+generated_artifacts: .env.local and runtime port files when setup is approved.
+common_failure_modes: Assuming default ports, double-quoting private keys, running Rovo in unavailable environments, or overwriting existing local env secrets.
 ---
 
 # VPK Setup - Initial Repository Setup

@@ -1,5 +1,5 @@
-import type { ClickyPointTarget } from "@/components/projects/studio/hooks/use-clicky";
-import type { StudioScreenAssistantTarget } from "@/components/projects/studio/lib/studio-screen-assistant";
+import type { ClickyPointTarget } from "@/components/projects/rovo-core/hooks/use-clicky";
+import type { StudioScreenAssistantTarget } from "@/components/projects/rovo-core/lib/screen-assistant";
 
 // Viewport center point for a grounded target. Mirrors the route-neutral
 // geometry used by the Studio shell's point_at_target handler.

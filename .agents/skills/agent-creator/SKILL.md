@@ -1,6 +1,15 @@
 ---
 name: agent-creator
 description: Create or update repo-local Markdown agent definitions with YAML frontmatter, project memory, structured workspace-agent sections, schedule handoff notes, and validation. Use when the user asks to create, define, draft, improve, or maintain an agent, subagent, workspace agent, scheduled agent, agent profile, or reusable agent persona in `.agents/agents/`.
+purpose: Define and maintain repo-local Markdown agents with clear runtime boundaries, project knowledge, schedule handoff notes, and validation.
+owner: VPK
+category: agent-operations
+inputs: User-approved agent plan, existing agent definitions, available skills, tool availability, and optional schedule or knowledge requirements.
+outputs: Canonical agent Markdown files, optional project knowledge files, validation notes, and schedule handoff instructions.
+required_tools: shell, rg, node
+validation_command: node .agents/skills/agent-creator/scripts/validate-agent.mjs .agents/agents
+generated_artifacts: .agents/agents/*.md and optional .agents/knowledge/<agent-name> files.
+common_failure_modes: Skipping plan approval, inventing unsupported frontmatter fields, silently assuming unavailable tools, or creating live schedules without review.
 ---
 
 # Agent Creator

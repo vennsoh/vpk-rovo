@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const SOURCE = readFileSync(join(__dirname, "components", "agent-evaluation.tsx"), "utf8");
 const INDEX_SOURCE = readFileSync(join(__dirname, "index.ts"), "utf8");
@@ -9,14 +11,8 @@ const DEMO_SOURCE = readFileSync(
 	join(__dirname, "..", "..", "website", "demos", "blocks", "agent-evaluation-demo.tsx"),
 	"utf8",
 );
-const REGISTRY_SOURCE = readFileSync(
-	join(__dirname, "..", "..", "website", "registry.ts"),
-	"utf8",
-);
-const DETAILS_SOURCE = readFileSync(
-	join(__dirname, "..", "..", "..", "app", "data", "details", "blocks.ts"),
-	"utf8",
-);
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
+const DETAILS_SOURCE = readDetailCategorySource("blocks");
 const COMPONENTS_SOURCE = readFileSync(
 	join(__dirname, "..", "..", "..", "app", "data", "components.ts"),
 	"utf8",

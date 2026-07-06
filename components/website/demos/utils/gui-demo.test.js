@@ -2,16 +2,18 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = process.cwd();
 const DEMO_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/demos/utils/gui-demo.tsx"), "utf8");
 const DETAILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/details/utility.ts"), "utf8");
-const REGISTRY_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/registry.ts"), "utf8");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 test("GUI utility docs expose a rendered full-config example", () => {
 	assert.match(DETAILS_SOURCE, /examplesContentWidth: "full"/);
 	assert.match(DETAILS_SOURCE, /title: "Full config"[\s\S]*demoSlug: "gui-demo-full-config"/);
-	assert.match(REGISTRY_SOURCE, /utility: \{[\s\S]*"gui-demo-full-config": dynamic\(/);
+	assert.match(REGISTRY_SOURCE, /utility: UTILITY_VARIANT_DEMOS/);
+	assert.match(REGISTRY_SOURCE, /const UTILITY_VARIANT_DEMOS[\s\S]*"gui-demo-full-config": dynamic\(/);
 	assert.match(REGISTRY_SOURCE, /default: mod\.GUIFullConfigDemo/);
 	assert.match(DEMO_SOURCE, /export function GUIFullConfigDemo\(\)/);
 	assert.match(DEMO_SOURCE, /export default function GUIDemo\(\) \{\n\treturn <GUIFullConfigDemo \/>;\n\}/);

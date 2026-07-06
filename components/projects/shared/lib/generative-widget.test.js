@@ -3,10 +3,12 @@ const assert = require("node:assert/strict");
 
 const {
 	createBodyOnlySpec,
-	enrichGenerativeWidgetProfilePhotos,
 	parseGenerativeWidget,
 	resolveGenerativeWidgetMetadata,
 } = require("./generative-widget.ts");
+const {
+	enrichGenerativeWidgetProfilePhotos,
+} = require("./generative-widget-profile-photos.ts");
 
 test("createBodyOnlySpec removes empty translated card lead-in section and separator", () => {
 	const spec = {

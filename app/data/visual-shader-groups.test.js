@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -22,8 +24,8 @@ function extractGroupSlugs(source, groupName) {
 test("Visual Mesh catalog uses default slug for Framer mesh and mesh-v2 for SVG mesh", () => {
 	const componentSource = readProjectFile("app/data/components.ts");
 	const manifestSource = readProjectFile("app/data/component-manifest.ts");
-	const detailsSource = readProjectFile("app/data/details/visual.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const detailsSource = readDetailCategorySource("visual");
+	const registrySource = readWebsiteRegistrySource();
 
 	for (const source of [componentSource, manifestSource]) {
 		assert.match(
@@ -39,7 +41,7 @@ test("Visual Mesh catalog uses default slug for Framer mesh and mesh-v2 for SVG 
 		assert.doesNotMatch(source, /shaders\/mesh2/u);
 	}
 
-	assert.match(detailsSource, /"mesh": \{\n\t\tdescription: "3D wireframe mesh/u);
+	assert.match(detailsSource, /(?:"mesh"|mesh): \{\n\t\tdescription: "3D wireframe mesh/u);
 	assert.match(detailsSource, /"mesh-v2": \{\n\t\tdescription: "SVG animated mesh gradient/u);
 	assert.doesNotMatch(detailsSource, /"mesh-02"/u);
 	assert.match(registrySource, /mesh: dynamic\(\(\) => import\("\.\/demos\/visual\/mesh-demo"\)/u);

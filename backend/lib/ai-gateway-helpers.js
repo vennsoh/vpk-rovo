@@ -92,6 +92,27 @@ function getEnvVars() {
 	};
 }
 
+function getAIGatewayConfigReport(envVars = getEnvVars()) {
+	const realtimeConfig = getRealtimeConfig();
+	return {
+		AI_GATEWAY_URL: envVars.AI_GATEWAY_URL ? "SET" : "MISSING",
+		AI_GATEWAY_URL_GOOGLE: envVars.AI_GATEWAY_URL_GOOGLE ? "SET" : "MISSING",
+		AI_GATEWAY_USE_CASE_ID: envVars.AI_GATEWAY_USE_CASE_ID ? "SET" : "MISSING",
+		AI_GATEWAY_CLOUD_ID: envVars.AI_GATEWAY_CLOUD_ID ? "SET" : "MISSING",
+		AI_GATEWAY_USER_ID: envVars.AI_GATEWAY_USER_ID ? "SET" : "MISSING",
+		ASAP_ISSUER: process.env.ASAP_ISSUER ? "SET" : "MISSING",
+		ASAP_KID: process.env.ASAP_KID ? "SET" : "MISSING",
+		ASAP_PRIVATE_KEY: process.env.ASAP_PRIVATE_KEY ? "SET" : "MISSING",
+		OPENAI_REALTIME_MODEL: realtimeConfig.model,
+		OPENAI_REALTIME_WS_URL: realtimeConfig.wsUrl ? "SET" : "MISSING",
+		OPENAI_REALTIME_VOICE: realtimeConfig.voice,
+	};
+}
+
+function hasGatewayUrlConfigured(envVars = getEnvVars()) {
+	return Boolean(envVars.AI_GATEWAY_URL || envVars.AI_GATEWAY_URL_GOOGLE);
+}
+
 function base64UrlEncode(value) {
 	const buffer = Buffer.isBuffer(value) ? value : Buffer.from(value);
 	return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
@@ -593,6 +614,8 @@ function getRealtimeConfig() {
 
 module.exports = {
 	getEnvVars,
+	getAIGatewayConfigReport,
+	hasGatewayUrlConfigured,
 	getAuthToken,
 	detectEndpointType,
 	getGatewayHeaders,

@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const SOURCE = readFileSync(join(__dirname, "list.tsx"), "utf8");
 
@@ -65,10 +66,7 @@ test("List is registered in the component catalog and demo registry", () => {
 		join(__dirname, "..", "..", "app", "data", "components.ts"),
 		"utf8",
 	);
-	const registry = readFileSync(
-		join(__dirname, "..", "..", "components", "website", "registry.ts"),
-		"utf8",
-	);
+	const registry = readWebsiteRegistrySource();
 	// Catalog/nav (manifest) and detail page (components) both expose the slug.
 	assert.match(manifest, /customComponent\("list"\)/);
 	assert.match(components, /customComponent\("list"\)/);

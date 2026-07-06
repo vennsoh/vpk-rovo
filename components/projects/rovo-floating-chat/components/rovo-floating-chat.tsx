@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { token } from "@/lib/tokens";
 import { useRovoChat } from "@/app/contexts";
 import type { SendPromptOptions } from "@/app/contexts";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import type { ChatSurfaceSwitchHandler } from "@/components/projects/shared/components/chat-surface-switcher";
 import ChatPanel from "@/components/projects/sidebar-chat/page";
 import type { ChatPanelCustomAgentTabs, ChatPanelGreetingProps, ChatSubmitInterceptOutcome } from "@/components/projects/sidebar-chat/page";

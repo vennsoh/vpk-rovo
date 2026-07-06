@@ -113,6 +113,10 @@ type PaperShaderDefinition = {
 	image?: string;
 };
 
+type PaperShadersDemoProps = {
+	slug?: string;
+};
+
 type PaperShaderParamValue = boolean | number | string | string[] | undefined;
 type PaperShaderParams = Record<string, PaperShaderParamValue>;
 
@@ -594,6 +598,14 @@ function getSlugFromPathname(pathname: string | null): PaperShaderSlug {
 	return DEFAULT_SLUG;
 }
 
+function getPaperShaderSlug(previewSlug: string | undefined, pathname: string | null): PaperShaderSlug {
+	if (previewSlug && previewSlug in PAPER_SHADER_DEMOS) {
+		return previewSlug as PaperShaderSlug;
+	}
+
+	return getSlugFromPathname(pathname);
+}
+
 function clonePaperShaderValue(value: unknown): PaperShaderParamValue {
 	if (Array.isArray(value)) {
 		return value.filter((entry): entry is string => typeof entry === "string");
@@ -841,10 +853,10 @@ function renderPaperShaderControl({
 	return null;
 }
 
-export default function PaperShadersDemo() {
+export default function PaperShadersDemo({ slug: previewSlug }: Readonly<PaperShadersDemoProps>) {
 	const pathname = usePathname();
 	const shouldReduceMotion = useReducedMotion() ?? false;
-	const slug = getSlugFromPathname(pathname);
+	const slug = getPaperShaderSlug(previewSlug, pathname);
 	const definition = PAPER_SHADER_DEMOS[slug];
 	const [selectedPresetName, setSelectedPresetName] = useState(definition.presets[0].name);
 	const [params, setParams] = useState<PaperShaderParams>(() => createPaperShaderParams(definition));

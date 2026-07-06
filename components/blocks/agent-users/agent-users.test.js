@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -25,11 +27,11 @@ test("Agent Users is exposed as a website block", () => {
 		/blockComponent\("agent-users", "Agent Users"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ AgentUsers, AddUserDialog \} from "@\/components\/blocks\/agent-users";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"agent-users": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/agent-users-demo"\)/u,
 	);
 });

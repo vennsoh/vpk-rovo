@@ -19,7 +19,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AutomationIcon from "@atlaskit/icon/core/automation";
-import GenerativeIndicatorIcon from "@atlaskit/icon-lab/core/generative-indicator";
 import CrossIcon from "@atlaskit/icon/core/cross";
 
 import {
@@ -187,14 +186,6 @@ function ManageAutomationFlowVisual({ rule }: Readonly<{ rule: AgentAutomationRu
 					</span>
 				) : null}
 			</div>
-			<div className="h-px w-6 shrink-0 bg-border" />
-			<IconTile
-				aria-hidden={true}
-				icon={<GenerativeIndicatorIcon label="" size="small" />}
-				label="Agent instructions"
-				size="small"
-				variant="gray"
-			/>
 		</div>
 	);
 }

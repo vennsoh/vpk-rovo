@@ -1,6 +1,15 @@
 ---
 name: vpk-deploy
 description: Deploy, redeploy, or check status for a VPK prototype on Atlassian Micros.
+purpose: Deploy or inspect VPK prototypes on Atlassian Micros while preserving existing service configuration and operator handoff details.
+owner: VPK
+category: deployment
+inputs: Target prototype path, deployment mode, Micros service state, environment files, and build output.
+outputs: Deployment status, service configuration updates, redeploy logs, and operator-facing remediation steps.
+required_tools: shell, pnpm, atlas, docker, curl
+validation_command: pnpm run build:export
+generated_artifacts: Micros deployment artifacts, Docker images, and local deployment metadata when approved.
+common_failure_modes: Deploying the wrong checkout, missing .deploy.local, stale env configuration, or skipping build/export verification.
 ---
 # VPK Deploy - Deploy to Micros
 

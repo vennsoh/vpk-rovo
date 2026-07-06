@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { existsSync, readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -42,7 +43,7 @@ test("ui-charts catalog section is wired through data, routes, previews, and reg
 	const previewTypesSource = readProjectFile("app/preview/_shared/preview-types.ts");
 	const previewPageSource = readProjectFile("app/preview/ui-charts/[slug]/page.tsx");
 	const loaderSource = readProjectFile("components/website/demo-registry-loader.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const registrySource = readWebsiteRegistrySource();
 	const detailsSource = readProjectFile("app/data/details/ui-charts.ts");
 	const sidebarSource = readProjectFile("app/data/website-sidebar-nav.ts");
 	const titleSource = readProjectFile("lib/project-page-title.ts");

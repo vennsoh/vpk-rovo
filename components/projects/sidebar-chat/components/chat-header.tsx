@@ -18,8 +18,8 @@ import {
 	ChatSurfaceSwitcherItems,
 	type ChatSurfaceSwitchHandler,
 } from "@/components/projects/shared/components/chat-surface-switcher";
-import { RovoAppBrand } from "@/components/projects/rovo/components/rovo-app-brand";
-import { RovoAgentBackButton } from "@/components/projects/rovo/components/rovo-agent-back-button";
+import { RovoAppBrand } from "@/components/projects/rovo-core/components/rovo-app-brand";
+import { RovoAgentBackButton } from "@/components/projects/rovo-core/components/rovo-agent-back-button";
 import { ChatHistoryButton } from "./chat-history-button";
 import AppIcon from "@atlaskit/icon/core/app";
 import BugIcon from "@atlaskit/icon/core/bug";

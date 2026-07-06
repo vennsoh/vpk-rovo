@@ -2,13 +2,15 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = join(__dirname, "..", "..");
 const SOURCE = readFileSync(join(__dirname, "twg-appstack.tsx"), "utf8");
 const COMPONENTS_SOURCE = readFileSync(join(ROOT, "app/data/components.ts"), "utf8");
 const MANIFEST_SOURCE = readFileSync(join(ROOT, "app/data/component-manifest.ts"), "utf8");
-const DETAILS_SOURCE = readFileSync(join(ROOT, "app/data/details/ui-custom.ts"), "utf8");
-const REGISTRY_SOURCE = readFileSync(join(ROOT, "components/website/registry.ts"), "utf8");
+const DETAILS_SOURCE = readDetailCategorySource("ui-custom");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const DEMO_SOURCE = readFileSync(join(ROOT, "components/website/demos/ui-custom/twg-appstack-demo.tsx"), "utf8");
 
 test("TWG Appstack fixes md source items to 24px wrappers", () => {

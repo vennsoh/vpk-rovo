@@ -20,7 +20,7 @@ function loadPipeline() {
 	modPromise ??= loadDirectoryModule(`
 		export { repairGeneratedAgentCatalog } from "@/app/data/directory/repair-agent-result";
 		export { AGENT_TEMPLATE_CONFIGS } from "@/app/data/directory/agent-templates";
-		export { buildCreationTemplateContextFromAgent } from "@/components/projects/studio/lib/studio-agent-creation-context";
+		export { buildCreationTemplateContextFromAgent } from "@/components/projects/rovo-core/lib/agent-records/agent-creation-context";
 		export { deriveTemplateCategoryIds } from "@/components/projects/studio/lib/agent-creation-domain-scope";
 	`);
 	return modPromise;

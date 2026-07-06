@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { createRequire } from "node:module";
 
+const requireRegistrySource = createRequire(import.meta.url);
+const { readWebsiteRegistrySource } = requireRegistrySource(process.cwd() + "/components/website/registry/test-source.cjs");
 const ROOT = process.cwd();
 
 function readProjectFile(filePath) {
@@ -24,8 +27,8 @@ test("Ink Wash is registered in the visual catalog and manifest", () => {
 });
 
 test("Ink Wash docs register the main preview and visual example demos", () => {
-	const detailsSource = readProjectFile("app/data/details/visual.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const detailsSource = readProjectFile("app/data/details/visual/ink-wash.ts");
+	const registrySource = readWebsiteRegistrySource();
 
 	assert.match(registrySource, /"ink-wash": dynamic\(\(\) => import\("\.\/demos\/visual\/ink-wash-demo"\)/u);
 	for (const demoSlug of [

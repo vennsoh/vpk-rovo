@@ -1,10 +1,12 @@
 ---
 description: AI SDK / Chat architecture — useChat, Rovo Serve, data parts, streaming
-globs: app/contexts/context-rovo-chat.tsx, backend/server.js, backend/lib/rovo-*.js, rovo/**
+globs: app/contexts/context-rovo-chat.tsx, backend/chat/**, backend/routes/chat-*.js, backend/routes/rovo-*.js, backend/lib/rovo-*.js, rovo/**
 alwaysApply: false
 paths:
   - app/contexts/context-rovo-chat.tsx
-  - backend/server.js
+  - backend/chat/**
+  - backend/routes/chat-*.js
+  - backend/routes/rovo-*.js
   - backend/lib/rovo-*.js
   - rovo/**
 ---
@@ -41,7 +43,7 @@ Custom data parts sent by the backend (`data-` prefix in SSE, stripped in fronte
 - `tool-approval` — tool approval request (file/bash permissions)
 - `turn-complete` — turn boundary signal
 
-Backend streaming (`backend/server.js`):
+Backend streaming (`backend/chat/*`, mounted by route handlers):
 
 - `createUIMessageStream` + `pipeUIMessageStreamToResponse` from `ai` handle SSE streaming
 
@@ -57,8 +59,13 @@ Key files:
 
 - `app/contexts/context-rovo-chat.tsx` — `useChat` integration, data part handling, message transformation
 - `rovo/config.js` — system prompt builder, model config, payload construction
-- `backend/server.js` — Express streaming endpoint using `createUIMessageStream`
+- `backend/routes/chat-sdk.js` — Express route owner for `/api/chat-sdk`
+- `backend/routes/rovo-chat-proxy.js` — Express route owner for Rovo chat proxy traffic
+- `backend/chat/chat-sdk-handler.js` — Chat SDK streaming handler using `createUIMessageStream`
+- `backend/chat/chat-sdk-handler-composition.js` — server dependency composition for Chat SDK handlers
+- `backend/chat/rovo-stream.js` — Rovo app streaming orchestration
 - `backend/lib/rovo-gateway.js` — Rovo Serve streaming/text bridge
 - `backend/lib/rovo-client.js` — Low-level V3 REST + SSE client for `rovo serve`
 - `backend/lib/ai-gateway-helpers.js` — AI Gateway helpers for chat, media, suggestions, and other gateway-backed flows
+- `backend/server.js` — runtime startup, static serving, process listen, and WebSocket wiring
 - `app/api/chat-sdk/route.ts` — dev proxy forwarding to Express; `/agents` referers default to AI Gateway if no backend preference is present

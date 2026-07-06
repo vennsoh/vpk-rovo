@@ -113,3 +113,81 @@ test("rejectDraft and deleteDraft update thread-scoped pending draft state", asy
 		assert.equal(await manager.getDraft(draft.id), null);
 	});
 });
+
+test("listDrafts precomputes draft timestamps while sorting newest first", async () => {
+	await withTempBaseDir(async (baseDir) => {
+		const indexDir = path.join(baseDir, "rovo-app", "indices", "hermes-skill-drafts");
+		await fs.mkdir(indexDir, { recursive: true });
+		const records = [
+			{
+				id: "draft-old",
+				status: "pending",
+				action: "create",
+				category: "research",
+				name: "old-helper",
+				summary: "Old helper",
+				rationale: null,
+				sourceThreadId: "thread-1",
+				sourceMessageId: null,
+				createdAt: "2026-01-01T00:00:00.000Z",
+				updatedAt: "2026-01-01T00:00:00.000Z",
+				reviewedAt: null,
+				bundleDir: null,
+			},
+			{
+				id: "draft-new",
+				status: "pending",
+				action: "update",
+				category: "research",
+				name: "new-helper",
+				summary: "New helper",
+				rationale: null,
+				sourceThreadId: "thread-1",
+				sourceMessageId: null,
+				createdAt: "2026-01-03T00:00:00.000Z",
+				updatedAt: "2026-01-03T00:00:00.000Z",
+				reviewedAt: null,
+				bundleDir: null,
+			},
+			{
+				id: "draft-middle",
+				status: "pending",
+				action: "delete",
+				category: "research",
+				name: "middle-helper",
+				summary: "Middle helper",
+				rationale: null,
+				sourceThreadId: "thread-1",
+				sourceMessageId: null,
+				createdAt: "2026-01-02T00:00:00.000Z",
+				updatedAt: "2026-01-02T00:00:00.000Z",
+				reviewedAt: null,
+				bundleDir: null,
+			},
+		];
+		await fs.writeFile(
+			path.join(indexDir, "index.json"),
+			`${JSON.stringify(records, null, 2)}\n`,
+			"utf8",
+		);
+
+		const manager = createHermesSkillDraftManager({ baseDir });
+		const originalDateParse = Date.parse;
+		let parseCalls = 0;
+		Date.parse = (value) => {
+			parseCalls += 1;
+			return originalDateParse(value);
+		};
+		try {
+			const drafts = await manager.listDrafts();
+			assert.deepEqual(drafts.map((draft) => draft.id), [
+				"draft-new",
+				"draft-middle",
+				"draft-old",
+			]);
+			assert.equal(parseCalls, records.length);
+		} finally {
+			Date.parse = originalDateParse;
+		}
+	});
+});

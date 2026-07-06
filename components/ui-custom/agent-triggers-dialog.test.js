@@ -4,8 +4,20 @@ const { join } = require("node:path");
 const { test } = require("node:test");
 
 const DIALOG_SOURCE = readFileSync(join(__dirname, "agent-triggers-dialog.tsx"), "utf8");
-const AGENT_SOURCE = readFileSync(
-	join(__dirname, "..", "blocks", "agent", "components", "agent.tsx"),
+const AGENT_FIELDS_SOURCE = readFileSync(
+	join(__dirname, "..", "blocks", "agent-2", "components", "agent-2.tsx"),
+	"utf8",
+);
+const AUTOMATION_DIALOGS_HOOK_SOURCE = readFileSync(
+	join(__dirname, "..", "blocks", "agent-2", "hooks", "use-agent-automation-dialogs.ts"),
+	"utf8",
+);
+const COMPACT_CONFIG_NAV_SOURCE = readFileSync(
+	join(__dirname, "..", "blocks", "agent-2", "components", "agent-compact-config-nav.tsx"),
+	"utf8",
+);
+const FILLED_CONFIG_SUMMARY_SOURCE = readFileSync(
+	join(__dirname, "..", "blocks", "agent-2", "components", "agent-filled-config-summary.tsx"),
 	"utf8",
 );
 const TRIGGERS_PAGE_SOURCE = readFileSync(
@@ -54,27 +66,28 @@ test("TriggerPicker is exported and accepts a custom trigger element", () => {
 });
 
 test("Trigger summary row routes add-event selections to a new automation draft", () => {
-	assert.match(AGENT_SOURCE, /function AgentTriggerSummaryRow\(/u);
-	assert.match(AGENT_SOURCE, /onClick=\{\(\) => onEditTriggers\?\.\(\)\}/u);
-	assert.match(AGENT_SOURCE, /const next = createAutomationRuleFromEvent\(providerId, eventId, automationRules\);/u);
-	assert.match(AGENT_SOURCE, /onEditTriggers\?\.\(next \?\? undefined\)/u);
-	assert.match(AGENT_SOURCE, /onEditTriggers[\s\S]*\? \(\) => onEditTriggers\(rule\)[\s\S]*: undefined/u);
-	assert.doesNotMatch(AGENT_SOURCE, /onEditTriggers\?\.\(next \? \[\.\.\.existing, next\] : existing\)/u);
+	assert.match(FILLED_CONFIG_SUMMARY_SOURCE, /function AgentTriggerSummaryRow\(/u);
+	assert.match(FILLED_CONFIG_SUMMARY_SOURCE, /onClick=\{\(\) => onEditTriggers\?\.\(\)\}/u);
+	assert.match(FILLED_CONFIG_SUMMARY_SOURCE, /const next = createAutomationRuleFromEvent\(providerId, eventId, automationRules\);/u);
+	assert.match(FILLED_CONFIG_SUMMARY_SOURCE, /onEditTriggers\?\.\(next \?\? undefined\)/u);
+	assert.match(FILLED_CONFIG_SUMMARY_SOURCE, /onEditTriggers[\s\S]*\? \(\) => onEditTriggers\(rule\)[\s\S]*: undefined/u);
+	assert.doesNotMatch(FILLED_CONFIG_SUMMARY_SOURCE, /onEditTriggers\?\.\(next \? \[\.\.\.existing, next\] : existing\)/u);
 });
 
 test("AgentConfigFields hosts a single automation dialog and commits via onAutomationRulesChange", () => {
-	assert.match(AGENT_SOURCE, /import \{ AgentTriggersDialog \} from "@\/components\/ui-custom\/agent-triggers-dialog"/u);
-	assert.match(AGENT_SOURCE, /const handleEditTriggers = useCallback\(\(seed\?: AgentAutomationRule\) =>/u);
-	assert.match(AGENT_SOURCE, /seed: seed \?\? createAgentAutomationRule\(\{/u);
-	assert.match(AGENT_SOURCE, /<AgentTriggersDialog/u);
-	assert.match(AGENT_SOURCE, /automationRule=\{triggersEditor\.seed\}/u);
-	assert.match(AGENT_SOURCE, /onSave=\{handleTriggersSave\}/u);
-	assert.match(AGENT_SOURCE, /onAutomationRulesChange\?\.\(/u);
-	assert.match(AGENT_SOURCE, /existingIndex >= 0[\s\S]*current\.map\([\s\S]*: \[\.\.\.current, automationRule\]/u);
+	assert.match(AGENT_FIELDS_SOURCE, /import \{ AgentTriggersDialog \} from "@\/components\/ui-custom\/agent-triggers-dialog"/u);
+	assert.match(AGENT_FIELDS_SOURCE, /from "@\/components\/blocks\/agent-2\/hooks\/use-agent-automation-dialogs";/u);
+	assert.match(AGENT_FIELDS_SOURCE, /<AgentTriggersDialog/u);
+	assert.match(AGENT_FIELDS_SOURCE, /automationRule=\{triggersEditor\.seed\}/u);
+	assert.match(AGENT_FIELDS_SOURCE, /onSave=\{handleTriggersSave\}/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const handleEditTriggers = useCallback\(\(seed\?: AgentAutomationRule, fromManage = false, isNew = false\) =>/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /seed: seed \?\? createEmptyAutomationRule\(`automation-\$\{getNextAutomationRuleIndex\(currentAutomationRules\)\}`\)/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /onAutomationRulesChange\?\.\(/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /existingIndex >= 0[\s\S]*current\.map\([\s\S]*: \[\.\.\.current, automationRule\]/u);
 });
 
 test("Compact empty nav opens the automation modal", () => {
-	assert.match(AGENT_SOURCE, /item\.agentFieldName === "trigger"\)\s*\{\s*return \(\) => onEditTriggers\?\.\(\);/u);
+	assert.match(COMPACT_CONFIG_NAV_SOURCE, /item\.agentFieldName === "trigger"\)\s*\{\s*return \(\) => onEditTriggers\?\.\(\);/u);
 });
 
 test("Agent demo round-trips rich automation rules", () => {

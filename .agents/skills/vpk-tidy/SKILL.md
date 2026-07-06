@@ -1,6 +1,15 @@
 ---
 name: vpk-tidy
 description: Repo-local VPK-rovo component refactoring and placement guidance. Use when the user asks to tidy or refactor a VPK React component, split an overgrown component under app or components, move VPK UI logic into hooks or data files, make a VPK component easier to reuse without changing behavior, remove stale shared buckets, or verify VPK route/accessibility impact after cleanup. Do not use for generic behavior-preserving simplification outside VPK UI; prefer the global code-simplification skill for that.
+purpose: Keep VPK React component refactors behavior-preserving, locally owned, and aligned with repo placement, token, accessibility, and validation rules.
+owner: VPK
+category: component-architecture
+inputs: Target component or route, current callsites, nearby primitives, route impact, and validation requirements.
+outputs: Focused component, hook, data, or import cleanup with validation evidence and route-impact notes.
+required_tools: shell, rg, pnpm, browser verification tools for UI changes
+validation_command: pnpm run lint && pnpm run typecheck
+generated_artifacts: none by default; approved refactors may create colocated component, hook, data, or test files.
+common_failure_modes: Moving behavior into vague shared buckets, changing public props unnecessarily, missing route callsites, or skipping UI verification after rendered changes.
 ---
 
 # VPK Tidy

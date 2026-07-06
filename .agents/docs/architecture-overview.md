@@ -62,9 +62,9 @@ See `## Appendix -> Detailed Directory Structure` for expanded layout.
 Provider order in `app/providers.tsx`:
 
 ```text
-ThemeWrapper
-  -> SidebarProvider
-    -> CreationModeProvider
+MotionConfig
+  -> ThemeWrapper
+    -> SidebarProvider
       -> RovoChatProvider
 ```
 

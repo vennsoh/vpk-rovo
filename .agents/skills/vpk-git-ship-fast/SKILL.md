@@ -1,6 +1,15 @@
 ---
 name: vpk-git-ship-fast
 description: "Use for VPK-rovo fast direct-to-main shipping: commit ALL uncommitted changes and push straight to remote main with an auto-generated commit message — NO PR, NO branch, NO review gate. The fast counterpart to vpk-git-ship. Use for \"vpk-git-ship-fast\", \"commit and push to main\", \"commit everything and sync to main\", \"quick commit to main\", \"push straight to main no PR\", \"just commit and sync\", or \"land this directly\". For the gated PR + Codex-review + auto-merge flow use vpk-git-ship; for worktree/branch cleanup use vpk-git-clean."
+purpose: Commit every current change and fast-forward push directly to main only when the user explicitly chooses the no-PR fast path.
+owner: VPK
+category: git-workflow
+inputs: Complete uncommitted diff, current main/remote state, branch-protection expectations, and explicit user fast-ship request.
+outputs: Direct main commit, pushed main branch, and post-push status summary.
+required_tools: shell, git
+validation_command: git status --short
+generated_artifacts: Git commit on main and remote push.
+common_failure_modes: Invoking without explicit fast-ship intent, omitting untracked files, pushing non-fast-forward history, or using this instead of the PR-gated ship flow.
 disable-model-invocation: true
 model: haiku
 effort: low

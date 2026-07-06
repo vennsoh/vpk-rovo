@@ -1,0 +1,133 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const test = require("node:test");
+const {
+	buildPausedRovoResumeDecisions,
+	runPausedRovoToolContinuation,
+} = require("./rovo-paused-continuation");
+
+function createPausedRecord(overrides = {}) {
+	return {
+		handle: {
+			release() {},
+		},
+		kind: "clarification",
+		port: 43124,
+		toolCallId: "paused-tool-1",
+		...overrides,
+	};
+}
+
+test("buildPausedRovoResumeDecisions builds clarification decisions", () => {
+	const decisions = buildPausedRovoResumeDecisions({
+		adaptClarificationAnswersForToolContract: () => "adapted",
+		buildClarificationResumeDecision: ({
+			buildDenyMessageFn,
+			clarificationSubmission,
+			clarificationToolCallId,
+			setChatAccepted,
+		}) => ({
+			tool_call_id: clarificationToolCallId,
+			deny_message: buildDenyMessageFn(clarificationSubmission),
+			setChatAccepted,
+		}),
+		buildClarificationResumeDenyMessage: (_submission, adapt) => adapt(),
+		clarificationSubmission: { answers: { choice: "A" } },
+		hasPausedClarificationToolCall: true,
+		pausedToolCallRecord: createPausedRecord(),
+	});
+
+	assert.deepEqual(decisions, [{
+		tool_call_id: "paused-tool-1",
+		deny_message: "adapted",
+		setChatAccepted: false,
+	}]);
+});
+
+test("runPausedRovoToolContinuation resumes, replays, and releases on success", async () => {
+	const replayCalls = [];
+	const resumeCalls = [];
+	let releaseCount = 0;
+	const pausedToolCallRecord = createPausedRecord({
+		handle: {
+			release() {
+				releaseCount += 1;
+			},
+		},
+	});
+
+	await runPausedRovoToolContinuation({
+		approvalSubmission: { decision: "approved" },
+		buildApprovalResumeDecision: (approvalSubmission) => approvalSubmission.decision,
+		getPausedToolCallHandled: () => false,
+		hasPausedApprovalToolCall: true,
+		logger: { info() {} },
+		pausedToolCallRecord,
+		replayViaRovo: async (options) => {
+			replayCalls.push({
+				port: options.port,
+				skipReplayUntilToolCallId: options.skipReplayUntilToolCallId,
+			});
+		},
+		rovoCancelChat: async () => {
+			throw new Error("cancel should not run");
+		},
+		rovoResumeToolCalls: async (...args) => {
+			resumeCalls.push(args);
+		},
+		streamCommonOptions: {
+			onTextDelta() {},
+		},
+	});
+
+	assert.deepEqual(resumeCalls, [[
+		43124,
+		{
+			decisions: [{
+				tool_call_id: "paused-tool-1",
+				deny_message: "approved",
+			}],
+		},
+	]]);
+	assert.deepEqual(replayCalls, [{
+		port: 43124,
+		skipReplayUntilToolCallId: "paused-tool-1",
+	}]);
+	assert.equal(releaseCount, 1);
+});
+
+test("runPausedRovoToolContinuation cancels and releases when replay fails", async () => {
+	const cancelCalls = [];
+	let releaseCount = 0;
+	const pausedToolCallRecord = createPausedRecord({
+		handle: {
+			release() {
+				releaseCount += 1;
+			},
+		},
+	});
+
+	await assert.rejects(
+		runPausedRovoToolContinuation({
+			approvalSubmission: { decision: "approved" },
+			buildApprovalResumeDecision: (approvalSubmission) => approvalSubmission.decision,
+			getPausedToolCallHandled: () => false,
+			hasPausedApprovalToolCall: true,
+			logger: { info() {} },
+			pausedToolCallRecord,
+			replayViaRovo: async () => {
+				throw new Error("replay failed");
+			},
+			rovoCancelChat: async (...args) => {
+				cancelCalls.push(args);
+			},
+			rovoResumeToolCalls: async () => {},
+			streamCommonOptions: {},
+		}),
+		/replay failed/u,
+	);
+
+	assert.deepEqual(cancelCalls, [[43124, { timeoutMs: 3_000 }]]);
+	assert.equal(releaseCount, 1);
+});

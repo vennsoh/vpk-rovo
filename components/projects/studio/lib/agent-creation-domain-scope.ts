@@ -24,7 +24,7 @@ import type {
 	ParsedQuestionCardPayload,
 	ParsedQuestionCardQuestion,
 } from "@/components/projects/shared/lib/question-card-widget";
-import type { StudioCreationTemplateContext } from "./studio-agent-creation-context";
+import type { StudioCreationTemplateContext } from "@/components/projects/rovo-core/lib/agent-records/agent-creation-context";
 
 export const DOMAIN_SCOPE_QUESTION_ID = "domain-scope";
 

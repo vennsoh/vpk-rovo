@@ -2,13 +2,15 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 }
 
 function readKnowledgeDetailsSection() {
-	const source = readProjectFile("app/data/details/blocks.ts");
+	const source = readDetailCategorySource("blocks");
 	const start = source.indexOf('\t"knowledge-directory": {');
 	const end = source.indexOf('\t"mermaid-diagram": {', start);
 
@@ -38,11 +40,11 @@ test("Knowledge Directory is exposed as a website block", () => {
 		/blockComponent\("knowledge-directory", "Knowledge Directory"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ KnowledgeDirectoryDialog \} from "@\/components\/blocks\/knowledge-directory";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"knowledge-directory": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/knowledge-directory-demo"\)/u,
 	);
 });

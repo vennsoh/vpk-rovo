@@ -1,0 +1,2535 @@
+{
+	"version": 1,
+	"backendRoutes": [
+		{
+			"method": "GET",
+			"path": "/api/agent-mode",
+			"runtimeAdmin": false,
+			"source": "backend/routes/agent-mode.js:70"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agent-mode",
+			"runtimeAdmin": false,
+			"source": "backend/routes/agent-mode.js:42"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agents/rfp-demo/agent/apply",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:200"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agents/rfp-demo/events/ticket-entered-column",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:214"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agents/rfp-demo/reset",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:184"
+		},
+		{
+			"method": "GET",
+			"path": "/api/agents/rfp-demo/state",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:156"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agents/rfp-demo/state",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:168"
+		},
+		{
+			"method": "POST",
+			"path": "/api/agents/rfp-demo/vpk-html-report",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:67"
+		},
+		{
+			"method": "GET",
+			"path": "/api/browser-workspaces",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:126"
+		},
+		{
+			"method": "POST",
+			"path": "/api/browser-workspaces",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:142"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/browser-workspaces/:workspaceId",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:182"
+		},
+		{
+			"method": "GET",
+			"path": "/api/browser-workspaces/:workspaceId",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:160"
+		},
+		{
+			"method": "GET",
+			"path": "/api/browser-workspaces/:workspaceId/:action",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:391"
+		},
+		{
+			"method": "POST",
+			"path": "/api/browser-workspaces/:workspaceId/:action",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:479"
+		},
+		{
+			"method": "POST",
+			"path": "/api/browser-workspaces/:workspaceId/preview-session",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:316"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/browser-workspaces/:workspaceId/preview-session/:sessionId",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:355"
+		},
+		{
+			"method": "GET",
+			"path": "/api/browser-workspaces/:workspaceId/tabs",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:204"
+		},
+		{
+			"method": "POST",
+			"path": "/api/browser-workspaces/:workspaceId/tabs",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:226"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:284"
+		},
+		{
+			"method": "POST",
+			"path": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex/activate",
+			"runtimeAdmin": true,
+			"source": "backend/routes/browser-workspaces.js:252"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chat-cancel",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chat-control.js:42"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chat-sdk",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chat-sdk.js:17"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chat-sdk/skip-question",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chat-skip-question.js:59"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chat-title",
+			"runtimeAdmin": false,
+			"source": "backend/routes/ai-utilities.js:181"
+		},
+		{
+			"method": "GET",
+			"path": "/api/checkpoints",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:267"
+		},
+		{
+			"method": "POST",
+			"path": "/api/checkpoints",
+			"runtimeAdmin": true,
+			"source": "backend/routes/rovo-app.js:280"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/checkpoints/:id",
+			"runtimeAdmin": true,
+			"source": "backend/routes/rovo-app.js:313"
+		},
+		{
+			"method": "POST",
+			"path": "/api/checkpoints/:id/rollback",
+			"runtimeAdmin": true,
+			"source": "backend/routes/rovo-app.js:299"
+		},
+		{
+			"method": "GET",
+			"path": "/api/chromium-preview",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:57"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:83"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/back",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:116"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/click",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:152"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/click-ref",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:164"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/fill-ref",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:202"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/forward",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:128"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/hover-ref",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:183"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/press",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:317"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/reload",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:140"
+		},
+		{
+			"method": "GET",
+			"path": "/api/chromium-preview/screenshot",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:368"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/scroll",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:280"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/select-ref",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:252"
+		},
+		{
+			"method": "GET",
+			"path": "/api/chromium-preview/snapshot",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:355"
+		},
+		{
+			"method": "GET",
+			"path": "/api/chromium-preview/stream",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:69"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/type",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:336"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/type-ref",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:227"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/viewport",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:102"
+		},
+		{
+			"method": "POST",
+			"path": "/api/chromium-preview/wheel",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chromium-preview.js:302"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/claim-test",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:124"
+		},
+		{
+			"method": "GET",
+			"path": "/api/claim-test",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:98"
+		},
+		{
+			"method": "POST",
+			"path": "/api/claim-test",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:111"
+		},
+		{
+			"method": "POST",
+			"path": "/api/genui-chat",
+			"runtimeAdmin": false,
+			"source": "backend/routes/genui.js:33"
+		},
+		{
+			"method": "POST",
+			"path": "/api/genui-description-summary",
+			"runtimeAdmin": false,
+			"source": "backend/routes/ai-utilities.js:246"
+		},
+		{
+			"method": "POST",
+			"path": "/api/genui-export",
+			"runtimeAdmin": false,
+			"source": "backend/routes/genui.js:39"
+		},
+		{
+			"method": "GET",
+			"path": "/api/health",
+			"runtimeAdmin": false,
+			"source": "backend/routes/status.js:205"
+		},
+		{
+			"method": "GET",
+			"path": "/api/image-proxy",
+			"runtimeAdmin": false,
+			"source": "backend/routes/media.js:184"
+		},
+		{
+			"method": "GET",
+			"path": "/api/jobs",
+			"runtimeAdmin": false,
+			"source": "backend/routes/jobs.js:66"
+		},
+		{
+			"method": "POST",
+			"path": "/api/jobs",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:83"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/jobs/:id",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:126"
+		},
+		{
+			"method": "GET",
+			"path": "/api/jobs/:id",
+			"runtimeAdmin": false,
+			"source": "backend/routes/jobs.js:98"
+		},
+		{
+			"method": "PATCH",
+			"path": "/api/jobs/:id",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:108"
+		},
+		{
+			"method": "POST",
+			"path": "/api/jobs/:id/pause",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:146"
+		},
+		{
+			"method": "POST",
+			"path": "/api/jobs/:id/resume",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:156"
+		},
+		{
+			"method": "POST",
+			"path": "/api/jobs/:id/run",
+			"runtimeAdmin": true,
+			"source": "backend/routes/jobs.js:136"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/orchestrator/log",
+			"runtimeAdmin": true,
+			"source": "backend/routes/orchestrator.js:72"
+		},
+		{
+			"method": "GET",
+			"path": "/api/orchestrator/log",
+			"runtimeAdmin": false,
+			"source": "backend/routes/orchestrator.js:46"
+		},
+		{
+			"method": "GET",
+			"path": "/api/orchestrator/timeline",
+			"runtimeAdmin": false,
+			"source": "backend/routes/orchestrator.js:59"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/capture",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:608"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/explorer",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:424"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/ingest",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:657"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/log",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:641"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/page/*slug",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:547"
+		},
+		{
+			"method": "PUT",
+			"path": "/api/personal-graph/page/*slug",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:560"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/raw",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:574"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/search",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:624"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/source",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:449"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/source",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:463"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/summarize",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:653"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/twg/chat",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:478"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/twg/expand",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:514"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/twg/refresh",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:492"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/unprocessed-count",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:596"
+		},
+		{
+			"method": "GET",
+			"path": "/api/personal-graph/vault",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:140"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/vault/reset",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:166"
+		},
+		{
+			"method": "POST",
+			"path": "/api/personal-graph/vault/select",
+			"runtimeAdmin": false,
+			"source": "backend/routes/personal-graph.js:152"
+		},
+		{
+			"method": "POST",
+			"path": "/api/plan-title",
+			"runtimeAdmin": false,
+			"source": "backend/routes/ai-utilities.js:213"
+		},
+		{
+			"method": "GET",
+			"path": "/api/realtime/audio-conversation-token",
+			"runtimeAdmin": false,
+			"source": "backend/routes/realtime.js:26"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/background-streams",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:480"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/cancel-deferred-tool",
+			"runtimeAdmin": false,
+			"source": "backend/routes/chat-control.js:52"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/chat",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-chat-proxy.js:21"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/detach",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:458"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/rovo/documents",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:773"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/documents",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:697"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/documents",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:720"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/files/:fileId",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:818"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/files/upload",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:789"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/generated-media",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:838"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/messages",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:171"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/messages",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:189"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/runs/:threadId/cancel",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:540"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/runs/:threadId/detach",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:516"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/runs/:threadId/stream",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:490"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/suggestions",
+			"runtimeAdmin": false,
+			"source": "backend/routes/ai-utilities.js:99"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/rovo/threads",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:370"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/threads",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:225"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/threads",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:328"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/rovo/threads/:threadId",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:627"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/threads/:threadId",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:396"
+		},
+		{
+			"method": "PUT",
+			"path": "/api/rovo/threads/:threadId",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:415"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/rovo/threads/:threadId/browser-workspace",
+			"runtimeAdmin": true,
+			"source": "backend/routes/rovo-app.js:612"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/threads/:threadId/browser-workspace",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:566"
+		},
+		{
+			"method": "POST",
+			"path": "/api/rovo/threads/:threadId/browser-workspace",
+			"runtimeAdmin": true,
+			"source": "backend/routes/rovo-app.js:585"
+		},
+		{
+			"method": "GET",
+			"path": "/api/rovo/votes",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:660"
+		},
+		{
+			"method": "PATCH",
+			"path": "/api/rovo/votes",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:676"
+		},
+		{
+			"method": "GET",
+			"path": "/api/sessions/search",
+			"runtimeAdmin": false,
+			"source": "backend/routes/rovo-app.js:246"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:58"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/:category/:name",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:248"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/:category/:name/bundle",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:265"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/:category/:name/toggle",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:282"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/drafts",
+			"runtimeAdmin": true,
+			"source": "backend/lib/hermes-skill-draft-routes.js:8"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/skills/drafts/:id",
+			"runtimeAdmin": true,
+			"source": "backend/lib/hermes-skill-draft-routes.js:80"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/drafts/:id",
+			"runtimeAdmin": true,
+			"source": "backend/lib/hermes-skill-draft-routes.js:27"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/drafts/:id/approve",
+			"runtimeAdmin": true,
+			"source": "backend/lib/hermes-skill-draft-routes.js:42"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/drafts/:id/reject",
+			"runtimeAdmin": true,
+			"source": "backend/lib/hermes-skill-draft-routes.js:63"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/browse",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:90"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/check",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:188"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/inspect/*identifier",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:105"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/hub/install",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:133"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/hub/install-by-id",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:151"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/installed",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:121"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/search",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:72"
+		},
+		{
+			"method": "GET",
+			"path": "/api/skills/hub/taps",
+			"runtimeAdmin": false,
+			"source": "backend/routes/skills.js:201"
+		},
+		{
+			"method": "POST",
+			"path": "/api/skills/hub/taps",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:213"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/skills/hub/taps/*repo",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:229"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/skills/hub/uninstall/*name",
+			"runtimeAdmin": true,
+			"source": "backend/routes/skills.js:169"
+		},
+		{
+			"method": "POST",
+			"path": "/api/sound-generation",
+			"runtimeAdmin": false,
+			"source": "backend/routes/media.js:91"
+		},
+		{
+			"method": "POST",
+			"path": "/api/speech-transcription",
+			"runtimeAdmin": false,
+			"source": "backend/routes/media.js:133"
+		},
+		{
+			"method": "POST",
+			"path": "/api/standup",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:137"
+		},
+		{
+			"method": "GET",
+			"path": "/api/status",
+			"runtimeAdmin": false,
+			"source": "backend/routes/status.js:99"
+		},
+		{
+			"method": "GET",
+			"path": "/api/status/hermes",
+			"runtimeAdmin": false,
+			"source": "backend/routes/status.js:81"
+		},
+		{
+			"method": "GET",
+			"path": "/api/status/rovo",
+			"runtimeAdmin": false,
+			"source": "backend/routes/status.js:64"
+		},
+		{
+			"method": "POST",
+			"path": "/api/studio/agent-data-flow",
+			"runtimeAdmin": false,
+			"source": "backend/routes/ai-utilities.js:144"
+		},
+		{
+			"method": "POST",
+			"path": "/api/ticket-classify",
+			"runtimeAdmin": false,
+			"source": "backend/routes/demos.js:79"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/captures",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:20"
+		},
+		{
+			"method": "GET",
+			"path": "/api/wiki/memories",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:23"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/wiki/memories/:scope/blocks/:blockId",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:28"
+		},
+		{
+			"method": "DELETE",
+			"path": "/api/wiki/memories/proposals/:proposalId",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:29"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/memories/reset",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:30"
+		},
+		{
+			"method": "GET",
+			"path": "/api/wiki/memory-explorer",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:24"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/memory-explorer/brief",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:26"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/memory-explorer/deck",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:27"
+		},
+		{
+			"method": "GET",
+			"path": "/api/wiki/memory-explorer/export",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:25"
+		},
+		{
+			"method": "GET",
+			"path": "/api/wiki/search",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:21"
+		},
+		{
+			"method": "GET",
+			"path": "/api/wiki/status",
+			"runtimeAdmin": false,
+			"source": "backend/routes/wiki.js:19"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/sync",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:31"
+		},
+		{
+			"method": "POST",
+			"path": "/api/wiki/synthesis",
+			"runtimeAdmin": true,
+			"source": "backend/routes/wiki.js:22"
+		},
+		{
+			"method": "GET",
+			"path": "/healthcheck",
+			"runtimeAdmin": false,
+			"source": "backend/routes/status.js:204"
+		}
+	],
+	"nextApiRoutes": [
+		{
+			"method": "GET",
+			"nextPath": "/api/agent-mode",
+			"source": "app/api/agent-mode/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/agent-mode",
+					"source": "app/api/agent-mode/route.ts:7"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agent-mode",
+			"source": "app/api/agent-mode/route.ts:13",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agent-mode",
+					"source": "app/api/agent-mode/route.ts:19"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agents/rfp-demo/agent/apply",
+			"source": "app/api/agents/rfp-demo/agent/apply/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agents/rfp-demo/agent/apply",
+					"source": "app/api/agents/rfp-demo/agent/apply/route.ts:14"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agents/rfp-demo/events/ticket-entered-column",
+			"source": "app/api/agents/rfp-demo/events/ticket-entered-column/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agents/rfp-demo/events/ticket-entered-column",
+					"source": "app/api/agents/rfp-demo/events/ticket-entered-column/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agents/rfp-demo/reset",
+			"source": "app/api/agents/rfp-demo/reset/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agents/rfp-demo/reset",
+					"source": "app/api/agents/rfp-demo/reset/route.ts:14"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/agents/rfp-demo/state",
+			"source": "app/api/agents/rfp-demo/state/route.ts:11",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/agents/rfp-demo/state",
+					"source": "app/api/agents/rfp-demo/state/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agents/rfp-demo/state",
+			"source": "app/api/agents/rfp-demo/state/route.ts:21",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agents/rfp-demo/state",
+					"source": "app/api/agents/rfp-demo/state/route.ts:28"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/agents/rfp-demo/vpk-html-report",
+			"source": "app/api/agents/rfp-demo/vpk-html-report/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/agents/rfp-demo/vpk-html-report",
+					"source": "app/api/agents/rfp-demo/vpk-html-report/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/browser-workspaces",
+			"source": "app/api/browser-workspaces/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/browser-workspaces",
+					"source": "app/api/browser-workspaces/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/browser-workspaces",
+			"source": "app/api/browser-workspaces/route.ts:12",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/browser-workspaces",
+					"source": "app/api/browser-workspaces/route.ts:18"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/browser-workspaces/:workspaceId",
+			"source": "app/api/browser-workspaces/[workspaceId]/route.ts:21",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/browser-workspaces/:workspaceId",
+					"source": "app/api/browser-workspaces/[workspaceId]/route.ts:27"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/browser-workspaces/:workspaceId",
+			"source": "app/api/browser-workspaces/[workspaceId]/route.ts:9",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/browser-workspaces/:workspaceId",
+					"source": "app/api/browser-workspaces/[workspaceId]/route.ts:15"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/browser-workspaces/:workspaceId/:action",
+			"source": "app/api/browser-workspaces/[workspaceId]/[action]/route.ts:31",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/browser-workspaces/:workspaceId/:action",
+					"source": "app/api/browser-workspaces/[workspaceId]/[action]/route.ts:43"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/browser-workspaces/:workspaceId/:action",
+			"source": "app/api/browser-workspaces/[workspaceId]/[action]/route.ts:49",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/browser-workspaces/:workspaceId/:action",
+					"source": "app/api/browser-workspaces/[workspaceId]/[action]/route.ts:70"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/browser-workspaces/:workspaceId/preview-session",
+			"source": "app/api/browser-workspaces/[workspaceId]/preview-session/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/browser-workspaces/:workspaceId/preview-session",
+					"source": "app/api/browser-workspaces/[workspaceId]/preview-session/route.ts:21"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/browser-workspaces/:workspaceId/preview-session/:sessionId",
+			"source": "app/api/browser-workspaces/[workspaceId]/preview-session/[sessionId]/route.ts:10",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/browser-workspaces/:workspaceId/preview-session/:sessionId",
+					"source": "app/api/browser-workspaces/[workspaceId]/preview-session/[sessionId]/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/browser-workspaces/:workspaceId/tabs",
+			"source": "app/api/browser-workspaces/[workspaceId]/tabs/route.ts:11",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/browser-workspaces/:workspaceId/tabs",
+					"source": "app/api/browser-workspaces/[workspaceId]/tabs/route.ts:17"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/browser-workspaces/:workspaceId/tabs",
+			"source": "app/api/browser-workspaces/[workspaceId]/tabs/route.ts:23",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/browser-workspaces/:workspaceId/tabs",
+					"source": "app/api/browser-workspaces/[workspaceId]/tabs/route.ts:33"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex",
+			"source": "app/api/browser-workspaces/[workspaceId]/tabs/[tabIndex]/route.ts:10",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex",
+					"source": "app/api/browser-workspaces/[workspaceId]/tabs/[tabIndex]/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex/activate",
+			"source": "app/api/browser-workspaces/[workspaceId]/tabs/[tabIndex]/activate/route.ts:10",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/browser-workspaces/:workspaceId/tabs/:tabIndex/activate",
+					"source": "app/api/browser-workspaces/[workspaceId]/tabs/[tabIndex]/activate/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chat-cancel",
+			"source": "app/api/chat-cancel/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chat-cancel",
+					"source": "app/api/chat-cancel/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chat-sdk",
+			"source": "app/api/chat-sdk/route.ts:51",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chat-sdk",
+					"source": "app/api/chat-sdk/route.ts:64"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chat-sdk/skip-question",
+			"source": "app/api/chat-sdk/skip-question/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chat-sdk/skip-question",
+					"source": "app/api/chat-sdk/skip-question/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chat-title",
+			"source": "app/api/chat-title/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chat-title",
+					"source": "app/api/chat-title/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/checkpoints",
+			"source": "app/api/checkpoints/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/checkpoints",
+					"source": "app/api/checkpoints/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/checkpoints",
+			"source": "app/api/checkpoints/route.ts:12",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/checkpoints",
+					"source": "app/api/checkpoints/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/checkpoints/:id",
+			"source": "app/api/checkpoints/[id]/route.ts:4",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/checkpoints/:id",
+					"source": "app/api/checkpoints/[id]/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/checkpoints/:id/rollback",
+			"source": "app/api/checkpoints/[id]/rollback/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/checkpoints/:id/rollback",
+					"source": "app/api/checkpoints/[id]/rollback/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/chromium-preview",
+			"source": "app/api/chromium-preview/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/chromium-preview",
+					"source": "app/api/chromium-preview/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chromium-preview",
+			"source": "app/api/chromium-preview/route.ts:12",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chromium-preview",
+					"source": "app/api/chromium-preview/route.ts:18"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/chromium-preview/:action",
+			"source": "app/api/chromium-preview/[action]/route.ts:22",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/chromium-preview/:action",
+					"source": "app/api/chromium-preview/[action]/route.ts:43"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/chromium-preview/screenshot",
+			"source": "app/api/chromium-preview/screenshot/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/chromium-preview/screenshot",
+					"source": "app/api/chromium-preview/screenshot/route.ts:7"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/chromium-preview/snapshot",
+			"source": "app/api/chromium-preview/snapshot/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/chromium-preview/snapshot",
+					"source": "app/api/chromium-preview/snapshot/route.ts:7"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/chromium-preview/stream",
+			"source": "app/api/chromium-preview/stream/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/chromium-preview/stream",
+					"source": "app/api/chromium-preview/stream/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/genui-chat",
+			"source": "app/api/genui-chat/route.ts:16",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/genui-chat",
+					"source": "app/api/genui-chat/route.ts:23"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/genui-description-summary",
+			"source": "app/api/genui-description-summary/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/genui-description-summary",
+					"source": "app/api/genui-description-summary/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/genui-export",
+			"source": "app/api/genui-export/route.ts:13",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/genui-export",
+					"source": "app/api/genui-export/route.ts:19"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/health",
+			"source": "app/api/health/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/health",
+					"source": "app/api/health/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/jobs",
+			"source": "app/api/jobs/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/jobs",
+					"source": "app/api/jobs/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/jobs",
+			"source": "app/api/jobs/route.ts:12",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/jobs",
+					"source": "app/api/jobs/route.ts:18"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/jobs/:id",
+			"source": "app/api/jobs/[id]/route.ts:33",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/jobs/:id",
+					"source": "app/api/jobs/[id]/route.ts:35"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/jobs/:id",
+			"source": "app/api/jobs/[id]/route.ts:11",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/jobs/:id",
+					"source": "app/api/jobs/[id]/route.ts:13"
+				}
+			]
+		},
+		{
+			"method": "PATCH",
+			"nextPath": "/api/jobs/:id",
+			"source": "app/api/jobs/[id]/route.ts:19",
+			"targets": [
+				{
+					"method": "PATCH",
+					"path": "/api/jobs/:id",
+					"source": "app/api/jobs/[id]/route.ts:26"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/jobs/:id/pause",
+			"source": "app/api/jobs/[id]/pause/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/jobs/:id/pause",
+					"source": "app/api/jobs/[id]/pause/route.ts:21"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/jobs/:id/resume",
+			"source": "app/api/jobs/[id]/resume/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/jobs/:id/resume",
+					"source": "app/api/jobs/[id]/resume/route.ts:21"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/jobs/:id/run",
+			"source": "app/api/jobs/[id]/run/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/jobs/:id/run",
+					"source": "app/api/jobs/[id]/run/route.ts:21"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/orchestrator/log",
+			"source": "app/api/orchestrator/log/route.ts:21",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/orchestrator/log",
+					"source": "app/api/orchestrator/log/route.ts:22"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/orchestrator/log",
+			"source": "app/api/orchestrator/log/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/orchestrator/log",
+					"source": "app/api/orchestrator/log/route.ts:15"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/orchestrator/timeline",
+			"source": "app/api/orchestrator/timeline/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/orchestrator/timeline",
+					"source": "app/api/orchestrator/timeline/route.ts:15"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/capture",
+			"source": "app/api/personal-graph/capture/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/capture",
+					"source": "app/api/personal-graph/capture/route.ts:10"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/explorer",
+			"source": "app/api/personal-graph/explorer/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/explorer",
+					"source": "app/api/personal-graph/explorer/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/ingest",
+			"source": "app/api/personal-graph/ingest/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/ingest",
+					"source": "app/api/personal-graph/ingest/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/log",
+			"source": "app/api/personal-graph/log/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/log",
+					"source": "app/api/personal-graph/log/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/page/*slug",
+			"source": "app/api/personal-graph/page/[...slug]/route.ts:9",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/page/*slug",
+					"source": "app/api/personal-graph/page/[...slug]/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "PUT",
+			"nextPath": "/api/personal-graph/page/*slug",
+			"source": "app/api/personal-graph/page/[...slug]/route.ts:18",
+			"targets": [
+				{
+					"method": "PUT",
+					"path": "/api/personal-graph/page/*slug",
+					"source": "app/api/personal-graph/page/[...slug]/route.ts:25"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/raw",
+			"source": "app/api/personal-graph/raw/route.ts:6",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/raw",
+					"source": "app/api/personal-graph/raw/route.ts:10"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/search",
+			"source": "app/api/personal-graph/search/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/search",
+					"source": "app/api/personal-graph/search/route.ts:7"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/source",
+			"source": "app/api/personal-graph/source/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/source",
+					"source": "app/api/personal-graph/source/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/source",
+			"source": "app/api/personal-graph/source/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/source",
+					"source": "app/api/personal-graph/source/route.ts:20"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/summarize",
+			"source": "app/api/personal-graph/summarize/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/summarize",
+					"source": "app/api/personal-graph/summarize/route.ts:10"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/twg/chat",
+			"source": "app/api/personal-graph/twg/chat/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/twg/chat",
+					"source": "app/api/personal-graph/twg/chat/route.ts:8"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/twg/expand",
+			"source": "app/api/personal-graph/twg/expand/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/twg/expand",
+					"source": "app/api/personal-graph/twg/expand/route.ts:14"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/twg/refresh",
+			"source": "app/api/personal-graph/twg/refresh/route.ts:3",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/twg/refresh",
+					"source": "app/api/personal-graph/twg/refresh/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/unprocessed-count",
+			"source": "app/api/personal-graph/unprocessed-count/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/unprocessed-count",
+					"source": "app/api/personal-graph/unprocessed-count/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/personal-graph/vault",
+			"source": "app/api/personal-graph/vault/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/personal-graph/vault",
+					"source": "app/api/personal-graph/vault/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/vault/reset",
+			"source": "app/api/personal-graph/vault/reset/route.ts:3",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/vault/reset",
+					"source": "app/api/personal-graph/vault/reset/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/personal-graph/vault/select",
+			"source": "app/api/personal-graph/vault/select/route.ts:3",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/personal-graph/vault/select",
+					"source": "app/api/personal-graph/vault/select/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/plan-title",
+			"source": "app/api/plan-title/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/plan-title",
+					"source": "app/api/plan-title/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/realtime/audio-conversation-token",
+			"source": "app/api/realtime/audio-conversation-token/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/realtime/audio-conversation-token",
+					"source": "app/api/realtime/audio-conversation-token/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/realtime/ws-url",
+			"source": "app/api/realtime/ws-url/route.ts:12",
+			"targets": []
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/background-streams",
+			"source": "app/api/rovo/background-streams/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/background-streams",
+					"source": "app/api/rovo/background-streams/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/cancel-deferred-tool",
+			"source": "app/api/rovo/cancel-deferred-tool/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/cancel-deferred-tool",
+					"source": "app/api/rovo/cancel-deferred-tool/route.ts:15"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/chat",
+			"source": "app/api/rovo/chat/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/chat",
+					"source": "app/api/rovo/chat/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/detach",
+			"source": "app/api/rovo/detach/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/detach",
+					"source": "app/api/rovo/detach/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/rovo/documents",
+			"source": "app/api/rovo/documents/route.ts:47",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/rovo/documents",
+					"source": "app/api/rovo/documents/route.ts:50"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/documents",
+			"source": "app/api/rovo/documents/route.ts:9",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/documents",
+					"source": "app/api/rovo/documents/route.ts:21"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/documents",
+			"source": "app/api/rovo/documents/route.ts:32",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/documents",
+					"source": "app/api/rovo/documents/route.ts:40"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/files/:fileId",
+			"source": "app/api/rovo/files/[fileId]/route.ts:8",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/files/:fileId",
+					"source": "app/api/rovo/files/[fileId]/route.ts:10"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/files/upload",
+			"source": "app/api/rovo/files/upload/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/files/upload",
+					"source": "app/api/rovo/files/upload/route.ts:11"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/generated-media",
+			"source": "app/api/rovo/generated-media/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/generated-media",
+					"source": "app/api/rovo/generated-media/route.ts:10"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/messages",
+			"source": "app/api/rovo/messages/route.ts:6",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/messages",
+					"source": "app/api/rovo/messages/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/messages",
+			"source": "app/api/rovo/messages/route.ts:18",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/messages",
+					"source": "app/api/rovo/messages/route.ts:24"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/runs/:threadId/cancel",
+			"source": "app/api/rovo/runs/[threadId]/cancel/route.ts:7",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/runs/:threadId/cancel",
+					"source": "app/api/rovo/runs/[threadId]/cancel/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/runs/:threadId/detach",
+			"source": "app/api/rovo/runs/[threadId]/detach/route.ts:7",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/runs/:threadId/detach",
+					"source": "app/api/rovo/runs/[threadId]/detach/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/runs/:threadId/stream",
+			"source": "app/api/rovo/runs/[threadId]/stream/route.ts:7",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/runs/:threadId/stream",
+					"source": "app/api/rovo/runs/[threadId]/stream/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/suggestions",
+			"source": "app/api/rovo/suggestions/route.ts:6",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/suggestions",
+					"source": "app/api/rovo/suggestions/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/rovo/threads",
+			"source": "app/api/rovo/threads/route.ts:31",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/rovo/threads",
+					"source": "app/api/rovo/threads/route.ts:34"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/threads",
+			"source": "app/api/rovo/threads/route.ts:6",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/threads",
+					"source": "app/api/rovo/threads/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/rovo/threads",
+			"source": "app/api/rovo/threads/route.ts:18",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/rovo/threads",
+					"source": "app/api/rovo/threads/route.ts:24"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/rovo/threads/:threadId",
+			"source": "app/api/rovo/threads/[threadId]/route.ts:35",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/rovo/threads/:threadId",
+					"source": "app/api/rovo/threads/[threadId]/route.ts:37"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/threads/:threadId",
+			"source": "app/api/rovo/threads/[threadId]/route.ts:10",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/threads/:threadId",
+					"source": "app/api/rovo/threads/[threadId]/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "PUT",
+			"nextPath": "/api/rovo/threads/:threadId",
+			"source": "app/api/rovo/threads/[threadId]/route.ts:21",
+			"targets": [
+				{
+					"method": "PUT",
+					"path": "/api/rovo/threads/:threadId",
+					"source": "app/api/rovo/threads/[threadId]/route.ts:28"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/rovo/votes",
+			"source": "app/api/rovo/votes/route.ts:6",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/rovo/votes",
+					"source": "app/api/rovo/votes/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "PATCH",
+			"nextPath": "/api/rovo/votes",
+			"source": "app/api/rovo/votes/route.ts:18",
+			"targets": [
+				{
+					"method": "PATCH",
+					"path": "/api/rovo/votes",
+					"source": "app/api/rovo/votes/route.ts:24"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/sessions/search",
+			"source": "app/api/sessions/search/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/sessions/search",
+					"source": "app/api/sessions/search/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills",
+			"source": "app/api/skills/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills",
+					"source": "app/api/skills/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/:category/:name",
+			"source": "app/api/skills/[category]/[name]/route.ts:11",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/:category/:name",
+					"source": "app/api/skills/[category]/[name]/route.ts:13"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/:category/:name/bundle",
+			"source": "app/api/skills/[category]/[name]/bundle/route.ts:11",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/:category/:name/bundle",
+					"source": "app/api/skills/[category]/[name]/bundle/route.ts:13"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/:category/:name/toggle",
+			"source": "app/api/skills/[category]/[name]/toggle/route.ts:11",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/:category/:name/toggle",
+					"source": "app/api/skills/[category]/[name]/toggle/route.ts:17"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/drafts",
+			"source": "app/api/skills/drafts/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/drafts",
+					"source": "app/api/skills/drafts/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/skills/drafts/:id",
+			"source": "app/api/skills/drafts/[id]/route.ts:18",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/skills/drafts/:id",
+					"source": "app/api/skills/drafts/[id]/route.ts:20"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/drafts/:id",
+			"source": "app/api/skills/drafts/[id]/route.ts:10",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/drafts/:id",
+					"source": "app/api/skills/drafts/[id]/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/drafts/:id/approve",
+			"source": "app/api/skills/drafts/[id]/approve/route.ts:10",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/drafts/:id/approve",
+					"source": "app/api/skills/drafts/[id]/approve/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/drafts/:id/reject",
+			"source": "app/api/skills/drafts/[id]/reject/route.ts:10",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/drafts/:id/reject",
+					"source": "app/api/skills/drafts/[id]/reject/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/hub",
+			"source": "app/api/skills/hub/route.ts:5",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/browse",
+					"source": "app/api/skills/hub/route.ts:28"
+				},
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/inspect/*identifier",
+					"source": "app/api/skills/hub/route.ts:15"
+				},
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/installed",
+					"source": "app/api/skills/hub/route.ts:22"
+				},
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/search",
+					"source": "app/api/skills/hub/route.ts:28"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/hub",
+			"source": "app/api/skills/hub/route.ts:36",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/hub/install",
+					"source": "app/api/skills/hub/route.ts:42"
+				},
+				{
+					"method": "POST",
+					"path": "/api/skills/hub/install-by-id",
+					"source": "app/api/skills/hub/route.ts:42"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/hub/browse",
+			"source": "app/api/skills/hub/browse/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/browse",
+					"source": "app/api/skills/hub/browse/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/hub/inspect/*identifier",
+			"source": "app/api/skills/hub/inspect/[...identifier]/route.ts:9",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/inspect/*identifier",
+					"source": "app/api/skills/hub/inspect/[...identifier]/route.ts:13"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/hub/install",
+			"source": "app/api/skills/hub/install/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/hub/install",
+					"source": "app/api/skills/hub/install/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/skills/hub/install-by-id",
+			"source": "app/api/skills/hub/install-by-id/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/skills/hub/install-by-id",
+					"source": "app/api/skills/hub/install-by-id/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/hub/installed",
+			"source": "app/api/skills/hub/installed/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/installed",
+					"source": "app/api/skills/hub/installed/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/skills/hub/search",
+			"source": "app/api/skills/hub/search/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/skills/hub/search",
+					"source": "app/api/skills/hub/search/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/sound-generation",
+			"source": "app/api/sound-generation/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/sound-generation",
+					"source": "app/api/sound-generation/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/speech-transcription",
+			"source": "app/api/speech-transcription/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/speech-transcription",
+					"source": "app/api/speech-transcription/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/sprint-board/tasks",
+			"source": "app/api/sprint-board/tasks/route.ts:20",
+			"targets": []
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/standup",
+			"source": "app/api/standup/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/standup",
+					"source": "app/api/standup/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/status",
+			"source": "app/api/status/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/status",
+					"source": "app/api/status/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/status/hermes",
+			"source": "app/api/status/hermes/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/status/hermes",
+					"source": "app/api/status/hermes/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/status/rovo",
+			"source": "app/api/status/rovo/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/status/rovo",
+					"source": "app/api/status/rovo/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/studio/agent-data-flow",
+			"source": "app/api/studio/agent-data-flow/route.ts:6",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/studio/agent-data-flow",
+					"source": "app/api/studio/agent-data-flow/route.ts:12"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/ticket-classify",
+			"source": "app/api/ticket-classify/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/ticket-classify",
+					"source": "app/api/ticket-classify/route.ts:9"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/wiki/memories",
+			"source": "app/api/wiki/memories/route.ts:11",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/wiki/memories/proposals/:proposalId",
+					"source": "app/api/wiki/memories/route.ts:20"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/wiki/memories",
+			"source": "app/api/wiki/memories/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/wiki/memories",
+					"source": "app/api/wiki/memories/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "DELETE",
+			"nextPath": "/api/wiki/memories/:scope/blocks/:blockId",
+			"source": "app/api/wiki/memories/[scope]/blocks/[blockId]/route.ts:12",
+			"targets": [
+				{
+					"method": "DELETE",
+					"path": "/api/wiki/memories/:scope/blocks/:blockId",
+					"source": "app/api/wiki/memories/[scope]/blocks/[blockId]/route.ts:19"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/wiki/memories/reset",
+			"source": "app/api/wiki/memories/reset/route.ts:3",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/wiki/memories/reset",
+					"source": "app/api/wiki/memories/reset/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/wiki/memory-explorer",
+			"source": "app/api/wiki/memory-explorer/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/wiki/memory-explorer",
+					"source": "app/api/wiki/memory-explorer/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/wiki/memory-explorer/brief",
+			"source": "app/api/wiki/memory-explorer/brief/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/wiki/memory-explorer/brief",
+					"source": "app/api/wiki/memory-explorer/brief/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/wiki/memory-explorer/deck",
+			"source": "app/api/wiki/memory-explorer/deck/route.ts:4",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/wiki/memory-explorer/deck",
+					"source": "app/api/wiki/memory-explorer/deck/route.ts:5"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/wiki/memory-explorer/export",
+			"source": "app/api/wiki/memory-explorer/export/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/wiki/memory-explorer/export",
+					"source": "app/api/wiki/memory-explorer/export/route.ts:6"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/wiki/search",
+			"source": "app/api/wiki/search/route.ts:4",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/wiki/search",
+					"source": "app/api/wiki/search/route.ts:16"
+				}
+			]
+		},
+		{
+			"method": "GET",
+			"nextPath": "/api/wiki/status",
+			"source": "app/api/wiki/status/route.ts:3",
+			"targets": [
+				{
+					"method": "GET",
+					"path": "/api/wiki/status",
+					"source": "app/api/wiki/status/route.ts:4"
+				}
+			]
+		},
+		{
+			"method": "POST",
+			"nextPath": "/api/wiki/sync",
+			"source": "app/api/wiki/sync/route.ts:5",
+			"targets": [
+				{
+					"method": "POST",
+					"path": "/api/wiki/sync",
+					"source": "app/api/wiki/sync/route.ts:14"
+				}
+			]
+		}
+	]
+}

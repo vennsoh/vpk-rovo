@@ -4,7 +4,7 @@ import type {
 	StudioScreenAssistantRegion,
 	StudioScreenAssistantSnapshot,
 	StudioScreenAssistantTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
 
 // ---------------------------------------------------------------------------
 // Public types for the isolated screen-assistant (AI Cursor + Live chat) unit.

@@ -2,7 +2,7 @@
 
 import { ScreenAssistant } from "@/components/screen-assistant";
 import { Button } from "@/components/ui/button";
-import { SCREEN_ASSISTANT_TARGET_ATTR } from "@/components/projects/studio/lib/studio-screen-assistant";
+import { SCREEN_ASSISTANT_TARGET_ATTR } from "@/components/projects/rovo-core/lib/screen-assistant";
 
 // ---------------------------------------------------------------------------
 // Isolated sandbox for the AI Cursor + Live chat (screen assistant) unit.

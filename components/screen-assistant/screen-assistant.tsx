@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { ClickyOverlay } from "@/components/projects/studio/components/clicky/clicky-overlay";
+import { ClickyOverlay } from "@/components/projects/rovo-core/components/clicky/clicky-overlay";
 import { ScreenAssistantRegionOverlay } from "./screen-assistant-region-overlay";
 import { ScreenAssistantControls } from "./screen-assistant-controls";
 import { ScreenAssistantTranscript } from "./screen-assistant-transcript";

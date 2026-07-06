@@ -22,7 +22,7 @@ import { AgentsWorkItemInlinePage } from "./components/agents-work-item-inline-p
 import { RfpAttachmentPreviewDialog } from "./components/rfp-attachment-preview-dialog";
 import { RfpReportCanvas } from "./components/rfp-report-canvas";
 import type { ChatPanelCustomAgentTabs, ChatPanelGreetingProps } from "@/components/projects/sidebar-chat/page";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import { SONNER_TOAST_AUTO_DISMISS_MS, SonnerToast, Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {

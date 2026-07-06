@@ -7,7 +7,7 @@ import { RovoCanvas, type RovoCanvasStatus, type RovoCanvasVersion, type RovoCan
 import ChatPanel, { type ChatPanelCustomAgentTabs, type ChatPanelGreetingProps } from "@/components/projects/sidebar-chat/page";
 import type { ArtifactResult } from "@/components/projects/sidebar-chat/components/artifact-result-card";
 import { Spinner } from "@/components/ui/spinner";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import { mergeRovoContextDescriptions } from "@/lib/rovo-context";
 import { RFP_101_WORK_ITEM, formatActiveJiraWorkItemContext } from "../data/rfp-work-items";
 import type { AgentsRfpDemoActions } from "../hooks/use-agents-rfp-demo-state";

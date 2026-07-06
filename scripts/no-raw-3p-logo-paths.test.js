@@ -51,7 +51,11 @@ test("no raw /3p/ asset paths outside the LogoThirdParty module", () => {
 		if (ALLOWLIST.has(file)) {
 			continue;
 		}
-		const contents = fs.readFileSync(path.join(repoRoot, file), "utf8");
+		const filePath = path.join(repoRoot, file);
+		if (!fs.existsSync(filePath)) {
+			continue;
+		}
+		const contents = fs.readFileSync(filePath, "utf8");
 		if (contents.includes("/3p/")) {
 			offenders.push(file);
 		}

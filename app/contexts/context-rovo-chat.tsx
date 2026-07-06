@@ -15,46 +15,43 @@ import { useChat } from "@ai-sdk/react";
 import { API_ENDPOINTS } from "@/lib/api-config";
 import {
 	createAssistantTextMessage,
-	getLatestDataPart,
-	getMessageText,
 	type RovoDataParts,
-	type RovoMessageMetadata,
 	type RovoUIMessage,
 } from "@/lib/rovo-ui-messages";
-import {
-	DEFAULT_STARTER_ICON,
-	getStarterIcon,
-	type StarterIconKey,
-} from "@/components/blocks/conversation-starters";
 import { shouldSendExplicitRovoCancel } from "@/lib/rovo-cancel-strategy";
-import { mergeRovoContextDescriptions } from "@/lib/rovo-context";
 import {
 	createRovoAppId,
-	type RovoAppHermesContext,
 	type RovoAppThread,
 } from "@/lib/rovo-app-types";
 import type { AgentSelectorAgent } from "@/components/blocks/agent-selector";
 import {
-	readSessionAgentRecords,
-	writeSessionAgentRecords,
-	toPersistedRecord,
-} from "@/components/projects/studio/lib/studio-session-agent-storage";
+	normalizeSessionAgentEntry,
+} from "@/components/projects/rovo-core/lib/agent-records/session-agent-entry";
 import {
-	areStudioAgentResultsEqual,
-	getStudioAgentChangeSummary,
-	type StudioAgentChangeSummary,
-} from "@/components/projects/studio/lib/studio-agent-versioning";
+	STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS,
+	commitSessionAgentPublishReadyEntry,
+	getSessionAgentEntryByProfileId,
+	mergeRehydratedSessionAgentEntries,
+	persistSessionAgentEntries,
+	publishSessionAgentEntry,
+	registerSessionAgentFromResult,
+	rehydrateSessionAgentEntriesFromStorage,
+	removeSessionAgentEntry,
+	restoreSessionAgentVersionEntry,
+	updateSessionAgentDraftEntry,
+	type SessionAgentEntry,
+	type SessionAgentEntryMutationResult,
+	type StudioSessionAgentSaveStatus,
+} from "@/components/projects/rovo-core/lib/agent-records/session-agent-registry";
+import type { StudioSessionAgentEntry } from "@/components/projects/rovo-core/lib/agent-records/types";
 import {
 	getRovoAgentProfile,
-	getRovoAgentPromptContext,
 	isRovoAgentProfile,
 	ROVO_AGENT_PROFILES,
 	ROVO_AGENT_ID,
 	ROVO_AGENT_SELECTOR_AGENTS,
 	type RovoAgentProfile,
 } from "@/app/data/directory/agents";
-import { repairGeneratedAgentCatalog } from "@/app/data/directory/repair-agent-result";
-import { applyTemplateDefaultsToResult } from "@/components/projects/studio/lib/studio-agent-creation-context";
 import {
 	cancelRovoAppRun,
 	createRovoAppThread,
@@ -66,15 +63,11 @@ import {
 	getRovoAppThread,
 	listRovoAppThreads,
 	updateRovoAppThread,
-} from "@/components/projects/rovo/lib/api";
+} from "@/components/projects/rovo-core/lib/api";
 import {
 	appendSuggestedQuestionsToAssistantMessage,
-	buildSuggestedQuestionsRequest,
-} from "@/components/projects/rovo/lib/rovo-app-suggestions";
-import {
-	appendTurnCompleteToLastAssistantMessage,
-	markClarificationToolResolved,
-} from "@/components/projects/rovo/lib/rovo-app-streaming-assistant";
+	buildNextSuggestedQuestionsRequest,
+} from "@/components/projects/rovo-core/lib/rovo-app-suggestions";
 import {
 	buildExitPlanModeDeferredToolResponse,
 	type ParsedPlanWidgetPayload,
@@ -86,14 +79,31 @@ import {
 	type PlanApprovalSelection,
 } from "@/components/projects/shared/lib/plan-approval";
 import {
-	buildWorkItemReportRequestContext,
-	hasActiveWorkItemContext,
-	isWorkItemReportIntent,
-	mergeHermesSkillIds,
-	VPK_HTML_SKILL_ID,
-} from "@/lib/work-item-report-intent";
-import { resolveConversationStarterVisualIdentity, type RovoSuggestion } from "@/lib/rovo-suggestions";
-import { getDeterministicAgentAvatarSrc } from "@/lib/agent-avatars";
+	buildCompactThreadPersistKey,
+	buildSendMessageBody,
+	createAssistantThinkingStatusMessage,
+	createQueueItemId,
+	deriveCompactThreadTitle,
+	didAssistantCompleteActivePrompt,
+	getPayloadTooLargeUserMessage,
+	hasRichCompactMessageState,
+	hasRichCompactThreadState,
+	hasTurnCompleteForPrompt,
+	isClarificationResolutionPrompt,
+	isInvalidPartStateError,
+	isPayloadTooLargeError,
+	markPendingClarificationResolvedInMessages,
+	mergeSelectedAgentPromptOptions,
+	mergeSendPromptOptions,
+	resolveWorkItemReportPromptOptions,
+	sanitizeMessagesForTransport,
+	sanitizeRovoUiMessages,
+	sanitizeValueForTransport,
+	toUserFacingChatErrorMessage,
+	trimMessagesForRequestSize,
+	type QueuedPromptItem,
+	type SendPromptOptions,
+} from "@/app/contexts/rovo-chat-helpers";
 import {
 	isRateLimitError,
 	isChatInProgressError,
@@ -107,587 +117,21 @@ import {
 	getChatInProgressRetryContent,
 	getChatInProgressUserMessage,
 } from "@/lib/chat-error-utils";
-import { isPlainRecord } from "@/lib/utils";
 import { DefaultChatTransport, type FileUIPart } from "ai";
 
-export interface SendPromptOptions {
-	backendPreference?: "rovo" | "ai-gateway";
-	contextDescription?: string;
-	hermesContext?: RovoAppHermesContext;
-	userName?: string;
-	clientTimeZone?: string;
-	messageMetadata?: RovoMessageMetadata;
-	clarification?: unknown;
-	approval?: unknown;
-	deferredToolResponse?: {
-		tool_call_id: string;
-		result: unknown;
-	};
-	planRequestId?: string;
-	creationMode?: "skill" | "agent";
-	smartGeneration?: {
-		enabled?: boolean;
-		surface?: string;
-		containerWidthPx?: number;
-		viewportWidthPx?: number;
-		widthClass?: "compact" | "regular" | "wide";
-	};
-}
+export type {
+	StudioAgentPublishStatus,
+	StudioAgentVersionRecord,
+	StudioSessionAgentEntry,
+} from "@/components/projects/rovo-core/lib/agent-records/types";
+export type { StudioSessionAgentSaveStatus } from "@/components/projects/rovo-core/lib/agent-records/session-agent-registry";
+export type { QueuedPromptItem, SendPromptOptions } from "@/app/contexts/rovo-chat-helpers";
 
-export interface QueuedPromptItem {
-	id: string;
-	files: FileUIPart[];
-	text: string;
-	options?: SendPromptOptions;
-	createdAt: number;
-}
-
-type RovoUIMessagePart = RovoUIMessage["parts"][number];
-const INLINE_DATA_PLACEHOLDER = "[inline data omitted]";
-const CHAT_REQUEST_MAX_BYTES = 4 * 1024 * 1024;
-const CHAT_REQUEST_MIN_MESSAGES = 8;
 const EXPLICIT_CANCEL_DEBOUNCE_MS = 2_000;
 const EXPLICIT_CANCEL_GRACE_MS = 1_200;
 const MEDIA_GENERATION_TIMEOUT_MS = 120_000;
 const COMPACT_HISTORY_LIMIT = 40;
 const COMPACT_THREAD_PERSIST_DEBOUNCE_MS = 450;
-const TURN_COMPLETE_TIMESTAMP_TOLERANCE_MS = 1_000;
-
-function resolveClientTimeZone(explicitTimeZone?: string): string | undefined {
-	if (typeof explicitTimeZone === "string" && explicitTimeZone.trim().length > 0) {
-		return explicitTimeZone.trim();
-	}
-
-	try {
-		const inferredTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		return typeof inferredTimeZone === "string" && inferredTimeZone.trim().length > 0
-			? inferredTimeZone.trim()
-			: undefined;
-	} catch {
-		return undefined;
-	}
-}
-
-function buildSendMessageBody(
-	options: SendPromptOptions | undefined,
-	hasQueuedPrompts: boolean
-): Record<string, unknown> {
-	return {
-		backendPreference: options?.backendPreference,
-		contextDescription: options?.contextDescription,
-		hermesContext: options?.hermesContext,
-		userName: options?.userName,
-		clientTimeZone: resolveClientTimeZone(options?.clientTimeZone),
-		clarification: options?.clarification,
-		approval: options?.approval,
-		deferredToolResponse: options?.deferredToolResponse,
-		planRequestId: options?.planRequestId,
-		creationMode: options?.creationMode,
-		smartGeneration: options?.smartGeneration,
-		hasQueuedPrompts,
-	};
-}
-
-function mergePromptOptionObject<T extends object>(
-	defaultValue: T | undefined,
-	value: T | undefined
-): T | undefined {
-	if (!defaultValue && !value) {
-		return undefined;
-	}
-
-	return {
-		...(defaultValue ?? {}),
-		...(value ?? {}),
-	} as T;
-}
-
-function mergeHermesContext(
-	defaultValue: RovoAppHermesContext | undefined,
-	value: RovoAppHermesContext | undefined
-): RovoAppHermesContext | undefined {
-	if (!defaultValue && !value) {
-		return undefined;
-	}
-
-	return {
-		selectedSkillIds: Array.from(new Set([
-			...(defaultValue?.selectedSkillIds ?? []),
-			...(value?.selectedSkillIds ?? []),
-		])),
-		...(defaultValue?.autoSelectedSkillIds || value?.autoSelectedSkillIds
-			? {
-					autoSelectedSkillIds: Array.from(new Set([
-						...(defaultValue?.autoSelectedSkillIds ?? []),
-						...(value?.autoSelectedSkillIds ?? []),
-					])),
-				}
-			: {}),
-		...(defaultValue?.pendingDraftIds || value?.pendingDraftIds
-			? {
-					pendingDraftIds: Array.from(new Set([
-						...(defaultValue?.pendingDraftIds ?? []),
-						...(value?.pendingDraftIds ?? []),
-					])),
-				}
-			: {}),
-		...(defaultValue?.recentMemoryProposalIds || value?.recentMemoryProposalIds
-			? {
-					recentMemoryProposalIds: Array.from(new Set([
-						...(defaultValue?.recentMemoryProposalIds ?? []),
-						...(value?.recentMemoryProposalIds ?? []),
-					])),
-				}
-			: {}),
-	};
-}
-
-function resolveWorkItemReportPromptOptions(
-	prompt: string,
-	options?: SendPromptOptions
-): SendPromptOptions | undefined {
-	if (options?.creationMode === "agent") {
-		return options;
-	}
-
-	if (!isWorkItemReportIntent(prompt)) {
-		return options;
-	}
-
-	const reportContextBlock = buildWorkItemReportRequestContext({
-		contextDescription: options?.contextDescription,
-		promptText: prompt,
-		skillId: VPK_HTML_SKILL_ID,
-	});
-	if (!reportContextBlock) {
-		return options;
-	}
-
-	const shouldLoadSkill = hasActiveWorkItemContext(options?.contextDescription);
-
-	return {
-		...(options ?? {}),
-		contextDescription: mergeRovoContextDescriptions(
-			options?.contextDescription,
-			reportContextBlock
-		),
-		...(shouldLoadSkill
-			? {
-					hermesContext: {
-						...(options?.hermesContext ?? {}),
-						selectedSkillIds: mergeHermesSkillIds(
-							options?.hermesContext?.selectedSkillIds,
-							VPK_HTML_SKILL_ID
-						),
-					},
-				}
-			: {}),
-	};
-}
-
-function mergeSendPromptOptions(
-	defaultOptions?: SendPromptOptions,
-	options?: SendPromptOptions
-): SendPromptOptions | undefined {
-	if (!defaultOptions) return options;
-	if (!options) return defaultOptions;
-
-	return {
-		...defaultOptions,
-		...options,
-		contextDescription: mergeRovoContextDescriptions(
-			defaultOptions.contextDescription,
-			options.contextDescription
-		),
-		messageMetadata: mergePromptOptionObject(
-			defaultOptions.messageMetadata,
-			options.messageMetadata
-		),
-		smartGeneration: mergePromptOptionObject(
-			defaultOptions.smartGeneration,
-			options.smartGeneration
-		),
-		hermesContext: mergeHermesContext(
-			defaultOptions.hermesContext,
-			options.hermesContext
-		),
-	};
-}
-
-function mergeSelectedAgentPromptOptions(
-	options: SendPromptOptions | undefined,
-	selectedAgent: RovoAgentProfile
-): SendPromptOptions | undefined {
-	const selectedAgentContext = getRovoAgentPromptContext(selectedAgent);
-	if (!selectedAgentContext) {
-		return options;
-	}
-
-	return {
-		...(options ?? {}),
-		contextDescription: mergeRovoContextDescriptions(
-			options?.contextDescription,
-			selectedAgentContext
-		),
-	};
-}
-
-function isValidRovoUiMessagePart(part: unknown): part is RovoUIMessagePart {
-	return (
-		typeof part === "object" &&
-		part !== null &&
-		typeof (part as { type?: unknown }).type === "string"
-	);
-}
-
-function isDataUrl(value: string): boolean {
-	return /^data:[^,]+,/i.test(value);
-}
-
-function sanitizeValueForTransport(value: unknown): unknown {
-	if (typeof value === "string") {
-		return isDataUrl(value) ? INLINE_DATA_PLACEHOLDER : value;
-	}
-
-	if (Array.isArray(value)) {
-		let hasChanged = false;
-		const next = value.map((item) => {
-			const sanitized = sanitizeValueForTransport(item);
-			if (sanitized !== item) {
-				hasChanged = true;
-			}
-			return sanitized;
-		});
-		return hasChanged ? next : value;
-	}
-
-	if (!value || typeof value !== "object") {
-		return value;
-	}
-
-	let hasChanged = false;
-	const record = value as Record<string, unknown>;
-	const nextRecord: Record<string, unknown> = {};
-	for (const [key, item] of Object.entries(record)) {
-		const sanitized = sanitizeValueForTransport(item);
-		nextRecord[key] = sanitized;
-		if (sanitized !== item) {
-			hasChanged = true;
-		}
-	}
-
-	return hasChanged ? nextRecord : value;
-}
-
-function sanitizeMessagePartForTransport(part: RovoUIMessagePart): RovoUIMessagePart | null {
-	if (part.type === "file" && isDataUrl(part.url)) {
-		return null;
-	}
-
-	return sanitizeValueForTransport(part) as RovoUIMessagePart;
-}
-
-function sanitizeRovoUiMessages(
-	messages: ReadonlyArray<RovoUIMessage>
-): RovoUIMessage[] {
-	let hasChanged = false;
-
-	const nextMessages = messages.map((message) => {
-		const hasPartsArray = Array.isArray(message.parts);
-		const messageParts = hasPartsArray ? message.parts : [];
-		const nextParts = messageParts.filter(isValidRovoUiMessagePart);
-
-		if (!hasPartsArray || nextParts.length !== messageParts.length) {
-			hasChanged = true;
-			return { ...message, parts: nextParts };
-		}
-
-		return message;
-	});
-
-	return hasChanged ? nextMessages : (messages as RovoUIMessage[]);
-}
-
-function isClarificationResolutionPrompt(options: SendPromptOptions | undefined): boolean {
-	return Boolean(options?.clarification) || options?.messageMetadata?.source === "clarification-submit";
-}
-
-function getClarificationResolutionOutput(options: SendPromptOptions | undefined): string {
-	return options?.messageMetadata?.clarificationStatus === "dismissed"
-		? "Question dismissed."
-		: "Answers received.";
-}
-
-function getTurnCompleteTimestampMs(message: RovoUIMessage): number | null | undefined {
-	for (let index = message.parts.length - 1; index >= 0; index -= 1) {
-		const part = message.parts[index];
-		if (part.type !== "data-turn-complete") {
-			continue;
-		}
-
-		const timestamp = (part as { data?: { timestamp?: unknown } }).data?.timestamp;
-		if (typeof timestamp !== "string") {
-			return null;
-		}
-
-		const timestampMs = Date.parse(timestamp);
-		return Number.isFinite(timestampMs) ? timestampMs : null;
-	}
-
-	return undefined;
-}
-
-function hasTurnCompleteForPrompt(
-	message: RovoUIMessage,
-	prompt: QueuedPromptItem
-): boolean {
-	const timestampMs = getTurnCompleteTimestampMs(message);
-	if (timestampMs === undefined) {
-		return false;
-	}
-
-	return (
-		timestampMs === null ||
-		timestampMs + TURN_COMPLETE_TIMESTAMP_TOLERANCE_MS >= prompt.createdAt
-	);
-}
-
-function getFileSignature(file: FileUIPart): string {
-	return [
-		file.url,
-		file.filename ?? "",
-		file.mediaType ?? "",
-	].join("\u0000");
-}
-
-function hasMatchingFileParts(
-	message: RovoUIMessage,
-	files: ReadonlyArray<FileUIPart>
-): boolean {
-	if (files.length === 0) {
-		return false;
-	}
-
-	const messageFileSignatures = new Set(
-		message.parts
-			.filter((part): part is FileUIPart => part.type === "file")
-			.map(getFileSignature)
-	);
-
-	return files.every((file) => messageFileSignatures.has(getFileSignature(file)));
-}
-
-function didAssistantCompleteActivePrompt(
-	messages: ReadonlyArray<RovoUIMessage>,
-	assistantIndex: number,
-	prompt: QueuedPromptItem
-): boolean {
-	const promptText = prompt.text.trim();
-	for (let index = assistantIndex - 1; index >= 0; index -= 1) {
-		const message = messages[index];
-		if (message.role === "assistant") {
-			return false;
-		}
-
-		if (message.role !== "user") {
-			continue;
-		}
-
-		return (
-			(promptText.length > 0 && getMessageText(message).trim() === promptText) ||
-			hasMatchingFileParts(message, prompt.files)
-		);
-	}
-
-	return false;
-}
-
-function markPendingClarificationResolvedInMessages(
-	messages: ReadonlyArray<RovoUIMessage>,
-	options: SendPromptOptions | undefined
-): RovoUIMessage[] {
-	const resolved = markClarificationToolResolved(
-		sanitizeRovoUiMessages(messages),
-		getClarificationResolutionOutput(options)
-	);
-
-	return appendTurnCompleteToLastAssistantMessage(resolved).messages;
-}
-
-function sanitizeMessagesForTransport(
-	messages: ReadonlyArray<RovoUIMessage>
-): RovoUIMessage[] {
-	let hasChanged = false;
-
-	const nextMessages = messages.map((message) => {
-		const nextParts: RovoUIMessagePart[] = [];
-		const hasPartsArray = Array.isArray(message.parts);
-		let messageChanged = !hasPartsArray;
-		const messageParts = hasPartsArray ? message.parts : [];
-		if (messageChanged) {
-			hasChanged = true;
-		}
-
-		for (const part of messageParts) {
-			const sanitizedPart = sanitizeMessagePartForTransport(part);
-			if (!sanitizedPart) {
-				hasChanged = true;
-				messageChanged = true;
-				continue;
-			}
-			if (sanitizedPart !== part) {
-				hasChanged = true;
-				messageChanged = true;
-			}
-			nextParts.push(sanitizedPart);
-		}
-
-		if (!messageChanged) {
-			return message;
-		}
-
-		return { ...message, parts: nextParts };
-	});
-
-	return hasChanged ? nextMessages : (messages as RovoUIMessage[]);
-}
-
-function estimateChatRequestBytes(
-	messages: ReadonlyArray<RovoUIMessage>,
-	body: Record<string, unknown>
-): number {
-	try {
-		const json = JSON.stringify({
-			...body,
-			messages,
-		});
-		return new TextEncoder().encode(json).byteLength;
-	} catch {
-		return Number.POSITIVE_INFINITY;
-	}
-}
-
-function trimMessagesForRequestSize(
-	messages: ReadonlyArray<RovoUIMessage>,
-	body: Record<string, unknown>
-): { messages: RovoUIMessage[]; trimmed: boolean } {
-	if (messages.length <= CHAT_REQUEST_MIN_MESSAGES) {
-		return {
-			messages: [...messages],
-			trimmed: false,
-		};
-	}
-
-	const nextMessages = [...messages];
-	let trimmed = false;
-	while (
-		nextMessages.length > CHAT_REQUEST_MIN_MESSAGES &&
-		estimateChatRequestBytes(nextMessages, body) > CHAT_REQUEST_MAX_BYTES
-	) {
-		nextMessages.shift();
-		trimmed = true;
-	}
-
-	return {
-		messages: nextMessages,
-		trimmed,
-	};
-}
-
-function isInvalidPartStateError(error: unknown): boolean {
-	return (
-		error instanceof TypeError &&
-		typeof error.message === "string" &&
-		error.message.includes("reading 'state'")
-	);
-}
-
-function isPayloadTooLargeError(rawMessage?: string): boolean {
-	const extractedMessage = extractErrorMessageFromValue(rawMessage);
-	if (!extractedMessage) {
-		return false;
-	}
-
-	const normalized = extractedMessage.toLowerCase();
-	return (
-		normalized.includes("payloadtoolargeerror") ||
-		normalized.includes("payload too large") ||
-		normalized.includes("entity too large") ||
-		normalized.includes("request entity too large") ||
-		normalized.includes("request payload too large")
-	);
-}
-
-function getPayloadTooLargeUserMessage(): string {
-	return "I couldn't process that request because the chat payload is too large (usually from inline image/file history). I trimmed oversized history data, so you can continue chatting.";
-}
-
-function deriveCompactThreadTitle(prompt: string): string {
-	const normalized = prompt.replace(/\s+/g, " ").trim();
-	if (!normalized) {
-		return "New chat";
-	}
-
-	return normalized.length > 48 ? `${normalized.slice(0, 45).trim()}...` : normalized;
-}
-
-function buildCompactThreadPersistKey(
-	threadId: string | null,
-	messages: ReadonlyArray<RovoUIMessage>
-): string {
-	return JSON.stringify({
-		threadId,
-		messages,
-	});
-}
-
-function hasRichCompactThreadState(thread: RovoAppThread | null): boolean {
-	if (!thread) {
-		return false;
-	}
-
-	if (thread.activeDocumentId || thread.realtimeMessages.length > 0) {
-		return true;
-	}
-
-	return hasRichCompactMessageState(thread.messages);
-}
-
-function hasRichCompactMessageState(messages: ReadonlyArray<RovoUIMessage>): boolean {
-	return messages.some((message) =>
-		message.parts.some((part) => {
-			if (!part.type.startsWith("data-")) {
-				return false;
-			}
-
-			return (
-				part.type.includes("artifact") ||
-				part.type.includes("plan") ||
-				part.type.includes("browser")
-			);
-		})
-	);
-}
-
-function createAssistantThinkingStatusMessage(
-	id: string,
-	label: string,
-	content?: string
-): RovoUIMessage {
-	return {
-		id,
-		role: "assistant",
-		parts: [
-			{
-				type: "data-thinking-status",
-				data: {
-					label,
-					content,
-				},
-			},
-		],
-	};
-}
 
 export type ChatSurface = "floating" | "sidebar";
 
@@ -703,44 +147,11 @@ export interface RegisterCreatedAgentOptions extends SelectAgentOptions {
 	silentSave?: boolean;
 }
 
-export type StudioAgentPublishStatus = "testing" | "published";
-
-export type StudioSessionAgentSaveStatus = "idle" | "saving" | "saved" | "error";
-
-export interface StudioAgentVersionRecord {
-	id: string;
-	label: string;
-	version: number;
-	kind: "publish" | "update" | "rollback";
-	createdAt: number;
-	createdBy: string;
-	snapshot: RovoDataParts["agent-result"];
-	changeSummary: StudioAgentChangeSummary;
-}
-
-export interface StudioSessionAgentEntry {
-	profile: RovoAgentProfile;
-	resultKey: string;
-	sourceResult: RovoDataParts["agent-result"];
-	draftResult: RovoDataParts["agent-result"];
-	lastTouchedAt: number;
-	publishReadyResult: RovoDataParts["agent-result"];
-	publishedResult: RovoDataParts["agent-result"] | null;
-	publishStatus: StudioAgentPublishStatus;
-	publishedVersion: number;
-	lastPublishedAt: number | null;
-	lastPublishedBy: string | null;
-	versionHistory: readonly StudioAgentVersionRecord[];
-}
-
 export interface RovoThreadSnapshot {
 	markPersisted?: boolean;
 	messages: ReadonlyArray<RovoUIMessage>;
 	threadId: string;
 }
-
-// Internal alias retained for backwards compatibility with prior naming.
-type SessionAgentEntry = StudioSessionAgentEntry;
 
 interface RovoChatContextType {
 	selectedAgentId: string;
@@ -834,105 +245,6 @@ interface RovoChatContextType {
 
 const RovoChatContext = createContext<RovoChatContextType | undefined>(undefined);
 
-function extractErrorMessageFromValue(value: unknown): string | null {
-	if (typeof value === "string") {
-		const trimmed = value.trim();
-		return trimmed.length > 0 ? trimmed : null;
-	}
-
-	if (!value || typeof value !== "object") {
-		return null;
-	}
-
-	const record = value as {
-		error?: unknown;
-		message?: unknown;
-		details?: unknown;
-	};
-
-	return (
-		extractErrorMessageFromValue(record.error) ??
-		extractErrorMessageFromValue(record.message) ??
-		extractErrorMessageFromValue(record.details)
-	);
-}
-
-function toUserFacingChatErrorMessage(rawMessage?: string): string {
-	const fallback = "Sorry, I hit an error. Please try again.";
-	const directMessage = extractErrorMessageFromValue(rawMessage);
-	if (!directMessage) {
-		return fallback;
-	}
-
-	try {
-		const parsed = JSON.parse(directMessage) as unknown;
-		return extractErrorMessageFromValue(parsed) ?? directMessage;
-	} catch {
-		return directMessage;
-	}
-}
-
-function createQueueItemId(fallbackCounter: number): string {
-	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-		return crypto.randomUUID();
-	}
-
-	return `queue-${Date.now()}-${fallbackCounter}`;
-}
-
-const STUDIO_SESSION_AGENT_PUBLISHER_NAME = "Venn Soh";
-const STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS = 900;
-
-function createStudioAgentVersionId(kind: StudioAgentVersionRecord["kind"]): string {
-	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-		return crypto.randomUUID();
-	}
-
-	return `studio-agent-${kind}-${Date.now()}`;
-}
-
-function getStudioAgentVersionLabel(
-	kind: StudioAgentVersionRecord["kind"],
-	changeCount: number,
-): string {
-	if (kind === "publish") {
-		return "Agent published";
-	}
-	if (kind === "rollback") {
-		return "Rollback prepared";
-	}
-	return changeCount === 1 ? "1 update" : `${changeCount} changes`;
-}
-
-function createStudioAgentVersionRecord({
-	before,
-	createdAt,
-	createdBy = STUDIO_SESSION_AGENT_PUBLISHER_NAME,
-	kind,
-	snapshot,
-	version,
-}: {
-	before: RovoDataParts["agent-result"] | null;
-	createdAt: number;
-	createdBy?: string | null;
-	kind: StudioAgentVersionRecord["kind"];
-	snapshot: RovoDataParts["agent-result"];
-	version: number;
-}): StudioAgentVersionRecord {
-	const changeSummary = getStudioAgentChangeSummary(before, snapshot);
-
-	return {
-		id: createStudioAgentVersionId(kind),
-		label: getStudioAgentVersionLabel(kind, changeSummary.count),
-		version,
-		kind,
-		createdAt,
-		createdBy: createdBy || STUDIO_SESSION_AGENT_PUBLISHER_NAME,
-		snapshot,
-		changeSummary,
-	};
-}
-
 interface RovoChatProviderProps {
 	agentProfiles?: readonly RovoAgentProfile[];
 	autoSelectAgentId?: string;
@@ -947,477 +259,6 @@ function toAgentSelectorAgent(agent: Pick<RovoAgentProfile, "avatarSrc" | "bylin
 		name: agent.name,
 		byline: agent.byline,
 		avatarSrc: agent.avatarSrc,
-	};
-}
-
-const SESSION_AGENT_DEFAULT_ID = "session-agent";
-const SESSION_AGENT_DEFAULT_NAME = "Untitled agent";
-const SESSION_AGENT_LEGACY_DEFAULT_NAME = "New agent";
-const SESSION_AGENT_DEFAULT_BYLINE = "Custom agent by You";
-const SESSION_AGENT_DEFAULT_AVATAR_SRC = "/avatar-agent/strategy-agents/wildcard-4.svg";
-const SESSION_AGENT_MAX_CONVERSATION_STARTERS = 3;
-
-type AgentResultPayload = RovoDataParts["agent-result"] & Record<string, unknown>;
-
-function getNonEmptyString(value: unknown): string | null {
-	if (typeof value !== "string") {
-		return null;
-	}
-
-	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : null;
-}
-
-function getPayloadString(
-	payload: Record<string, unknown>,
-	keys: ReadonlyArray<string>
-): string | null {
-	for (const key of keys) {
-		const value = getNonEmptyString(payload[key]);
-		if (value) {
-			return value;
-		}
-	}
-
-	return null;
-}
-
-function getAgentResultStarterLabel(value: unknown): string | null {
-	const directLabel = getNonEmptyString(value);
-	if (directLabel) {
-		return directLabel;
-	}
-
-	if (!isPlainRecord(value)) {
-		return null;
-	}
-
-	return getPayloadString(value, ["label", "prompt", "text", "title"]);
-}
-
-function getAgentResultStarterLabels(payload: AgentResultPayload): string[] {
-	const rawStarters = payload.conversationStarters ?? payload.starters ?? payload.suggestions;
-	if (!Array.isArray(rawStarters)) {
-		return [];
-	}
-
-	const seenLabels = new Set<string>();
-	const labels: string[] = [];
-	for (const rawStarter of rawStarters) {
-		const label = getAgentResultStarterLabel(rawStarter);
-		if (!label) {
-			continue;
-		}
-
-		const normalizedLabel = label.toLowerCase();
-		if (seenLabels.has(normalizedLabel)) {
-			continue;
-		}
-
-		seenLabels.add(normalizedLabel);
-		labels.push(label);
-		if (labels.length >= SESSION_AGENT_MAX_CONVERSATION_STARTERS) {
-			break;
-		}
-	}
-
-	return labels;
-}
-
-function getAgentResultStarterIconKeys(payload: AgentResultPayload): string[] {
-	return [...getPayloadStringArray(payload, ["conversationStarterIcons", "starterIcons", "suggestionIcons"])];
-}
-
-function normalizeSessionAgentResult(
-	result: RovoDataParts["agent-result"]
-): RovoDataParts["agent-result"] {
-	const conversationStarters = getAgentResultStarterLabels(result as AgentResultPayload);
-	const conversationStarterIcons = getAgentResultStarterIconKeys(result as AgentResultPayload);
-	const name = getNonEmptyString(result.name) === SESSION_AGENT_LEGACY_DEFAULT_NAME
-		? ""
-		: result.name;
-	const shouldNormalizeName = name !== result.name;
-	if (
-		!shouldNormalizeName &&
-		!Array.isArray(result.conversationStarters) &&
-		conversationStarters.length === 0
-	) {
-		return result;
-	}
-
-	return {
-		...result,
-		name,
-		...(Array.isArray(result.conversationStarters) || conversationStarters.length > 0
-			? { conversationStarters }
-			: {}),
-		...(conversationStarterIcons.length > 0 ? { conversationStarterIcons } : {}),
-	};
-}
-
-// react-doctor-disable-next-line react-doctor/only-export-components -- Studio agent table/config consumers share this normalized display helper with the provider.
-export function getStudioSessionAgentResultDisplayName(
-	result: RovoDataParts["agent-result"],
-): string {
-	return getNonEmptyString(result.name) ?? SESSION_AGENT_DEFAULT_NAME;
-}
-
-// react-doctor-disable-next-line react-doctor/only-export-components -- Studio agent table/config consumers share this normalized display helper with the provider.
-export function getStudioSessionAgentDisplayName(
-	entry: Pick<StudioSessionAgentEntry, "draftResult">,
-): string {
-	return getStudioSessionAgentResultDisplayName(normalizeSessionAgentResult(entry.draftResult));
-}
-
-function getPayloadStringArray(
-	payload: Record<string, unknown>,
-	keys: ReadonlyArray<string>
-): readonly string[] {
-	for (const key of keys) {
-		const value = payload[key];
-		if (!Array.isArray(value)) {
-			continue;
-		}
-
-		return value
-			.map(getNonEmptyString)
-			.filter((item): item is string => item !== null);
-	}
-
-	return [];
-}
-
-function normalizeGeneratedAgentId(value: string): string {
-	const normalized = value
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9_-]+/gu, "-")
-		.replace(/-+/gu, "-")
-		.replace(/^-|-$/gu, "");
-
-	return normalized || SESSION_AGENT_DEFAULT_ID;
-}
-
-function getSuffixedSessionAgentId(
-	baseId: string,
-	reservedIds: ReadonlySet<string>
-): string {
-	if (!reservedIds.has(baseId)) {
-		return baseId;
-	}
-
-	let suffix = 2;
-	while (reservedIds.has(`${baseId}-${suffix}`)) {
-		suffix += 1;
-	}
-
-	return `${baseId}-${suffix}`;
-}
-
-function getSuffixedSessionAgentName(
-	baseName: string,
-	reservedNames: ReadonlySet<string>
-): string {
-	if (!reservedNames.has(baseName.toLowerCase())) {
-		return baseName;
-	}
-
-	let suffix = 2;
-	while (reservedNames.has(`${baseName} ${suffix}`.toLowerCase())) {
-		suffix += 1;
-	}
-
-	return `${baseName} ${suffix}`;
-}
-
-function createSessionAgentStarter(
-	agentId: string,
-	label: string,
-	index: number,
-	context: { agentName: string; byline: string; description?: string | null },
-	iconKey?: string,
-): RovoSuggestion {
-	return {
-		id: `${agentId}-starter-${index + 1}`,
-		icon: getStarterIcon((iconKey as StarterIconKey | undefined) ?? DEFAULT_STARTER_ICON),
-		label,
-		prompt: label,
-		type: "skill",
-		visualIdentity: resolveConversationStarterVisualIdentity({
-			agentId,
-			agentName: context.agentName,
-			byline: context.byline,
-			description: context.description ?? undefined,
-			label,
-		}),
-	};
-}
-
-function createSessionAgentContextDescription(input: {
-	description?: string;
-	instructions?: string;
-	payload: AgentResultPayload;
-	profile: Pick<RovoAgentProfile, "byline" | "name" | "starters">;
-}): string {
-	const tools = getPayloadStringArray(input.payload, ["tools", "skills"]);
-	const trigger = getPayloadString(input.payload, ["trigger"]);
-	const guardrail = getPayloadString(input.payload, ["guardrail", "constraints"]);
-	const starterLabels = input.profile.starters.map((starter) => starter.prompt ?? starter.label);
-
-	return [
-		"[Selected session-created agent]",
-		`Agent: ${input.profile.name}`,
-		`Byline: ${input.profile.byline}`,
-		input.description ? `Description: ${input.description}` : null,
-		input.instructions ? `Instructions: ${input.instructions}` : null,
-		trigger ? `Trigger: ${trigger}` : null,
-		tools.length > 0 ? `Tools: ${tools.join(", ")}` : null,
-		guardrail ? `Guardrail: ${guardrail}` : null,
-		starterLabels.length > 0 ? "Conversation starters:" : null,
-		...starterLabels.map((starter) => `- ${starter}`),
-		"Answer as this selected session-created agent while using the existing Rovo chat capabilities and available context.",
-		"[End selected session-created agent]",
-	]
-		.filter((line): line is string => Boolean(line))
-		.join("\n");
-}
-
-function getCreatedAgentResultKey(payload: AgentResultPayload): string {
-	return JSON.stringify({
-		agentId: getPayloadString(payload, ["agentId", "id"]),
-		name: getPayloadString(payload, ["name", "agentName", "title"]),
-		byline: getPayloadString(payload, ["byline", "sourceLabel", "generatedBy", "source"]),
-		description: getPayloadString(payload, ["description", "summary", "shortDescription"]),
-		instructions: getPayloadString(payload, ["instructions", "contextDescription", "context", "systemPrompt", "prompt"]),
-		starters: getAgentResultStarterLabels(payload),
-		starterIcons: getAgentResultStarterIconKeys(payload),
-		avatarSrc: getPayloadString(payload, ["avatarSrc", "avatarUrl", "iconSrc"]),
-	});
-}
-
-function buildSessionAgentProfileFromResult(params: {
-	agentResult: RovoDataParts["agent-result"];
-	profileId: string;
-	profileName: string;
-}): RovoAgentProfile {
-	const payload = params.agentResult as AgentResultPayload;
-	const description =
-		getPayloadString(payload, ["description", "summary", "shortDescription"]) ??
-		undefined;
-	const byline =
-		getPayloadString(payload, ["byline", "sourceLabel", "generatedBy", "source"]) ??
-		SESSION_AGENT_DEFAULT_BYLINE;
-	const avatarSrc =
-		getPayloadString(payload, ["avatarSrc", "avatarUrl", "iconSrc"]) ??
-		SESSION_AGENT_DEFAULT_AVATAR_SRC;
-	const instructions =
-		getPayloadString(payload, ["instructions", "contextDescription", "context", "systemPrompt", "prompt"]) ??
-		undefined;
-	const starterIcons = getAgentResultStarterIconKeys(payload);
-	const starters = getAgentResultStarterLabels(payload).map((starter, index) =>
-		createSessionAgentStarter(params.profileId, starter, index, {
-			agentName: params.profileName,
-			byline,
-			description,
-		}, starterIcons[index])
-	);
-
-	return {
-		id: params.profileId,
-		name: params.profileName,
-		byline,
-		avatarSrc,
-		description,
-		starters,
-		contextDescription: createSessionAgentContextDescription({
-			description,
-			instructions,
-			payload,
-			profile: {
-				byline,
-				name: params.profileName,
-				starters,
-			},
-		}),
-	};
-}
-
-/**
- * Repairs an LLM-generated agent-result against the real catalog before it
- * becomes a session entry: fuzzy-repairs each tools/skills/knowledge/subagents
- * id (dropping no-matches), repairs `@[category:id]` tokens in the instructions,
- * and UNIONs body-referenced ids into the matching array. Safe on empty results
- * (from-scratch agents stay untouched). Pure core lives in
- * `app/data/directory/repair-agent-result.ts` so it is unit testable.
- */
-function applyGeneratedCatalogRepair(
-	result: RovoDataParts["agent-result"],
-): RovoDataParts["agent-result"] {
-	// Backfill template defaults first (chipped body + bound capabilities + triggers
-	// when the model returned a thin profile), then repair/union/weave catalog refs.
-	const enriched = applyTemplateDefaultsToResult(result);
-	return { ...enriched, ...repairGeneratedAgentCatalog(enriched) };
-}
-
-function createSessionAgentEntryFromResult(params: {
-	agentResult: RovoDataParts["agent-result"];
-	sessionAgentEntries: readonly SessionAgentEntry[];
-	sourceKey?: string;
-	staticAgentProfiles: readonly RovoAgentProfile[];
-}): SessionAgentEntry | null {
-	if (params.agentResult.action !== "create") {
-		return null;
-	}
-
-	const normalizedResult = normalizeSessionAgentResult(params.agentResult);
-	// Stamp an avatar (and, via its family, accent color) once at creation time
-	// when none was supplied — both from-scratch and AI-generated agents reach
-	// here. Persisting it onto the result keeps the avatar stable across later
-	// draft edits instead of re-rolling on every keystroke. Derive it
-	// deterministically from the agent's identity so the streamed result card
-	// (which reads the raw, avatar-less data part) lands on the *same* avatar and
-	// banner color as this persisted entry — see getDeterministicAgentAvatarSrc.
-	const hasExplicitAvatar = Boolean(
-		getPayloadString(normalizedResult as AgentResultPayload, ["avatarSrc", "avatarUrl", "iconSrc"])
-	);
-	const avatarSeed = getPayloadString(normalizedResult as AgentResultPayload, ["agentId", "id", "name"]);
-	const agentResult: RovoDataParts["agent-result"] = hasExplicitAvatar
-		? normalizedResult
-		: { ...normalizedResult, avatarSrc: getDeterministicAgentAvatarSrc(avatarSeed) };
-	const payload = agentResult as AgentResultPayload;
-	const payloadResultKey = getCreatedAgentResultKey(payload);
-	const resultKey = params.sourceKey
-		? `${params.sourceKey}:${payloadResultKey}`
-		: payloadResultKey;
-	const existingEntry = params.sessionAgentEntries.find(
-		(entry) => entry.resultKey === resultKey
-	);
-	if (existingEntry) {
-		return existingEntry;
-	}
-
-	const explicitName = getPayloadString(payload, ["name", "agentName", "title"]);
-	const baseName = explicitName ?? SESSION_AGENT_DEFAULT_NAME;
-	const explicitId = getPayloadString(payload, ["agentId", "id"]);
-	const baseId = normalizeGeneratedAgentId(
-		explicitId ?? baseName
-	);
-	const staticReservedProfiles = explicitId
-		? params.staticAgentProfiles.filter((profile) => profile.id !== baseId)
-		: params.staticAgentProfiles;
-	const reservedProfiles = [
-		...staticReservedProfiles,
-		getRovoAgentProfile(ROVO_AGENT_ID),
-		...params.sessionAgentEntries.map((entry) => entry.profile),
-	];
-	const reservedIds = new Set(reservedProfiles.map((profile) => profile.id));
-	const reservedNames = new Set(
-		reservedProfiles.map((profile) => profile.name.toLowerCase())
-	);
-	const id = getSuffixedSessionAgentId(baseId, reservedIds);
-	const name = explicitName
-		? getSuffixedSessionAgentName(baseName, reservedNames)
-		: SESSION_AGENT_DEFAULT_NAME;
-	const profile = buildSessionAgentProfileFromResult({
-		agentResult,
-		profileId: id,
-		profileName: name,
-	});
-
-	return {
-		profile,
-		resultKey,
-		sourceResult: agentResult,
-		draftResult: agentResult,
-		lastTouchedAt: Date.now(),
-		publishReadyResult: agentResult,
-		publishedResult: null,
-		publishStatus: "testing",
-		publishedVersion: 0,
-		lastPublishedAt: null,
-		lastPublishedBy: null,
-		versionHistory: [],
-	};
-}
-
-function rehydrateSessionAgentEntriesFromStorage(): SessionAgentEntry[] {
-	const records = readSessionAgentRecords();
-	if (records.length === 0) {
-		return [];
-	}
-
-	return records.map((record) => {
-		const sourceResult = normalizeSessionAgentResult(record.sourceResult);
-		const draftResult = normalizeSessionAgentResult(record.draftResult);
-		const publishReadyResult = normalizeSessionAgentResult(record.publishReadyResult);
-		const publishedResult = record.publishedResult
-			? normalizeSessionAgentResult(record.publishedResult)
-			: null;
-		const profile = buildSessionAgentProfileFromResult({
-			agentResult: draftResult,
-			profileId: record.profileId,
-			profileName: getStudioSessionAgentResultDisplayName(draftResult),
-		});
-
-		return {
-			profile,
-			resultKey: record.resultKey,
-			sourceResult,
-			draftResult,
-			lastTouchedAt: record.lastTouchedAt,
-			publishReadyResult,
-			publishedResult,
-			publishStatus: record.publishStatus,
-			publishedVersion: record.publishedVersion,
-			lastPublishedAt: record.lastPublishedAt,
-			lastPublishedBy: record.lastPublishedBy,
-			versionHistory: record.versionHistory.map((version) => ({
-				...version,
-				snapshot: normalizeSessionAgentResult(version.snapshot),
-			})),
-		};
-	});
-}
-
-function persistSessionAgentEntries(entries: readonly SessionAgentEntry[]): boolean {
-	return writeSessionAgentRecords(entries.map(toPersistedRecord));
-}
-
-function normalizeSessionAgentEntry(entry: SessionAgentEntry): SessionAgentEntry {
-	const sourceResult = normalizeSessionAgentResult(entry.sourceResult);
-	const draftResult = normalizeSessionAgentResult(entry.draftResult);
-	const publishReadyResult = normalizeSessionAgentResult(entry.publishReadyResult);
-	const publishedResult = entry.publishedResult
-		? normalizeSessionAgentResult(entry.publishedResult)
-		: null;
-	const profileName = getStudioSessionAgentResultDisplayName(draftResult);
-
-	if (
-		sourceResult === entry.sourceResult &&
-		draftResult === entry.draftResult &&
-		publishReadyResult === entry.publishReadyResult &&
-		publishedResult === entry.publishedResult &&
-		entry.profile.name === profileName &&
-		entry.versionHistory.every((version) => version.snapshot === normalizeSessionAgentResult(version.snapshot))
-	) {
-		return entry;
-	}
-
-	return {
-		...entry,
-		profile: buildSessionAgentProfileFromResult({
-			agentResult: draftResult,
-			profileId: entry.profile.id,
-			profileName,
-		}),
-		sourceResult,
-		draftResult,
-		publishReadyResult,
-		publishedResult,
-		versionHistory: entry.versionHistory.map((version) => ({
-			...version,
-			snapshot: normalizeSessionAgentResult(version.snapshot),
-		})),
 	};
 }
 
@@ -1493,6 +334,23 @@ export function RovoChatProvider({
 	// meaningful content to save yet, so the save progression would be noise.
 	const suppressNextSessionAgentSaveStatusRef = useRef(false);
 	const sessionAgentEntriesRef = useRef<SessionAgentEntry[]>([]);
+	const applySessionAgentMutation = useCallback((
+		result: SessionAgentEntryMutationResult,
+		options?: { silentSave?: boolean }
+	): SessionAgentEntry | null => {
+		if (!result.changed) {
+			return result.entry;
+		}
+
+		sessionAgentEntriesRef.current = result.entries;
+		if (options?.silentSave) {
+			suppressNextSessionAgentSaveStatusRef.current = true;
+		} else {
+			setSessionAgentSaveStatus("saving");
+		}
+		setSessionAgentEntries(result.entries);
+		return result.entry;
+	}, []);
 	// oxlint-disable react-doctor/no-event-handler -- Agent profile props and session-agent storage are external inputs that reconcile selected-agent state after render.
 	// oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Removed or auto-selected agent profiles must fall back after the owning profile set changes.
 	// oxlint-disable react-doctor/no-chain-state-updates -- Selection reconciliation intentionally updates the selected-agent state/ref pair together.
@@ -1610,19 +468,12 @@ export function RovoChatProvider({
 		}
 
 		setSessionAgentEntries((previous) => {
-			const existingIds = new Set(previous.map((entry) => entry.profile.id));
-			const existingKeys = new Set(previous.map((entry) => entry.resultKey));
-			const filtered = rehydrated.filter(
-				(entry) =>
-					!existingIds.has(entry.profile.id) &&
-					!existingKeys.has(entry.resultKey)
-			);
-			if (filtered.length === 0) {
+			const mergeResult = mergeRehydratedSessionAgentEntries(previous, rehydrated);
+			if (!mergeResult.changed) {
 				return previous;
 			}
 
-			const next = [...previous, ...filtered];
-			sessionAgentEntriesRef.current = next;
+			sessionAgentEntriesRef.current = mergeResult.entries;
 			// Rehydration writes the persisted agents back to storage unchanged;
 			// run that persist silently so a plain reload (no user edits) never
 			// flashes the "Saving…/Saved just now" indicator. Only set here, in
@@ -1630,7 +481,7 @@ export function RovoChatProvider({
 			// debounced save effect, so the flag can't linger and swallow the
 			// user's next real save.
 			suppressNextSessionAgentSaveStatusRef.current = true;
-			return next;
+			return mergeResult.entries;
 		});
 	}, []);
 	// oxlint-enable react-doctor/no-initialize-state
@@ -2150,42 +1001,9 @@ export function RovoChatProvider({
 			return;
 		}
 
-		let latestAssistantMessage: RovoUIMessage | null = null;
-		for (let i = rawUiMessages.length - 1; i >= 0; i--) {
-			const message = rawUiMessages[i];
-			if (message.role === "assistant") {
-				latestAssistantMessage = message;
-				break;
-			}
-		}
-
-		if (!latestAssistantMessage) {
-			return;
-		}
-
-		const hasTurnCompleteSignal = latestAssistantMessage.parts.some(
-			(part) => part.type === "data-turn-complete"
-		);
-		if (
-			!hasTurnCompleteSignal ||
-			getMessageText(latestAssistantMessage).trim().length === 0 ||
-			getLatestDataPart(latestAssistantMessage, "data-suggested-questions")
-		) {
-			return;
-		}
-
-		const widgetType = getLatestDataPart(latestAssistantMessage, "data-widget-data")?.data?.type;
-		if (widgetType === "question-card" || widgetType === "plan") {
-			return;
-		}
-
-		if (requestedSuggestionMessageIds.has(latestAssistantMessage.id)) {
-			return;
-		}
-
-		const suggestionRequest = buildSuggestedQuestionsRequest(
+		const suggestionRequest = buildNextSuggestedQuestionsRequest(
 			rawUiMessages,
-			latestAssistantMessage.id
+			requestedSuggestionMessageIds
 		);
 		if (!suggestionRequest) {
 			return;
@@ -3113,26 +1931,6 @@ export function RovoChatProvider({
 		setMessages,
 	]);
 
-	const touchSessionAgent = useCallback((profileId: string): SessionAgentEntry | null => {
-		const current = sessionAgentEntriesRef.current;
-		const index = current.findIndex((entry) => entry.profile.id === profileId);
-		if (index === -1) {
-			return null;
-		}
-
-		const existing = current[index];
-		const nextEntry: SessionAgentEntry = {
-			...existing,
-			lastTouchedAt: Date.now(),
-		};
-		const nextEntries = [...current];
-		nextEntries[index] = nextEntry;
-		sessionAgentEntriesRef.current = nextEntries;
-		setSessionAgentSaveStatus("saving");
-		setSessionAgentEntries(nextEntries);
-		return nextEntry;
-	}, []);
-
 	const selectAgent = useCallback((agentId: string, options?: SelectAgentOptions) => {
 		const nextAgent = agentProfileById.get(agentId) ?? getRovoAgentProfile(agentId);
 		// Selecting an agent must not reorder the recent-agents nav list. That list
@@ -3155,29 +1953,17 @@ export function RovoChatProvider({
 			agentResult: RovoDataParts["agent-result"],
 			options?: RegisterCreatedAgentOptions
 		) => {
-			const entry = createSessionAgentEntryFromResult({
-				agentResult: applyGeneratedCatalogRepair(agentResult),
-				sessionAgentEntries: sessionAgentEntriesRef.current,
+			const result = registerSessionAgentFromResult({
+				agentResult,
+				entries: sessionAgentEntriesRef.current,
 				sourceKey: options?.sourceKey,
 				staticAgentProfiles,
 			});
+			const entry = applySessionAgentMutation(result, {
+				silentSave: result.created && options?.silentSave,
+			});
 			if (!entry) {
 				return null;
-			}
-
-			const existingEntry = sessionAgentEntriesRef.current.find((item) => item.resultKey === entry.resultKey);
-			if (existingEntry) {
-				touchSessionAgent(existingEntry.profile.id);
-			} else {
-				const nextEntries = [...sessionAgentEntriesRef.current, entry];
-				sessionAgentEntriesRef.current = nextEntries;
-				if (options?.silentSave) {
-					// Blank-agent creation: persist quietly, no save indicator.
-					suppressNextSessionAgentSaveStatusRef.current = true;
-				} else {
-					setSessionAgentSaveStatus("saving");
-				}
-				setSessionAgentEntries(nextEntries);
 			}
 
 			if (options?.select && entry.profile.id !== selectedAgentIdRef.current) {
@@ -3189,183 +1975,53 @@ export function RovoChatProvider({
 
 			return entry.profile;
 		},
-		[resetChat, setSelectedAgentIdState, staticAgentProfiles, touchSessionAgent]
+		[applySessionAgentMutation, resetChat, setSelectedAgentIdState, staticAgentProfiles]
 	);
 
 	const getSessionAgentEntry = useCallback((profileId: string): SessionAgentEntry | null => {
-		return sessionAgentEntriesRef.current.find((entry) => entry.profile.id === profileId) ?? null;
+		return getSessionAgentEntryByProfileId(sessionAgentEntriesRef.current, profileId);
 	}, []);
 
 	const updateSessionAgentDraft = useCallback(
 		(profileId: string, patch: Partial<RovoDataParts["agent-result"]>): SessionAgentEntry | null => {
-			const current = sessionAgentEntriesRef.current;
-			const index = current.findIndex((entry) => entry.profile.id === profileId);
-			if (index === -1) {
-				return null;
-			}
-
-			const existing = current[index];
-			const nextDraftResult = normalizeSessionAgentResult({
-				...existing.draftResult,
-				...patch,
-			});
-
-			const nextProfile = buildSessionAgentProfileFromResult({
-				agentResult: nextDraftResult,
-				profileId: existing.profile.id,
-				profileName: getStudioSessionAgentResultDisplayName(nextDraftResult),
-			});
-
-			// If this agent was published and the draft now diverges from the
-			// published snapshot, return it to a testing/pending-publish state.
-			const nextPublishStatus: StudioAgentPublishStatus =
-				existing.publishStatus === "published" &&
-				existing.publishedResult &&
-				JSON.stringify(nextDraftResult) === JSON.stringify(existing.publishedResult)
-					? "published"
-					: "testing";
-
-			const nextEntry: SessionAgentEntry = {
-				...existing,
-				profile: nextProfile,
-				draftResult: nextDraftResult,
-				lastTouchedAt: Date.now(),
-				publishStatus: nextPublishStatus,
-			};
-
-			const nextEntries = [...current];
-			nextEntries[index] = nextEntry;
-			sessionAgentEntriesRef.current = nextEntries;
-			setSessionAgentSaveStatus("saving");
-			setSessionAgentEntries(nextEntries);
-			return nextEntry;
+			return applySessionAgentMutation(updateSessionAgentDraftEntry({
+				entries: sessionAgentEntriesRef.current,
+				patch,
+				profileId,
+			}));
 		},
-		[]
+		[applySessionAgentMutation]
 	);
 
 	const commitSessionAgentPublishReady = useCallback(
 		(profileId: string): SessionAgentEntry | null => {
-			const current = sessionAgentEntriesRef.current;
-			const index = current.findIndex((entry) => entry.profile.id === profileId);
-			if (index === -1) {
-				return null;
-			}
-
-			const existing = current[index];
-			if (
-				JSON.stringify(existing.publishReadyResult) ===
-				JSON.stringify(existing.draftResult)
-			) {
-				return existing;
-			}
-
-			const nextEntry: SessionAgentEntry = {
-				...existing,
-				lastTouchedAt: Date.now(),
-				publishReadyResult: existing.draftResult,
-			};
-			const nextEntries = [...current];
-			nextEntries[index] = nextEntry;
-			sessionAgentEntriesRef.current = nextEntries;
-			setSessionAgentSaveStatus("saving");
-			setSessionAgentEntries(nextEntries);
-			return nextEntry;
+			return applySessionAgentMutation(commitSessionAgentPublishReadyEntry(
+				sessionAgentEntriesRef.current,
+				profileId,
+			));
 		},
-		[]
+		[applySessionAgentMutation]
 	);
 
 	const publishSessionAgent = useCallback(
 		(profileId: string): SessionAgentEntry | null => {
-			const current = sessionAgentEntriesRef.current;
-			const index = current.findIndex((entry) => entry.profile.id === profileId);
-			if (index === -1) {
-				return null;
-			}
-
-			const existing = current[index];
-			const publishResult = existing.publishReadyResult;
-			const now = Date.now();
-			const versionKind: StudioAgentVersionRecord["kind"] = existing.publishedResult ? "update" : "publish";
-			const nextPublishedVersion = existing.publishedResult
-				? Math.max(existing.publishedVersion, 1) + 1
-				: 1;
-			const versionRecord = createStudioAgentVersionRecord({
-				before: existing.publishedResult,
-				createdAt: now,
-				createdBy: existing.lastPublishedBy,
-				kind: versionKind,
-				snapshot: publishResult,
-				version: nextPublishedVersion,
-			});
-			const nextEntry: SessionAgentEntry = {
-				...existing,
-				lastTouchedAt: now,
-				lastPublishedAt: now,
-				lastPublishedBy: versionRecord.createdBy,
-				publishedResult: publishResult,
-				publishStatus: "published",
-				publishedVersion: nextPublishedVersion,
-				versionHistory: [versionRecord, ...existing.versionHistory],
-			};
-			const nextEntries = [...current];
-			nextEntries[index] = nextEntry;
-			sessionAgentEntriesRef.current = nextEntries;
-			setSessionAgentSaveStatus("saving");
-			setSessionAgentEntries(nextEntries);
-
-			return nextEntry;
+			return applySessionAgentMutation(publishSessionAgentEntry({
+				entries: sessionAgentEntriesRef.current,
+				profileId,
+			}));
 		},
-		[]
+		[applySessionAgentMutation]
 	);
 
 	const restoreSessionAgentVersion = useCallback(
 		(profileId: string, versionId: string): SessionAgentEntry | null => {
-			const current = sessionAgentEntriesRef.current;
-			const index = current.findIndex((entry) => entry.profile.id === profileId);
-			if (index === -1) {
-				return null;
-			}
-
-			const existing = current[index];
-			const version = existing.versionHistory.find((item) => item.id === versionId);
-			if (!version) {
-				return null;
-			}
-
-			const restoredDraft = normalizeSessionAgentResult(version.snapshot);
-			const now = Date.now();
-			const nextProfile = buildSessionAgentProfileFromResult({
-				agentResult: restoredDraft,
-				profileId: existing.profile.id,
-				profileName: getStudioSessionAgentResultDisplayName(restoredDraft),
-			});
-			const rollbackRecord = createStudioAgentVersionRecord({
-				before: existing.draftResult,
-				createdAt: now,
-				createdBy: existing.lastPublishedBy,
-				kind: "rollback",
-				snapshot: restoredDraft,
-				version: Math.max(existing.publishedVersion, 1),
-			});
-			const nextEntry: SessionAgentEntry = {
-				...existing,
-				profile: nextProfile,
-				draftResult: restoredDraft,
-				lastTouchedAt: now,
-				publishStatus: existing.publishedResult && areStudioAgentResultsEqual(restoredDraft, existing.publishedResult)
-					? "published"
-					: "testing",
-				versionHistory: [rollbackRecord, ...existing.versionHistory],
-			};
-			const nextEntries = [...current];
-			nextEntries[index] = nextEntry;
-			sessionAgentEntriesRef.current = nextEntries;
-			setSessionAgentSaveStatus("saving");
-			setSessionAgentEntries(nextEntries);
-
-			return nextEntry;
+			return applySessionAgentMutation(restoreSessionAgentVersionEntry({
+				entries: sessionAgentEntriesRef.current,
+				profileId,
+				versionId,
+			}));
 		},
-		[]
+		[applySessionAgentMutation]
 	);
 
 	const resetAgentToRovo = useCallback((options?: { preserveCurrentThread?: boolean }) => {
@@ -3384,15 +2040,14 @@ export function RovoChatProvider({
 	}, [resetChat, setSelectedAgentIdState]);
 
 	const removeSessionAgent = useCallback((profileId: string) => {
-		const current = sessionAgentEntriesRef.current;
-		if (!current.some((entry) => entry.profile.id === profileId)) {
+		const result = removeSessionAgentEntry(sessionAgentEntriesRef.current, profileId);
+		if (!result.changed) {
 			return;
 		}
 
-		const nextEntries = current.filter((entry) => entry.profile.id !== profileId);
-		sessionAgentEntriesRef.current = nextEntries;
+		sessionAgentEntriesRef.current = result.entries;
 		setSessionAgentSaveStatus("saving");
-		setSessionAgentEntries(nextEntries);
+		setSessionAgentEntries(result.entries);
 
 		// Deleting the agent that is currently driving the chat would otherwise
 		// leave the surface pointed at a profile that no longer exists, so fall

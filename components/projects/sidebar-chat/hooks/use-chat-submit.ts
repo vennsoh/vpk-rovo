@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useRovoChat } from "@/app/contexts";
 import type { QueuedPromptItem } from "@/app/contexts";
 import type { SendPromptOptions } from "@/app/contexts";
-import { createRovoAppUserMessage } from "@/components/projects/studio/lib/rovo-app-user-message";
+import { createRovoAppUserMessage } from "@/components/projects/rovo-core/lib/rovo-app-user-message";
 import { createId } from "@/lib/utils";
 import type { RovoMessageMetadata, RovoUIMessage } from "@/lib/rovo-ui-messages";
 import type { FileUIPart } from "ai";

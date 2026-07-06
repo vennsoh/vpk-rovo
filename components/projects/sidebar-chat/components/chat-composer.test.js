@@ -7,10 +7,14 @@ function readProjectFile(filePath) {
 	return fs.readFileSync(path.join(process.cwd(), filePath), "utf8");
 }
 
-const CLICKY_VOICE_HOOK_SOURCE = readProjectFile("components/projects/rovo/hooks/use-clicky-voice.ts");
-const REALTIME_VOICE_HOOK_SOURCE = readProjectFile("components/projects/rovo/hooks/use-realtime-voice.ts");
+const CLICKY_VOICE_HOOK_SOURCE = readProjectFile("components/projects/rovo-core/hooks/use-default-clicky-voice.ts");
+const REALTIME_VOICE_HOOK_SOURCE = readProjectFile("components/projects/rovo-core/hooks/use-realtime-voice.ts");
+const SESSION_AGENT_TYPES_SOURCE = readProjectFile("components/projects/rovo-core/lib/agent-records/types.ts");
+const SESSION_AGENT_ENTRY_SOURCE = readProjectFile("components/projects/rovo-core/lib/agent-records/session-agent-entry.ts");
+const SESSION_AGENT_REGISTRY_SOURCE = readProjectFile("components/projects/rovo-core/lib/agent-records/session-agent-registry.ts");
 const LIVE_WAVEFORM_SOURCE = readProjectFile("components/ui-audio/live-waveform.tsx");
 const ROVO_CURSOR_SOURCE = readProjectFile("components/ui-custom/rovo-cursor.tsx");
+const ROVO_CHAT_HELPERS_SOURCE = readProjectFile("app/contexts/rovo-chat-helpers.ts");
 
 function sourceBetween(source, startNeedle, endNeedle) {
 	const start = source.indexOf(startNeedle);
@@ -66,7 +70,7 @@ test("compact chat can hide the AI cursor control without changing the default",
 	assert.match(sidebarPanel, /hideAiCursor\?: boolean;/u);
 	assert.match(sidebarPanel, /hideAiCursor = false/u);
 	assert.match(sidebarPanel, /hideAiCursor=\{hideAiCursor\}/u);
-	assert.match(sidebarPanel, /clickyActive=\{!hideAiCursor && \(isClickyActive \|\| isScriptedConversationActive\)\}/u);
+	assert.match(sidebarPanel, /clickyActive=\{!hideAiCursor && \(isClickyActive \|\| isLocalConversationActive\)\}/u);
 	assert.match(sidebarPanel, /\{hideAiCursor \? null : \([\s\S]*<ClickyOverlay/u);
 	assert.match(sidebarPanel, /<ClickyOverlay[\s\S]*paintingActive=\{screenAssistantRegionPainting\}/u);
 	assert.match(sidebarPanel, /<ClickyOverlay[\s\S]*responseText=\{clicky\.responseText\}/u);
@@ -88,7 +92,7 @@ test("compact chat cursor activation starts live voice while cursor deactivation
 	const panelEndVoiceSessionSource = sourceBetween(sidebarPanel, "onEndVoiceSession: useCallback", "onToolCall: useCallback");
 
 	assert.match(sidebarPanel, /activate: activateClicky,/u);
-	assert.match(sidebarPanel, /const startRealtimeVoice = useCallback\(\(\) => \{[\s\S]*realtimeTranscriptRef\.current = "";[\s\S]*realtime\.connect\(isScriptedConversationActive \? \{ explicitResponseOnly: true \} : undefined\);[\s\S]*\}, \[isScriptedConversationActive, realtime\]\);/u);
+	assert.match(sidebarPanel, /const startRealtimeVoice = useCallback\(\(\) => \{[\s\S]*realtimeTranscriptRef\.current = "";[\s\S]*realtime\.connect\(isLocalConversationActive \? \{ explicitResponseOnly: true \} : undefined\);[\s\S]*\}, \[isLocalConversationActive, realtime\]\);/u);
 
 	assert.match(clickyToggleSource, /if \(isClickyActive\) \{[\s\S]*deactivateClicky\(\);[\s\S]*return;[\s\S]*\}/u);
 	assert.match(clickyToggleSource, /activateClicky\(\);[\s\S]*if \(realtime\.voiceState === "idle"\) \{[\s\S]*startRealtimeVoice\(\);[\s\S]*\}/u);
@@ -105,10 +109,15 @@ test("compact chat cursor activation starts live voice while cursor deactivation
 	assert.doesNotMatch(realtimeRequestSource, /once: true/u);
 	assert.match(realtimeRequestSource, /if \(startRealtimeVoiceRequestKey <= 0\) \{[\s\S]*lastStartRealtimeVoiceRequestKeyRef\.current = 0;[\s\S]*clearDeferredStartRealtimeVoice\(\);/u);
 	assert.match(realtimeRequestSource, /if \(realtime\.voiceState !== "idle"\) \{[\s\S]*return;[\s\S]*\}/u);
-	assert.doesNotMatch(realtimeRequestSource, /if \(isScriptedConversationActive\) \{[\s\S]*startRealtimeVoice\(\);/u);
+	assert.doesNotMatch(realtimeRequestSource, /if \(isLocalConversationActive\) \{[\s\S]*startRealtimeVoice\(\);/u);
 	assert.match(realtimeRequestSource, /if \(shouldDeferRealtimeVoiceStartForUserActivation\(\)\) \{[\s\S]*startRealtimeVoiceAfterUserActivation\(\);[\s\S]*return;/u);
 	assert.doesNotMatch(sidebarPanel, /connectRealtimeForClicky/u);
 	assert.match(sidebarPanel, /connectRealtime: realtime\.connect/u);
+	assert.match(sidebarPanel, /from "@\/components\/projects\/rovo-core\/hooks\/use-realtime-voice";/u);
+	assert.match(sidebarPanel, /from "@\/components\/projects\/rovo-core\/hooks\/use-default-clicky-voice";/u);
+	assert.match(sidebarPanel, /sessionPolicyMode: "auto"/u);
+	assert.doesNotMatch(sidebarPanel, /@\/components\/projects\/rovo\/hooks\/use-realtime-voice/u);
+	assert.doesNotMatch(sidebarPanel, /@\/components\/projects\/rovo\/hooks\/use-clicky-voice/u);
 	assert.doesNotMatch(REALTIME_VOICE_HOOK_SOURCE, /applyRealtimeConnectionOptions|createRealtimeSessionUpdateConfig/u);
 	assert.match(REALTIME_VOICE_HOOK_SOURCE, /if \(activeRef\.current\) \{[\s\S]*return;[\s\S]*\}/u);
 
@@ -158,6 +167,8 @@ test("compact chat cursor voice uses structured screen tools instead of screensh
 	assert.match(CLICKY_VOICE_HOOK_SOURCE, /activate_screen_target/u);
 	assert.doesNotMatch(CLICKY_VOICE_HOOK_SOURCE, /sendImageInput|captureViewport|\[POINT/u);
 	assert.match(sidebarPanel, /createStudioScreenAssistantSnapshot/u);
+	assert.match(sidebarPanel, /from "@\/components\/projects\/rovo-core\/lib\/screen-assistant";/u);
+	assert.doesNotMatch(sidebarPanel, /@\/components\/projects\/studio\/lib\/studio-screen-assistant/u);
 	assert.match(sidebarPanel, /activeRegion: screenAssistantRegion/u);
 	assert.match(sidebarPanel, /activeRegion: snapshot\.activeRegion \?\? null/u);
 	assert.match(sidebarPanel, /handleScreenAssistantToolCall/u);
@@ -516,7 +527,7 @@ test("compact chat edit context blocks unmatched prompts from normal Rovo chat",
 	assert.match(sidebarPanel, /isStreamingLifecycleActive \|\| message\.id === localThinkingAssistantMessageId/u);
 	assert.match(submitHook, /requiredInterceptReply = DEFAULT_REQUIRED_INTERCEPT_REPLY/u);
 	assert.match(submitHook, /localThinkingAssistantMessageId: string \| null/u);
-	assert.match(submitHook, /setLocalThinkingAssistantMessageId\(assistantMessageId\);[\s\S]*await waitForInterceptDelay\(delayMs\);/u);
+	assert.match(submitHook, /setLocalThinkingAssistantMessageId\(activeAssistantMessageId\);[\s\S]*await waitForInterceptDelay\(delayMs\);/u);
 	assert.match(submitHook, /await injectLocalAssistantTurn\(\{[\s\S]*requiredInterceptReply[\s\S]*\}\);[\s\S]*return;/u);
 	assert.ok(requireInterceptIndex > -1);
 	assert.ok(sendPromptIndex > requireInterceptIndex);
@@ -550,8 +561,9 @@ test("compact chat merges selected custom agent context before queueing prompts"
 	assert.match(context, /selectAgent: \(agentId: string, options\?: SelectAgentOptions\) => void;/u);
 	assert.match(context, /resetAgentToRovo: \(options\?: \{ preserveCurrentThread\?: boolean \}\) => void;/u);
 	assert.match(context, /const nextAgent = agentProfileById\.get\(autoSelectAgentId\);/u);
-	assert.match(context, /function mergeSelectedAgentPromptOptions/u);
-	assert.match(context, /getRovoAgentPromptContext\(selectedAgent\)/u);
+	assert.match(context, /mergeSelectedAgentPromptOptions,[\s\S]*\} from "@\/app\/contexts\/rovo-chat-helpers";/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /export function mergeSelectedAgentPromptOptions/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /getRovoAgentPromptContext\(selectedAgent\)/u);
 	assert.ok(sendPromptIndex > -1);
 	assert.match(
 		context.slice(sendPromptIndex),
@@ -562,18 +574,24 @@ test("compact chat merges selected custom agent context before queueing prompts"
 test("compact chat registers session-created agents from agent result payloads", () => {
 	const context = readProjectFile("app/contexts/context-rovo-chat.tsx");
 
-	assert.match(context, /interface StudioSessionAgentEntry \{[\s\S]*profile: RovoAgentProfile;[\s\S]*resultKey: string;[\s\S]*\}/u);
-	assert.match(context, /type SessionAgentEntry = StudioSessionAgentEntry;/u);
+	assert.match(context, /registerSessionAgentFromResult,[\s\S]*type SessionAgentEntry,[\s\S]*\} from "@\/components\/projects\/rovo-core\/lib\/agent-records\/session-agent-registry";/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /createSessionAgentEntryFromResult/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /export function registerSessionAgentFromResult/u);
+	assert.match(SESSION_AGENT_TYPES_SOURCE, /interface StudioSessionAgentEntry \{[\s\S]*profile: RovoAgentProfile;[\s\S]*resultKey: string;[\s\S]*\}/u);
 	assert.match(context, /const \[sessionAgentEntries, setSessionAgentEntries\] = useState<SessionAgentEntry\[\]>\(\[\]\);/u);
 	assert.match(context, /const sessionAgentEntriesRef = useRef<SessionAgentEntry\[\]>\(\[\]\);/u);
-	assert.match(context, /function createSessionAgentEntryFromResult\(params: \{[\s\S]*agentResult: RovoDataParts\["agent-result"\];[\s\S]*\}\): SessionAgentEntry \| null/u);
-	assert.match(context, /sourceKey\?: string;/u);
-	assert.match(context, /const payloadResultKey = getCreatedAgentResultKey\(payload\);/u);
-	assert.match(context, /const resultKey = params\.sourceKey[\s\S]*\? `\$\{params\.sourceKey\}:\$\{payloadResultKey\}`[\s\S]*: payloadResultKey;/u);
-	assert.match(context, /params\.sessionAgentEntries\.find\(\s*\(entry\) => entry\.resultKey === resultKey\s*\)/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /export function createSessionAgentEntryFromResult\(params: \{[\s\S]*agentResult: RovoDataParts\["agent-result"\];[\s\S]*lastTouchedAt: number;[\s\S]*\}\): StudioSessionAgentEntry \| null/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /sourceKey\?: string;/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const payloadResultKey = getCreatedAgentResultKey\(payload\);/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const resultKey = params\.sourceKey[\s\S]*\? `\$\{params\.sourceKey\}:\$\{payloadResultKey\}`[\s\S]*: payloadResultKey;/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /params\.sessionAgentEntries\.find\(\s*\(entry\) => entry\.resultKey === resultKey\s*\)/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /const existingEntry = entries\.find\(\(item\) => item\.resultKey === entry\.resultKey\);/u);
 	assert.match(context, /\.\.\.staticAgentProfiles,[\s\S]*\.\.\.normalizedSessionAgentEntries\.map\(\(entry\) => entry\.profile\)/u);
 	assert.match(context, /\.\.\.staticAgents\.map\(toAgentSelectorAgent\),[\s\S]*\.\.\.normalizedSessionAgentEntries\.map\(\(entry\) => toAgentSelectorAgent\(entry\.profile\)\)/u);
 	assert.match(context, /registerCreatedAgentFromResult: \([\s\S]*agentResult: RovoDataParts\["agent-result"\],[\s\S]*options\?: RegisterCreatedAgentOptions[\s\S]*\) => RovoAgentProfile \| null;/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /lastTouchedAt = Date\.now\(\)/u);
+	assert.match(context, /const result = registerSessionAgentFromResult\(\{[\s\S]*agentResult,[\s\S]*entries: sessionAgentEntriesRef\.current,[\s\S]*sourceKey: options\?\.sourceKey,[\s\S]*staticAgentProfiles,[\s\S]*\}\);/u);
+	assert.match(context, /applySessionAgentMutation\(result,[\s\S]*silentSave: result\.created && options\?\.silentSave,/u);
 	assert.match(context, /sourceKey: options\?\.sourceKey,/u);
 });
 
@@ -581,13 +599,14 @@ test("compact chat exposes normalized Untitled agent names for session-created a
 	const context = readProjectFile("app/contexts/context-rovo-chat.tsx");
 	const contextsIndex = readProjectFile("app/contexts/index.ts");
 
-	assert.match(context, /const SESSION_AGENT_DEFAULT_NAME = "Untitled agent";/u);
-	assert.match(context, /const SESSION_AGENT_LEGACY_DEFAULT_NAME = "New agent";/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const SESSION_AGENT_DEFAULT_NAME = "Untitled agent";/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const SESSION_AGENT_LEGACY_DEFAULT_NAME = "New agent";/u);
 	assert.match(
-		context,
+		SESSION_AGENT_ENTRY_SOURCE,
 		/const name = getNonEmptyString\(result\.name\) === SESSION_AGENT_LEGACY_DEFAULT_NAME[\s\S]*\? ""[\s\S]*: result\.name;/u,
 	);
-	assert.match(context, /export function getStudioSessionAgentDisplayName/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /export function getStudioSessionAgentDisplayName/u);
+	assert.match(contextsIndex, /getStudioSessionAgentDisplayName,[\s\S]*\} from "@\/components\/projects\/rovo-core\/lib\/agent-records\/session-agent-entry";/u);
 	assert.match(context, /const normalizedSessionAgentEntries = useMemo\(/u);
 	assert.match(context, /\.\.\.normalizedSessionAgentEntries\.map\(\(entry\) => entry\.profile\)/u);
 	assert.match(context, /\.\.\.normalizedSessionAgentEntries\.map\(\(entry\) => toAgentSelectorAgent\(entry\.profile\)\)/u);
@@ -598,29 +617,29 @@ test("compact chat exposes normalized Untitled agent names for session-created a
 });
 
 test("compact chat suffixes duplicate session-created agent ids and names", () => {
-	const context = readProjectFile("app/contexts/context-rovo-chat.tsx");
-
-	assert.match(context, /function getSuffixedSessionAgentId\([\s\S]*reservedIds: ReadonlySet<string>[\s\S]*\): string \{[\s\S]*let suffix = 2;[\s\S]*while \(reservedIds\.has\(`\$\{baseId\}-\$\{suffix\}`\)\) \{[\s\S]*return `\$\{baseId\}-\$\{suffix\}`;/u);
-	assert.match(context, /function getSuffixedSessionAgentName\([\s\S]*reservedNames: ReadonlySet<string>[\s\S]*\): string \{[\s\S]*let suffix = 2;[\s\S]*while \(reservedNames\.has\(`\$\{baseName\} \$\{suffix\}`\.toLowerCase\(\)\)\) \{[\s\S]*return `\$\{baseName\} \$\{suffix\}`;/u);
-	assert.match(context, /const id = getSuffixedSessionAgentId\(baseId, reservedIds\);/u);
-	assert.match(context, /const explicitName = getPayloadString\(payload, \["name", "agentName", "title"\]\);/u);
-	assert.match(context, /const name = explicitName[\s\S]*\? getSuffixedSessionAgentName\(baseName, reservedNames\)[\s\S]*: SESSION_AGENT_DEFAULT_NAME;/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /function getSuffixedSessionAgentId\([\s\S]*reservedIds: ReadonlySet<string>[\s\S]*\): string \{[\s\S]*let suffix = 2;[\s\S]*while \(reservedIds\.has\(`\$\{baseId\}-\$\{suffix\}`\)\) \{[\s\S]*return `\$\{baseId\}-\$\{suffix\}`;/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /function getSuffixedSessionAgentName\([\s\S]*reservedNames: ReadonlySet<string>[\s\S]*\): string \{[\s\S]*let suffix = 2;[\s\S]*while \(reservedNames\.has\(`\$\{baseName\} \$\{suffix\}`\.toLowerCase\(\)\)\) \{[\s\S]*return `\$\{baseName\} \$\{suffix\}`;/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const id = getSuffixedSessionAgentId\(baseId, reservedIds\);/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const explicitName = getPayloadString\(payload, \["name", "agentName", "title"\]\);/u);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const name = explicitName[\s\S]*\? getSuffixedSessionAgentName\(baseName, reservedNames\)[\s\S]*: SESSION_AGENT_DEFAULT_NAME;/u);
 });
 
-test("created agents without an explicit avatar get a random one stamped at creation", () => {
+test("created agents without an explicit avatar get a deterministic one stamped at creation", () => {
 	// Regression: every newly created agent (from-scratch or AI-generated) used
 	// to fall back to a single fixed avatar, so they all looked identical. The
 	// avatar is now stamped once at creation from the shared full set when none
 	// is supplied, and persisted onto the result so it stays stable across edits.
-	const context = readProjectFile("app/contexts/context-rovo-chat.tsx");
-	assert.match(context, /import \{ getRandomAgentAvatarSrc \} from "@\/lib\/agent-avatars";/u);
+	// Generated session entries derive it from identity so streamed result cards
+	// and persisted profiles agree without sharing mutable state.
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /import \{ getDeterministicAgentAvatarSrc \} from "@\/lib\/agent-avatars";/u);
 	assert.match(
-		context,
+		SESSION_AGENT_ENTRY_SOURCE,
 		/const hasExplicitAvatar = Boolean\([\s\S]*getPayloadString\(normalizedResult as AgentResultPayload, \["avatarSrc", "avatarUrl", "iconSrc"\]\)[\s\S]*\);/u,
 	);
+	assert.match(SESSION_AGENT_ENTRY_SOURCE, /const avatarSeed = getPayloadString\(normalizedResult as AgentResultPayload, \["agentId", "id", "name"\]\);/u);
 	assert.match(
-		context,
-		/const agentResult: RovoDataParts\["agent-result"\] = hasExplicitAvatar[\s\S]*\? normalizedResult[\s\S]*: \{ \.\.\.normalizedResult, avatarSrc: getRandomAgentAvatarSrc\(\) \};/u,
+		SESSION_AGENT_ENTRY_SOURCE,
+		/const agentResult: RovoDataParts\["agent-result"\] = hasExplicitAvatar[\s\S]*\? normalizedResult[\s\S]*: \{ \.\.\.normalizedResult, avatarSrc: getDeterministicAgentAvatarSrc\(avatarSeed\) \};/u,
 	);
 });
 
@@ -664,10 +683,11 @@ test("compact chat resolves pending clarification tools before queueing clarific
 	const context = readProjectFile("app/contexts/context-rovo-chat.tsx");
 	const sendPromptIndex = context.indexOf("const sendPrompt = useCallback(");
 
-	assert.match(context, /markClarificationToolResolved/u);
-	assert.match(context, /appendTurnCompleteToLastAssistantMessage/u);
-	assert.match(context, /function isClarificationResolutionPrompt\(options: SendPromptOptions \| undefined\): boolean/u);
-	assert.match(context, /options\?\.messageMetadata\?\.source === "clarification-submit"/u);
+	assert.match(context, /isClarificationResolutionPrompt,[\s\S]*markPendingClarificationResolvedInMessages,[\s\S]*\} from "@\/app\/contexts\/rovo-chat-helpers";/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /markClarificationToolResolved/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /appendTurnCompleteToLastAssistantMessage/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /export function isClarificationResolutionPrompt\(options: SendPromptOptions \| undefined\): boolean/u);
+	assert.match(ROVO_CHAT_HELPERS_SOURCE, /options\?\.messageMetadata\?\.source === "clarification-submit"/u);
 	assert.ok(sendPromptIndex > -1);
 	assert.match(
 		context.slice(sendPromptIndex),

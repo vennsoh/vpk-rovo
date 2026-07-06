@@ -1,6 +1,15 @@
 ---
 name: vpk-html
 description: 'Render supplied material into offline, single-file HTML artifacts — documents, reports, one-pagers, briefs, memos, decks, changelogs, portfolios, resumes, and engineering workflow surfaces — with the vpk-html Atlassian deck identity, plus an optional derived PDF export and a landing/product-site track. Invoked explicitly via /vpk-html (optionally with a doc-type hint, e.g. /vpk-html resume); does not auto-trigger on casual mentions of HTML or documents.'
+purpose: Render explicitly requested documents, reports, decks, resumes, and engineering artifacts into offline single-file HTML with VPK/Kami quality gates.
+owner: VPK
+category: artifact-generation
+inputs: User source material, requested document type, optional brand profile, HTML templates, and quality constraints.
+outputs: Single-file HTML artifact, optional PDF export, validation report, and local output path.
+required_tools: shell, node, browser verification tools
+validation_command: node .agents/skills/vpk-html/scripts/check-html.mjs
+generated_artifacts: HTML files, optional PDFs, screenshots, and local output assets under the approved artifact path.
+common_failure_modes: Auto-triggering without explicit invocation, overfitting the wrong template, breaking offline constraints, or skipping HTML quality gates.
 ---
 
 # vpk-html

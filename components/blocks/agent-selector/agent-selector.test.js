@@ -12,8 +12,7 @@ const AGENT_SELECTOR_DROPDOWN_CALLSITE_SOURCES = [
 	"components/projects/jira/components/column-agent-assignment.tsx",
 	"components/projects/jira/components/work-item-modal/agent-panel.tsx",
 	"components/projects/jira/components/work-item-modal/sidebar-stack.tsx",
-	"components/projects/rovo/components/rovo-app-brand.tsx",
-	"components/projects/studio/components/rovo-app-brand.tsx",
+	"components/projects/rovo-core/components/rovo-app-brand.tsx",
 ].map((sourcePath) => ({
 	source: fs.readFileSync(path.join(process.cwd(), sourcePath), "utf8"),
 	sourcePath,

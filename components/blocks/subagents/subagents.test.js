@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const SUBAGENTS_PAGE_SOURCE = readFileSync(join(__dirname, "page.tsx"), "utf8");
 const SUBAGENTS_NAVIGATOR_SOURCE = readFileSync(join(__dirname, "subagents-navigator.tsx"), "utf8");
@@ -16,11 +18,8 @@ const SUBAGENTS_DEMO_SOURCE = readFileSync(
 	join(__dirname, "..", "..", "website", "demos", "blocks", "subagents-demo.tsx"),
 	"utf8",
 );
-const WEBSITE_REGISTRY_SOURCE = readFileSync(join(__dirname, "..", "..", "website", "registry.ts"), "utf8");
-const BLOCK_DETAILS_SOURCE = readFileSync(
-	join(__dirname, "..", "..", "..", "app", "data", "details", "blocks.ts"),
-	"utf8",
-);
+const WEBSITE_REGISTRY_SOURCE = readWebsiteRegistrySource();
+const BLOCK_DETAILS_SOURCE = readDetailCategorySource("blocks");
 
 test("Subagents models one base agent with conditional prompt copies", () => {
 	assert.match(SUBAGENTS_PAGE_SOURCE, /initialBaseAgent\?: SubagentsBaseAgent/u);

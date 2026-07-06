@@ -3,9 +3,22 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const SOURCE = fs.readFileSync(path.join(__dirname, "rovo-app-brand.tsx"), "utf8");
-const HEADER_SOURCE = fs.readFileSync(path.join(__dirname, "rovo-app-header.tsx"), "utf8");
-const BACK_BUTTON_SOURCE = fs.readFileSync(path.join(__dirname, "rovo-agent-back-button.tsx"), "utf8");
+const SOURCE = fs.readFileSync(
+	path.join(process.cwd(), "components/projects/rovo-core/components/rovo-app-brand.tsx"),
+	"utf8",
+);
+const HEADER_SOURCE = fs.readFileSync(
+	path.join(process.cwd(), "components/projects/rovo-core/components/rovo-app-header.tsx"),
+	"utf8",
+);
+const STUDIO_HEADER_SOURCE = fs.readFileSync(
+	path.join(process.cwd(), "components/projects/studio/components/rovo-app-header.tsx"),
+	"utf8",
+);
+const BACK_BUTTON_SOURCE = fs.readFileSync(
+	path.join(process.cwd(), "components/projects/rovo-core/components/rovo-agent-back-button.tsx"),
+	"utf8",
+);
 
 test("RovoAppBrand agent selector keeps a single selected agent", () => {
 	assert.match(SOURCE, /useRovoSelectedAgent/u);
@@ -42,4 +55,18 @@ test("fullscreen Rovo header exposes a custom-agent back button", () => {
 	assert.match(BACK_BUTTON_SOURCE, /<motion\.div[\s\S]*key="back-to-rovo"[\s\S]*variants=\{buttonVariants\}/u);
 	assert.match(BACK_BUTTON_SOURCE, /aria-label="Back to Rovo"/u);
 	assert.match(BACK_BUTTON_SOURCE, /onClick=\{\(\) => resetAgentToRovo\(\)\}/u);
+});
+
+test("Rovo and Studio headers share the core header while Studio owns send mode", () => {
+	assert.match(HEADER_SOURCE, /export function RovoAppHeaderCore/u);
+	assert.match(HEADER_SOURCE, /moreMenuFooter\?: ReactNode;/u);
+	assert.match(HEADER_SOURCE, /\{moreMenuFooter\}/u);
+	assert.match(
+		STUDIO_HEADER_SOURCE,
+		/import type \{ RovoAppSendMode \} from "@\/components\/projects\/rovo-core\/lib\/rovo-app-dispatch";/u,
+	);
+	assert.match(STUDIO_HEADER_SOURCE, /function StudioSendModeMenu/u);
+	assert.match(STUDIO_HEADER_SOURCE, /<DropdownMenuLabel>Send mode<\/DropdownMenuLabel>/u);
+	assert.match(STUDIO_HEADER_SOURCE, /moreMenuFooter=\{\(/u);
+	assert.doesNotMatch(HEADER_SOURCE, /Send mode/u);
 });

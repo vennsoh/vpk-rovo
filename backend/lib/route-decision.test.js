@@ -4,6 +4,8 @@ const assert = require("node:assert/strict");
 const {
 	buildRouteDecision,
 	createRouteDecisionPart,
+	formatRouteDecisionSSE,
+	parseRouteDecisionFromSseChunk,
 } = require("./route-decision");
 
 test("buildRouteDecision normalizes the v2 contract", () => {
@@ -73,4 +75,28 @@ test("createRouteDecisionPart emits only the v2 data-route-decision fields", () 
 			},
 		},
 	);
+});
+
+test("formatRouteDecisionSSE serializes a normalized route decision data part", () => {
+	assert.equal(
+		formatRouteDecisionSSE({
+			intent: "genui",
+			origin: "voice",
+			reason: "smart_route",
+		}),
+		"data: {\"type\":\"data-route-decision\",\"data\":{\"intent\":\"genui\",\"presentation\":\"genui_card\",\"confidence\":1,\"reason\":\"smart_route\",\"origin\":\"voice\"}}\n\n",
+	);
+});
+
+test("parseRouteDecisionFromSseChunk reads route decision data chunks defensively", () => {
+	assert.deepEqual(
+		parseRouteDecisionFromSseChunk("data: {\"type\":\"data-route-decision\",\"data\":{\"intent\":\"chat\"}}\n\n"),
+		{ intent: "chat" },
+	);
+	assert.equal(parseRouteDecisionFromSseChunk(""), null);
+	assert.equal(parseRouteDecisionFromSseChunk("event: message"), null);
+	assert.equal(parseRouteDecisionFromSseChunk("data: [DONE]"), null);
+	assert.equal(parseRouteDecisionFromSseChunk("data: not-json"), null);
+	assert.equal(parseRouteDecisionFromSseChunk("data: {\"type\":\"text-delta\",\"delta\":\"hello\"}"), null);
+	assert.equal(parseRouteDecisionFromSseChunk("data: {\"type\":\"data-route-decision\",\"data\":[]}"), null);
 });

@@ -1,6 +1,15 @@
 ---
 name: vpk-component-ext
 description: Translate custom or third-party AI, voice, and adjacent component libraries into VPK-standardized primitives. Use when the user asks to "migrate to ui-custom", "replace custom chat", "use ui-custom message", "standardize AI components", "replace message bubble", "use conversation component", "migrate prompt input", "use code-block component", "replace custom suggestions", "switch to ui-custom", "adopt ai-elements", "elements.ai-sdk.dev", "port ElevenLabs UI", "use ui-audio", "voice picker", "waveform", "transcript viewer", "audio player", "speech input", "port this third-party component", "translate this library into VPK", or references an existing ui/ui-custom/ui-audio component and wants to migrate code to it.
+purpose: Standardize custom and third-party AI, chat, voice, and adjacent UI into VPK-owned primitives and migration patterns.
+owner: VPK
+category: component-migration
+inputs: Existing custom UI, third-party component references, VPK ui-custom/ui-audio targets, migration catalog, and parity requirements.
+outputs: Migrated VPK primitives or callsites, migration notes, focused tests, and validation evidence.
+required_tools: shell, rg, pnpm, browser verification tools for UI changes
+validation_command: pnpm run lint && pnpm run typecheck
+generated_artifacts: none by default; approved migrations may add ui-custom, ui-audio, demo, catalog, or test files.
+common_failure_modes: Importing upstream packages directly, placing AI/voice components in generic ui, losing interaction parity, or skipping migration catalog checks.
 ---
 
 # VPK Component External Translation

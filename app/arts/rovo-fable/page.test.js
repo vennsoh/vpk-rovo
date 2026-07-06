@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const PAGE_SOURCE = fs.readFileSync(path.join(__dirname, "page.tsx"), "utf8");
 const LAYOUT_SOURCE = fs.readFileSync(path.join(__dirname, "layout.tsx"), "utf8");
@@ -21,10 +22,7 @@ const DETAILS_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../../data/details/arts.ts"),
 	"utf8",
 );
-const REGISTRY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../../components/website/registry.ts"),
-	"utf8",
-);
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const DEMO_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../../../components/website/demos/arts/rovo-fable-demo.tsx"),
 	"utf8",

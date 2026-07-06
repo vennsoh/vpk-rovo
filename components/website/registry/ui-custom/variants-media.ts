@@ -1,0 +1,405 @@
+import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
+
+export const UI_CUSTOM_MEDIA_VARIANT_DEMOS: Record<string, ComponentType> = {
+	"audio-player-demo-full": dynamic(
+		() =>
+			import("../../demos/ui-custom/audio-player-demo").then((mod) => ({
+				default: mod.AudioPlayerDemoFull,
+			})),
+		{ ssr: false },
+	),
+	"audio-player-demo-compact": dynamic(
+		() =>
+			import("../../demos/ui-custom/audio-player-demo").then((mod) => ({
+				default: mod.AudioPlayerDemoCompact,
+			})),
+		{ ssr: false },
+	),
+	"audio-player-demo-with-volume": dynamic(
+		() =>
+			import("../../demos/ui-custom/audio-player-demo").then((mod) => ({
+				default: mod.AudioPlayerDemoWithVolume,
+			})),
+		{ ssr: false },
+	),
+	"animated-dots-demo-custom-colors": dynamic(
+		() =>
+			import("../../demos/ui-custom/animated-dots-demo").then((mod) => ({
+				default: mod.AnimatedDotsDemoCustomColors,
+			})),
+		{ ssr: false },
+	),
+	"animated-dots-demo-timing": dynamic(
+		() =>
+			import("../../demos/ui-custom/animated-dots-demo").then((mod) => ({
+				default: mod.AnimatedDotsDemoTiming,
+			})),
+		{ ssr: false },
+	),
+	"animated-dots-demo-sizes": dynamic(
+		() =>
+			import("../../demos/ui-custom/animated-dots-demo").then((mod) => ({
+				default: mod.AnimatedDotsDemoSizes,
+			})),
+		{ ssr: false },
+	),
+	"animated-rovo-demo": dynamic(
+		() => import("../../demos/ui-custom/animated-rovo-demo"),
+		{ ssr: false },
+	),
+	"rovo-cursor-demo": dynamic(
+		() => import("../../demos/ui-custom/rovo-cursor-demo"),
+		{ ssr: false },
+	),
+	"twg-loader-demo-sizes": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-loader-demo").then((mod) => ({
+				default: mod.TWGLoaderDemoSizes,
+			})),
+		{ ssr: false },
+	),
+	"twg-loader-demo-on-dark": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-loader-demo").then((mod) => ({
+				default: mod.TWGLoaderDemoOnDark,
+			})),
+		{ ssr: false },
+	),
+	"rovo-generation-demo-default": dynamic(
+		() =>
+			import("../../demos/ui-custom/rovo-generation-demo").then((mod) => ({
+				default: mod.RovoGenerationDemoDefault,
+			})),
+		{ ssr: false },
+	),
+	"rovo-generation-demo-rainbow-glow": dynamic(
+		() =>
+			import("../../demos/ui-custom/rovo-generation-demo").then((mod) => ({
+				default: mod.RovoGenerationDemoRainbowGlow,
+			})),
+		{ ssr: false },
+	),
+	"rovo-generation-demo-rainbow-border": dynamic(
+		() =>
+			import("../../demos/ui-custom/rovo-generation-demo").then((mod) => ({
+				default: mod.RovoGenerationDemoRainbowBorder,
+			})),
+		{ ssr: false },
+	),
+	"rovo-generation-demo-rainbow-glow-and-border": dynamic(
+		() =>
+			import("../../demos/ui-custom/rovo-generation-demo").then((mod) => ({
+				default: mod.RovoGenerationDemoRainbowGlowAndBorder,
+			})),
+		{ ssr: false },
+	),
+	"rovo-generation-demo-highlight": dynamic(
+		() =>
+			import("../../demos/ui-custom/rovo-generation-demo").then((mod) => ({
+				default: mod.RovoGenerationDemoHighlight,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-grid": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoGrid,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-inline": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoInline,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-list": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoList,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-hover-card": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoHoverCard,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-read-only": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoReadOnly,
+			})),
+		{ ssr: false },
+	),
+	"attachments-demo-empty": dynamic(
+		() =>
+			import("../../demos/ui-custom/attachments-demo").then((mod) => ({
+				default: mod.AttachmentsDemoEmpty,
+			})),
+		{ ssr: false },
+	),
+	"checkpoint-demo-conversation": dynamic(
+		() =>
+			import("../../demos/ui-custom/checkpoint-demo").then((mod) => ({
+				default: mod.CheckpointDemoConversation,
+			})),
+		{ ssr: false },
+	),
+	"checkpoint-demo-basic": dynamic(
+		() =>
+			import("../../demos/ui-custom/checkpoint-demo").then((mod) => ({
+				default: mod.CheckpointDemoBasic,
+			})),
+		{ ssr: false },
+	),
+	"checkpoint-demo-with-tooltip": dynamic(
+		() =>
+			import("../../demos/ui-custom/checkpoint-demo").then((mod) => ({
+				default: mod.CheckpointDemoWithTooltip,
+			})),
+		{ ssr: false },
+	),
+	"checkpoint-demo-custom-icon": dynamic(
+		() =>
+			import("../../demos/ui-custom/checkpoint-demo").then((mod) => ({
+				default: mod.CheckpointDemoCustomIcon,
+			})),
+		{ ssr: false },
+	),
+	"commit-demo-full": dynamic(
+		() =>
+			import("../../demos/ui-custom/commit-demo").then((mod) => ({
+				default: mod.CommitDemoFull,
+			})),
+		{ ssr: false },
+	),
+	"commit-demo-with-files": dynamic(
+		() =>
+			import("../../demos/ui-custom/commit-demo").then((mod) => ({
+				default: mod.CommitDemoWithFiles,
+			})),
+		{ ssr: false },
+	),
+	"commit-demo-minimal": dynamic(
+		() =>
+			import("../../demos/ui-custom/commit-demo").then((mod) => ({
+				default: mod.CommitDemoMinimal,
+			})),
+		{ ssr: false },
+	),
+	"commit-demo-multiple": dynamic(
+		() =>
+			import("../../demos/ui-custom/commit-demo").then((mod) => ({
+				default: mod.CommitDemoMultiple,
+			})),
+		{ ssr: false },
+	),
+	"confirmation-demo-request": dynamic(
+		() =>
+			import("../../demos/ui-custom/confirmation-demo").then((mod) => ({
+				default: mod.ConfirmationDemoRequest,
+			})),
+		{ ssr: false },
+	),
+	"confirmation-demo-accepted": dynamic(
+		() =>
+			import("../../demos/ui-custom/confirmation-demo").then((mod) => ({
+				default: mod.ConfirmationDemoAccepted,
+			})),
+		{ ssr: false },
+	),
+	"confirmation-demo-rejected": dynamic(
+		() =>
+			import("../../demos/ui-custom/confirmation-demo").then((mod) => ({
+				default: mod.ConfirmationDemoRejected,
+			})),
+		{ ssr: false },
+	),
+	"confirmation-demo-interactive": dynamic(
+		() =>
+			import("../../demos/ui-custom/confirmation-demo").then((mod) => ({
+				default: mod.ConfirmationDemoInteractive,
+			})),
+		{ ssr: false },
+	),
+	"confirmation-demo-variants": dynamic(
+		() =>
+			import("../../demos/ui-custom/confirmation-demo").then((mod) => ({
+				default: mod.ConfirmationDemoVariants,
+			})),
+		{ ssr: false },
+	),
+	"context-demo-with-cost": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-demo").then((mod) => ({
+				default: mod.ContextDemoWithCost,
+			})),
+		{ ssr: false },
+	),
+	"context-demo-minimal": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-demo").then((mod) => ({
+				default: mod.ContextDemoMinimal,
+			})),
+		{ ssr: false },
+	),
+	"context-demo-high-usage": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-demo").then((mod) => ({
+				default: mod.ContextDemoHighUsage,
+			})),
+		{ ssr: false },
+	),
+	"context-demo-custom-trigger": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-demo").then((mod) => ({
+				default: mod.ContextDemoCustomTrigger,
+			})),
+		{ ssr: false },
+	),
+	"context-bar-demo-collapsible": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-bar-demo").then((mod) => ({
+				default: mod.ContextBarDemoCollapsible,
+			})),
+		{ ssr: false },
+	),
+	"context-bar-demo-dismissible": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-bar-demo").then((mod) => ({
+				default: mod.ContextBarDemoDismissible,
+			})),
+		{ ssr: false },
+	),
+	"context-bar-demo-trigger": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-bar-demo").then((mod) => ({
+				default: mod.ContextBarDemoTrigger,
+			})),
+		{ ssr: false },
+	),
+	"context-bar-demo-animated": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-bar-demo").then((mod) => ({
+				default: mod.ContextBarDemoAnimated,
+			})),
+		{ ssr: false },
+	),
+	"context-bar-demo-multi-pill": dynamic(
+		() =>
+			import("../../demos/ui-custom/context-bar-demo").then((mod) => ({
+				default: mod.ContextBarDemoMultiPill,
+			})),
+		{ ssr: false },
+	),
+	"environment-variables-demo-with-copy": dynamic(
+		() =>
+			import("../../demos/ui-custom/environment-variables-demo").then((mod) => ({
+				default: mod.EnvironmentVariablesDemoWithCopy,
+			})),
+		{ ssr: false },
+	),
+	"environment-variables-demo-with-required": dynamic(
+		() =>
+			import("../../demos/ui-custom/environment-variables-demo").then((mod) => ({
+				default: mod.EnvironmentVariablesDemoWithRequired,
+			})),
+		{ ssr: false },
+	),
+	"environment-variables-demo-revealed": dynamic(
+		() =>
+			import("../../demos/ui-custom/environment-variables-demo").then((mod) => ({
+				default: mod.EnvironmentVariablesDemoRevealed,
+			})),
+		{ ssr: false },
+	),
+	"environment-variables-demo-minimal": dynamic(
+		() =>
+			import("../../demos/ui-custom/environment-variables-demo").then((mod) => ({
+				default: mod.EnvironmentVariablesDemoMinimal,
+			})),
+		{ ssr: false },
+	),
+	"controls-demo-default": dynamic(
+		() =>
+			import("../../demos/ui-custom/controls-demo").then((mod) => ({
+				default: mod.ControlsDemoDefault,
+			})),
+		{ ssr: false },
+	),
+	"controls-demo-position": dynamic(
+		() =>
+			import("../../demos/ui-custom/controls-demo").then((mod) => ({
+				default: mod.ControlsDemoPosition,
+			})),
+		{ ssr: false },
+	),
+	"controls-demo-zoom-only": dynamic(
+		() =>
+			import("../../demos/ui-custom/controls-demo").then((mod) => ({
+				default: mod.ControlsDemoZoomOnly,
+			})),
+		{ ssr: false },
+	),
+	"controls-demo-fit-only": dynamic(
+		() =>
+			import("../../demos/ui-custom/controls-demo").then((mod) => ({
+				default: mod.ControlsDemoFitOnly,
+			})),
+		{ ssr: false },
+	),
+	"edge-demo-animated": dynamic(
+		() =>
+			import("../../demos/ui-custom/edge-demo").then((mod) => ({
+				default: mod.EdgeDemoAnimated,
+			})),
+		{ ssr: false },
+	),
+	"edge-demo-temporary": dynamic(
+		() =>
+			import("../../demos/ui-custom/edge-demo").then((mod) => ({
+				default: mod.EdgeDemoTemporary,
+			})),
+		{ ssr: false },
+	),
+	"edge-demo-mixed": dynamic(
+		() =>
+			import("../../demos/ui-custom/edge-demo").then((mod) => ({
+				default: mod.EdgeDemoMixed,
+			})),
+		{ ssr: false },
+	),
+	"file-tree-demo-project": dynamic(
+		() =>
+			import("../../demos/ui-custom/file-tree-demo").then((mod) => ({
+				default: mod.FileTreeDemoProject,
+			})),
+		{ ssr: false },
+	),
+	"file-tree-demo-with-selection": dynamic(
+		() =>
+			import("../../demos/ui-custom/file-tree-demo").then((mod) => ({
+				default: mod.FileTreeDemoWithSelection,
+			})),
+		{ ssr: false },
+	),
+	"file-tree-demo-custom-icons": dynamic(
+		() =>
+			import("../../demos/ui-custom/file-tree-demo").then((mod) => ({
+				default: mod.FileTreeDemoCustomIcons,
+			})),
+		{ ssr: false },
+	),
+	"file-tree-demo-with-actions": dynamic(
+		() =>
+			import("../../demos/ui-custom/file-tree-demo").then((mod) => ({
+				default: mod.FileTreeDemoWithActions,
+			})),
+		{ ssr: false },
+	),
+};

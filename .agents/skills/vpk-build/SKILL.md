@@ -1,6 +1,15 @@
 ---
 name: vpk-build
 description: Extract VPK routes to standalone apps.
+purpose: Extract a single VPK route into a standalone Next.js project with traced imports, minimal dependencies, and Micros-ready scaffolding.
+owner: VPK
+category: build-and-deploy
+inputs: VPK route path, optional target project name, route import graph, scaffold templates, and deployment constraints.
+outputs: Standalone sibling project files, dependency list, verification notes, and deployment handoff guidance.
+required_tools: shell, node, pnpm, rg
+validation_command: node --test .agents/skills/vpk-build/scripts/*.test.js
+generated_artifacts: Sibling vpk-* project directories outside the source repo when extraction is approved.
+common_failure_modes: Missing route ownership proof, unresolved traced imports, undeclared transitive dependencies, or stale scaffold templates.
 ---
 
 # VPK Build — extract a route into a standalone sibling project

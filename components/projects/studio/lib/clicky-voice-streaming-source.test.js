@@ -7,12 +7,12 @@ const ROUTE_SOURCES = [
 	{
 		name: "Studio",
 		shell: "components/projects/studio/components/rovo-app-shell.tsx",
-		realtimeHook: "components/projects/studio/hooks/use-realtime-voice.ts",
+		realtimeHook: "components/projects/rovo-core/hooks/use-realtime-voice.ts",
 	},
 	{
 		name: "Rovo",
 		shell: "components/projects/rovo/components/rovo-app-shell.tsx",
-		realtimeHook: "components/projects/rovo/hooks/use-realtime-voice.ts",
+		realtimeHook: "components/projects/rovo-core/hooks/use-realtime-voice.ts",
 	},
 ].map((route) => ({
 	...route,

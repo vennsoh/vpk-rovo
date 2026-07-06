@@ -20,6 +20,8 @@ export function NavigationItem({
 	onClick,
 }: Readonly<NavigationItemProps>) {
 	const [isHovered, setIsHovered] = useState(false);
+	const [isFocusedWithin, setIsFocusedWithin] = useState(false);
+	const isActionAreaVisible = isHovered || isFocusedWithin;
 
 	const rowStyle = {
 		display: "flex",
@@ -103,6 +105,13 @@ export function NavigationItem({
 			style={rowStyle}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			onFocusCapture={() => setIsFocusedWithin(true)}
+			onBlurCapture={(event) => {
+				const nextTarget = event.relatedTarget;
+				if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+					setIsFocusedWithin(false);
+				}
+			}}
 		>
 			{/* Selected indicator */}
 			{isSelected && (
@@ -131,7 +140,7 @@ export function NavigationItem({
 			)}
 
 			{/* Actions */}
-			{hasActions && isHovered ? <NavigationItemActions label={label} /> : null}
+			{hasActions && isActionAreaVisible ? <NavigationItemActions label={label} /> : null}
 		</div>
 	);
 }

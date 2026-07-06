@@ -28,13 +28,13 @@ import {
 	parseGenerativeWidget,
 	resolveGenerativeWidgetMetadata,
 	createBodyOnlySpec,
-	enrichGenerativeWidgetProfilePhotos,
 	fetchDescriptionSummary,
 	type ParsedGenerativeWidget,
 	type GenerativeWidgetMetadata,
 } from "@/components/projects/shared/lib/generative-widget";
 import type { ThinkingToolCallSummary } from "@/lib/rovo-ui-messages";
 import { formatContentTypeLabel } from "@/components/projects/shared/lib/generative-widget-branding";
+import { enrichGenerativeWidgetProfilePhotos } from "@/components/projects/shared/lib/generative-widget-profile-photos";
 import { ContentTypeTile } from "./content-type-tile";
 import { GenuiExportMenu } from "./genui-export-menu";
 import { PreviewBodyRenderer } from "./preview-body-renderer";

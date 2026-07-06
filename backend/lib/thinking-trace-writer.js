@@ -7,9 +7,8 @@
  * Any backend path that wants the populated chain-of-thought collapsible
  * just needs to emit start/result pairs in this shape.
  *
- * Originally extracted from the agents-rfp demo trace helpers in
- * `backend/server.js`; see `createAgentsRfpDemoThinkingEventPart` and
- * `writeAgentsRfpDemoTrace` for the source pattern.
+ * Originally extracted from the agents-rfp demo trace helpers; see
+ * `backend/lib/agents-rfp-demo-chat-stream.js` for the preserved demo pattern.
  */
 
 const DEFAULT_TOOL_CALL_DELAY_RANGE_MS = Object.freeze({

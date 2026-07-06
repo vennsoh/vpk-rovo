@@ -15,7 +15,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { getRovoAppDocument } from "@/components/projects/rovo/lib/api";
+import { getRovoAppDocument } from "@/components/projects/rovo-core/lib/api";
 import { buildArtifactPreviewBody } from "@/components/projects/shared/lib/artifact-preview";
 import { PreviewBodyRenderer } from "@/components/projects/shared/components/preview-body-renderer";
 import type { RovoAppDocument } from "@/lib/rovo-app-types";

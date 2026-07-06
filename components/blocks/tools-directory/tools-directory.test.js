@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Tools Directory is exposed as a website block", () => {
 		/blockComponent\("tools-directory", "Tools Directory"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ ToolsDirectoryDialog \} from "@\/components\/blocks\/tools-directory";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"tools-directory": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/tools-directory-demo"\)/u,
 	);
 });

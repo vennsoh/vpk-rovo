@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -22,11 +24,11 @@ test("Conversation Starters is exposed as a website block", () => {
 		/blockComponent\("conversation-starters", "Conversation Starters"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ ConversationStartersDialog \} from "@\/components\/blocks\/conversation-starters";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"conversation-starters": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/conversation-starters-demo"\)/u,
 	);
 });

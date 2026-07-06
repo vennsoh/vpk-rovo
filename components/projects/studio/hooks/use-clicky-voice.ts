@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
-import { buildStudioAssistantKnowledgeContext } from "@/components/projects/studio/lib/studio-agent-creation-context";
+import { buildStudioAssistantKnowledgeContext } from "@/components/projects/rovo-core/lib/agent-records/agent-creation-context";
+import {
+	useClickyVoiceCore,
+	type UseClickyVoiceCoreOptions,
+} from "@/components/projects/rovo-core/hooks/use-clicky-voice";
 
 // ---------------------------------------------------------------------------
 // AI cursor system prompt — tool-based screen assistant (no screenshots).
@@ -56,25 +58,15 @@ export { CLICKY_SYSTEM_INSTRUCTIONS };
 // Hook options
 // ---------------------------------------------------------------------------
 
-interface UseClickyVoiceOptions {
-	/** Whether the Clicky cursor companion is active. */
-	isClickyActive: boolean;
-	/** Whether the Realtime WebSocket is connected. */
-	isRealtimeConnected: boolean;
-	/** Connect to the Realtime voice session. */
-	connectRealtime: () => void;
-	/** Inject context into the Realtime session (used for the system prompt). */
-	injectContext: (data: {
-		type:
-			| "initial_context"
-			| "thread_context"
-			| "artifact_complete"
-			| "thread_message"
-			| "artifact_annotations"
-			| "artifact_context"
-			| "delegation_error";
-		content: string;
-	}) => void;
+export type UseClickyVoiceOptions = Omit<
+	UseClickyVoiceCoreOptions,
+	"getInitialContextContent"
+>;
+
+function getStudioClickyInitialContextContent(): string {
+	// Build at injection time so the voice cursor sees the current catalog and
+	// editable field contract.
+	return `${CLICKY_SYSTEM_INSTRUCTIONS}\n\n${buildStudioAssistantKnowledgeContext()}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -89,7 +81,7 @@ interface UseClickyVoiceOptions {
  * - The model grounds itself with the get_screen_state tool and acts through
  *   app-owned tools; there is no screenshot capture.
  * - Cursor deactivation must NOT tear down a voice session the user started
- *   separately (connectedForClickyRef tracks who opened the session).
+ *   separately.
  */
 export function useClickyVoice({
 	isClickyActive,
@@ -97,46 +89,11 @@ export function useClickyVoice({
 	connectRealtime,
 	injectContext,
 }: UseClickyVoiceOptions) {
-	const wasActiveRef = useRef(false);
-	const hasInjectedPromptRef = useRef(false);
-	const connectedForClickyRef = useRef(false);
-
-	// Connect Realtime when Clicky activates. Cursor deactivation must not stop
-	// a voice session the user started separately.
-	useEffect(() => {
-		if (isClickyActive && !wasActiveRef.current) {
-			wasActiveRef.current = true;
-			hasInjectedPromptRef.current = false;
-			if (!isRealtimeConnected) {
-				connectedForClickyRef.current = true;
-				connectRealtime();
-			} else {
-				connectedForClickyRef.current = false;
-			}
-		} else if (!isClickyActive && wasActiveRef.current) {
-			wasActiveRef.current = false;
-			hasInjectedPromptRef.current = false;
-			connectedForClickyRef.current = false;
-		}
-	}, [isClickyActive, isRealtimeConnected, connectRealtime]);
-
-	// Inject Clicky system prompt once connected, including when the user
-	// started voice first and then enabled the cursor.
-	useEffect(() => {
-		if (
-			isClickyActive &&
-			isRealtimeConnected &&
-			!hasInjectedPromptRef.current
-		) {
-			injectContext({
-				type: "initial_context",
-				// Pair the behavior prompt with live product knowledge (catalog ids +
-				// editable fields + point targets) so the cursor can configure the whole
-				// agent, not just click visible controls. Built at inject time so the
-				// catalog reflects the current data layer.
-				content: `${CLICKY_SYSTEM_INSTRUCTIONS}\n\n${buildStudioAssistantKnowledgeContext()}`,
-			});
-			hasInjectedPromptRef.current = true;
-		}
-	}, [isClickyActive, isRealtimeConnected, injectContext]);
+	useClickyVoiceCore({
+		isClickyActive,
+		isRealtimeConnected,
+		connectRealtime,
+		injectContext,
+		getInitialContextContent: getStudioClickyInitialContextContent,
+	});
 }

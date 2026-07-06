@@ -13,7 +13,7 @@ import type { FileUIPart } from "ai";
 import { DEFAULT_REASONING_OPTION_ID } from "@/components/projects/shared/components/chat-configuration/customize-menu-data";
 import { useRovoChat } from "@/app/contexts";
 import type { SendPromptOptions } from "@/app/contexts";
-import type { ChatContextBarDescriptor } from "./lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import type { ChatSurfaceSwitchHandler } from "@/components/projects/shared/components/chat-surface-switcher";
 import { useLazyRef } from "@/lib/use-lazy-ref";
 import {
@@ -89,11 +89,11 @@ import { useChatSubmit, type ChatSubmitInterceptOutcome } from "./hooks/use-chat
 import { useScrollAnchor } from "./hooks/use-scroll-anchor";
 import { useThinkingStatus } from "./hooks/use-thinking-status";
 import { appendOptimisticCompactUserMessage } from "./lib/optimistic-user-message";
-import { type DelegationRequest, type UseRealtimeVoiceResult, useRealtimeVoice } from "@/components/projects/rovo/hooks/use-realtime-voice";
+import { type DelegationRequest, type UseRealtimeVoiceResult, useRealtimeVoice } from "@/components/projects/rovo-core/hooks/use-realtime-voice";
 import { appendDictationTranscript, resolveComposerDictationState } from "@/lib/composer-dictation";
-import { useClicky } from "@/components/projects/rovo/hooks/use-clicky";
-import { useClickyVoice } from "@/components/projects/rovo/hooks/use-clicky-voice";
-import { ClickyOverlay } from "@/components/projects/rovo/components/clicky/clicky-overlay";
+import { useClicky } from "@/components/projects/rovo-core/hooks/use-clicky";
+import { useDefaultClickyVoice } from "@/components/projects/rovo-core/hooks/use-default-clicky-voice";
+import { ClickyOverlay } from "@/components/projects/rovo-core/components/clicky/clicky-overlay";
 import { ScreenAssistantRegionOverlay } from "@/components/screen-assistant/screen-assistant-region-overlay";
 import {
 	activateStudioScreenAssistantTarget,
@@ -102,7 +102,7 @@ import {
 	groundStudioScreenAssistantTarget,
 	type StudioScreenAssistantRegion,
 	type StudioScreenAssistantTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
 import styles from "./chat.module.css";
 
 export type { ChatSubmitInterceptOutcome } from "./hooks/use-chat-submit";
@@ -1065,14 +1065,15 @@ export default function ChatPanel({
 		[isClickyActive, resolvedSendPromptOptions, localConversation, sendPrompt, setPrompt, speakLocalConversationVoiceText],
 	);
 	const realtime = useRealtimeVoice({
+		sessionPolicyMode: "auto",
 		chatMessages: uiMessages,
 		isGenerating: isStreaming,
 		onDelegateToRovo: handleRealtimeDelegateToRovo,
-			onSpeechStarted: handleRealtimeSpeechStarted,
-			onSpeechTranscriptCompleted: handleRealtimeTranscriptCompleted,
-			onSpeechTranscriptDelta: handleRealtimeTranscript,
-			onAssistantTextDelta: handleRealtimeAssistantTextDelta,
-			onAssistantTextCompleted: handleRealtimeAssistantTextCompleted,
+		onSpeechStarted: handleRealtimeSpeechStarted,
+		onSpeechTranscriptCompleted: handleRealtimeTranscriptCompleted,
+		onSpeechTranscriptDelta: handleRealtimeTranscript,
+		onAssistantTextDelta: handleRealtimeAssistantTextDelta,
+		onAssistantTextCompleted: handleRealtimeAssistantTextCompleted,
 		onEndVoiceSession: useCallback(() => {
 			realtimeTranscriptRef.current = "";
 			deactivateClicky();
@@ -1097,7 +1098,7 @@ export default function ChatPanel({
 	sendFunctionCallOutputRef.current = realtime.sendFunctionCallOutput;
 
 	// --- AI cursor voice bridge: connects realtime + injects tool-based prompt ---
-	useClickyVoice({
+	useDefaultClickyVoice({
 		isClickyActive,
 		isRealtimeConnected: realtime.isConnected,
 		connectRealtime: realtime.connect,

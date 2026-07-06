@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Apps Directory is exposed as a website block", () => {
 		/blockComponent\("apps-directory", "Apps Directory"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ AppsDirectoryDialog \} from "@\/components\/blocks\/apps-directory";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"apps-directory": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/apps-directory-demo"\)/u,
 	);
 });
@@ -318,8 +320,8 @@ test("Apps Directory docs demo includes added and non-added detail states", () =
 test("Apps Directory exposes an opt-in experimental variation", () => {
 	const source = readProjectFile("components/blocks/apps-directory/components/apps-directory.tsx");
 	const indexSource = readProjectFile("components/blocks/apps-directory/index.ts");
-	const blocksSource = readProjectFile("app/data/details/blocks.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const blocksSource = readDetailCategorySource("blocks");
+	const registrySource = readWebsiteRegistrySource();
 	const demoSource = readProjectFile("components/website/demos/blocks/apps-directory-demo.tsx");
 	const pageSource = readProjectFile("components/blocks/apps-directory/page.tsx");
 

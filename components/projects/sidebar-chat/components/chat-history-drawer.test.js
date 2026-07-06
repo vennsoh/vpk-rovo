@@ -78,7 +78,10 @@ test("custom agent compact chat renders view tabs below the header", () => {
 	assert.match(chatPanelSource, /isCustomAgentSelected,/u);
 	assert.match(chatPanelSource, /customAgentTabs\?: ChatPanelCustomAgentTabs;/u);
 	assert.match(chatPanelSource, /function isCustomAgentTabsProfile\(agent: \{ byline\?: string \}\): boolean \{[\s\S]*\\bcustom agent\\b/u);
-	assert.match(chatPanelSource, /const shouldRenderCustomAgentTabs = Boolean\(customAgentTabs\) \|\| \(isCustomAgentSelected && isCustomAgentTabsProfile\(selectedAgent\)\);/u);
+	assert.match(
+		chatPanelSource,
+		/const shouldRenderCustomAgentTabs = !suppressCustomAgentTabs && \([\s\S]*Boolean\(customAgentTabs\) \|\|[\s\S]*\(isCustomAgentSelected && isCustomAgentTabsProfile\(selectedAgent\)\)[\s\S]*\);/u,
+	);
 	assert.match(chatPanelSource, /const isAgentTestEmptyState = showAgentTestControls && !hasMessages;/u);
 	// The Test greeting bottom-aligns when the agent has starters (to line up with
 	// the Ask Rovo greeting) and only centers when there are none.
@@ -90,8 +93,8 @@ test("custom agent compact chat renders view tabs below the header", () => {
 	// the composer pins to the bottom, aligning with the sidebar composer.
 	assert.match(chatPanelSource, /<Conversation\s+className="min-h-0 min-w-0 flex-1"/u);
 	assert.match(chatPanelSource, /<Tabs[\s\S]*aria-label="Custom agent views"[\s\S]*className=\{cn\([\s\S]*"min-h-0 min-w-0 flex-1"[\s\S]*isAgentTestEmptyState && "flex flex-col"/u);
-	assert.match(chatPanelSource, /<DropdownMenuTrigger[\s\S]*aria-label="Switch version"[\s\S]*variant="ghost"[\s\S]*<Lozenge variant=\{selectedAgentVersion === "Draft" \? "neutral" : "success"\}>[\s\S]*<ChevronDownIcon label="" size="small" spacing="none" \/>/u);
-	assert.match(chatPanelSource, /<DropdownMenuItem[\s\S]*onSelect=\{\(\) => setSelectedAgentVersion\(version\)\}[\s\S]*elemAfter=\{version === selectedAgentVersion \? <CheckMarkIcon label="Selected" \/> : undefined\}/u);
+	assert.match(chatPanelSource, /<DropdownMenuTrigger[\s\S]*aria-label="Switch version"[\s\S]*variant="ghost"[\s\S]*<Badge variant=\{selectedAgentVersion\.variant \?\? "success"\}>[\s\S]*<ChevronDownIcon label="" size="small" spacing="none" \/>/u);
+	assert.match(chatPanelSource, /<DropdownMenuItem[\s\S]*onSelect=\{\(\) => \{[\s\S]*onAgentVersionChange\?\.\(version\.id\);[\s\S]*\}\}[\s\S]*elemAfter=\{version\.id === selectedAgentVersion\.id \? <CheckMarkIcon label="Selected" \/> : undefined\}/u);
 	assert.match(chatPanelSource, /<TabsList[\s\S]*<TabsTrigger value="chat">Chat<\/TabsTrigger>[\s\S]*<TabsTrigger value="trigger">Trigger<\/TabsTrigger>[\s\S]*<TabsTrigger value="activity">Activity<\/TabsTrigger>/u);
 	assert.match(chatPanelSource, /<Button aria-label="New chat" size="icon" variant="ghost" onClick=\{resetChat\}>[\s\S]*<EditIcon label="" \/>/u);
 	assert.match(chatPanelSource, /<TabsContent[\s\S]*value="chat"[\s\S]*className="min-h-0 flex flex-1 flex-col data-\[hidden\]:hidden"[\s\S]*isAgentTestEmptyState \? \([\s\S]*<div className="mx-auto flex min-h-0 w-full flex-1 flex-col gap-3">[\s\S]*\{chatConversationBody\}[\s\S]*\{chatComposerBody\}[\s\S]*\) : \([\s\S]*chatConversationBody/u);
@@ -177,7 +180,7 @@ test("chat history drawer can collapse the chats section from the heading", () =
 	assert.match(source, /chatsOpen=\{isChatsOpen\}/u);
 	assert.match(source, /controlsId=\{CHATS_REGION_ID\}/u);
 	assert.match(source, /id=\{CHATS_REGION_ID\}/u);
-	assert.match(source, /role="region"/u);
+	assert.match(source, /<section[\s\S]*id=\{CHATS_REGION_ID\}[\s\S]*aria-label="Chats"/u);
 	assert.match(source, /threadsLoaded && threads\.length === 0 && "flex items-center justify-center"/u);
 	assert.match(source, /!isChatsOpen && "hidden"/u);
 });
@@ -216,9 +219,11 @@ test("chat history drawer matches the Figma conversation-list content structure"
 
 test("sidebar, floating, and fullscreen chat message logs use 16px horizontal padding", () => {
 	const compactSource = readProjectFile("components/projects/sidebar-chat/page.tsx");
-	const fullscreenSource = readProjectFile("components/projects/rovo/components/rovo-app-messages.tsx");
+	const fullscreenWrapperSource = readProjectFile("components/projects/rovo/components/rovo-app-messages.tsx");
+	const fullscreenSource = readProjectFile("components/projects/rovo-core/components/rovo-app-messages.tsx");
 
 	assert.match(compactSource, /<ConversationContent[\s\S]*className="[^"]*px-4/u);
+	assert.match(fullscreenWrapperSource, /RovoAppMessages as RovoCoreAppMessages/u);
 	assert.match(fullscreenSource, /extraHorizontalPaddingWhenCompact && compact \? "px-9" : "px-4"/u);
 });
 
@@ -247,13 +252,17 @@ test("compact chat provider can delete all persisted history", () => {
 
 test("compact chat fetches Rovo follow-up suggestions after a completed idle turn", () => {
 	const source = readProjectFile("app/contexts/context-rovo-chat.tsx");
+	const suggestionsSource = readProjectFile("components/projects/rovo-core/lib/rovo-app-suggestions.ts");
 
 	assert.match(source, /fetchRovoAppSuggestedQuestions/u);
-	assert.match(source, /buildSuggestedQuestionsRequest/u);
+	assert.match(source, /buildNextSuggestedQuestionsRequest/u);
 	assert.match(source, /appendSuggestedQuestionsToAssistantMessage/u);
+	assert.match(suggestionsSource, /export function buildSuggestedQuestionsRequest/u);
+	assert.match(suggestionsSource, /export function buildNextSuggestedQuestionsRequest/u);
+	assert.match(suggestionsSource, /return buildSuggestedQuestionsRequest\(messages, message\.id\);/u);
 	assert.match(source, /requestedSuggestionMessageIdsRef/u);
-	assert.match(source, /part\.type === "data-turn-complete"/u);
-	assert.match(source, /"data-suggested-questions"/u);
+	assert.match(suggestionsSource, /part\.type === "data-turn-complete"/u);
+	assert.match(suggestionsSource, /"data-suggested-questions"/u);
 	assert.match(source, /activePrompt !== null[\s\S]*queuedPrompts\.length > 0/u);
 });
 

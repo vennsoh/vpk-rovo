@@ -6,7 +6,7 @@ import { ROVO_APP_ROOT_PATH } from "@/components/projects/studio/lib/rovo-app-th
 import {
 	toPersistedRecord,
 	writeSessionAgentRecords,
-} from "@/components/projects/studio/lib/studio-session-agent-storage";
+} from "@/components/projects/rovo-core/lib/agent-records/session-agent-storage";
 
 const STUDIO_RFP_DEMO_RESET_ENDPOINT = "/api/agents/rfp-demo/reset";
 

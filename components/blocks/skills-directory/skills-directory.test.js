@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Skills Directory is exposed as a website block", () => {
 		/blockComponent\("skills-directory", "Skills Directory"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ SkillsDirectoryDialog \} from "@\/components\/blocks\/skills-directory";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"skills-directory": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/skills-directory-demo"\)/u,
 	);
 });
@@ -320,7 +322,7 @@ test("Skills Directory renders the skill detail view with the config screen and 
 test("Skills Directory demo and docs use skill-specific examples", () => {
 	const source = readProjectFile("components/blocks/skills-directory/components/skills-directory.tsx");
 	const pageSource = readProjectFile("components/blocks/skills-directory/page.tsx");
-	const detailsSource = readProjectFile("app/data/details/blocks.ts");
+	const detailsSource = readDetailCategorySource("blocks");
 	// Skill data is now the single-source-of-truth JSON catalog; the loader + icon
 	// resolver own the typing/helpers and the Atlaskit icon imports.
 	const skillsJson = JSON.parse(readProjectFile("app/data/directory/skills.json"));
@@ -452,8 +454,8 @@ test("Skills Directory demo and docs use skill-specific examples", () => {
 test("Skills Directory exposes an opt-in experimental variation", () => {
 	const source = readProjectFile("components/blocks/skills-directory/components/skills-directory.tsx");
 	const indexSource = readProjectFile("components/blocks/skills-directory/index.ts");
-	const blocksSource = readProjectFile("app/data/details/blocks.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const blocksSource = readDetailCategorySource("blocks");
+	const registrySource = readWebsiteRegistrySource();
 	const demoSource = readProjectFile("components/website/demos/blocks/skills-directory-demo.tsx");
 	const pageSource = readProjectFile("components/blocks/skills-directory/page.tsx");
 

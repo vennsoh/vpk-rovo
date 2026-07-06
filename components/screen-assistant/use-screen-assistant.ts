@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createId } from "@/lib/utils";
-import { useClicky } from "@/components/projects/studio/hooks/use-clicky";
+import { useClicky } from "@/components/projects/rovo-core/hooks/use-clicky";
 import { useClickyVoice } from "@/components/projects/studio/hooks/use-clicky-voice";
 import {
 	type DelegationRequest,
@@ -15,7 +15,7 @@ import {
 	type StudioScreenAssistantRegion,
 	type StudioScreenAssistantSnapshot,
 	type StudioScreenAssistantVisibleTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
 import { normalizeAgentDraftPatch } from "@/components/projects/studio/lib/studio-agent-draft-patch";
 import type {
 	ScreenAssistantAdapter,

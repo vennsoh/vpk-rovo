@@ -12,21 +12,16 @@ import ArrowLeftIcon from "@atlaskit/icon/core/arrow-left";
 import AiAgentIcon from "@atlaskit/icon/core/ai-agent";
 import AiChatIcon from "@atlaskit/icon/core/ai-chat";
 import AutomationIcon from "@atlaskit/icon/core/automation";
-import ChartTrendUpIcon from "@atlaskit/icon/core/chart-trend-up";
 import DeleteIcon from "@atlaskit/icon/core/delete";
 import AppsIcon from "@atlaskit/icon/core/apps";
 import ChevronDownIcon from "@atlaskit/icon/core/chevron-down";
 import ChevronUpIcon from "@atlaskit/icon/core/chevron-up";
 import EditIcon from "@atlaskit/icon/core/edit";
 import PageIcon from "@atlaskit/icon/core/page";
-import PersonIcon from "@atlaskit/icon/core/person";
-import ScorecardIcon from "@atlaskit/icon/core/scorecard";
 import ShowMoreHorizontalIcon from "@atlaskit/icon/core/show-more-horizontal";
-import LockLockedIcon from "@atlaskit/icon/core/lock-locked";
 import AiComputeIcon from "@atlaskit/icon-lab/core/ai-compute";
 import AiModelIcon from "@atlaskit/icon-lab/core/ai-model";
 import SkillIcon from "@atlaskit/icon-lab/core/skill";
-import ViewsIcon from "@atlaskit/icon-lab/core/views";
 
 import { AgentAccess } from "@/components/blocks/agent-access";
 import { AgentEvaluation } from "@/components/blocks/agent-evaluation";
@@ -45,7 +40,7 @@ import {
 	type AgentAutomationRule,
 	type AgentTriggerValue,
 } from "@/components/blocks/triggers/page";
-import { createAgentAutomationRule, createAgentTriggerValue, getAgentAutomationRuleLabel, inferAutomationRules } from "@/components/blocks/triggers/data/trigger-catalog";
+import { createAgentAutomationRule, createAgentTriggerValue } from "@/components/blocks/triggers/data/trigger-catalog";
 import { ManageTriggersDialog } from "@/components/blocks/triggers/components/manage-triggers-dialog";
 import { UNTITLED_SUBAGENT_NAME } from "@/components/blocks/subagents/lib/subagent-prompts";
 import { AgentTriggersDialog } from "@/components/ui-custom/agent-triggers-dialog";
@@ -100,8 +95,7 @@ import { Input } from "@/components/ui/input";
 import { Lozenge, LozengeDropdownTrigger } from "@/components/ui/lozenge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tag, type TagColor } from "@/components/ui/tag";
-import { LayoutDashboardIcon, MoreHorizontalIcon, PlusIcon } from "@/components/ui/vpk-icons";
-import { computeContextBarOverflow } from "@/components/ui-custom/context-bar/overflow";
+import { PlusIcon } from "@/components/ui/vpk-icons";
 import {
 	type RichTextMentionItem,
 	type RichTextMentionRemovalRequest,
@@ -129,6 +123,44 @@ import type {
 import { cn } from "@/lib/utils";
 
 import { CodeBlock } from "@/components/ui-custom/code-block";
+import {
+	type AgentConfigFormValue,
+	type AgentConfigListFieldName,
+	type AgentConfigReferenceListFieldName,
+	type AgentConfigTextFieldName,
+	type AgentDirectoryKind,
+	type AgentHideableConfigField,
+	createAutomationRuleFromEvent,
+	getAgentAutomationItems,
+	getAgentAutomationRules,
+	getNonEmptyConfigItems,
+	getNormalizedAgentReferenceValue,
+	getNextAutomationRuleIndex,
+	isAgentListItemDisabled,
+	serializeAgentAutomationRuleLabels,
+} from "@/components/blocks/agent-2/lib/agent-config-model";
+
+export type {
+	AgentConfigFormValue,
+	AgentConfigListFieldName,
+	AgentConfigReferenceListFieldName,
+	AgentConfigTextFieldName,
+	AgentDirectoryKind,
+	AgentHideableConfigField,
+} from "@/components/blocks/agent-2/lib/agent-config-model";
+// react-doctor-disable-next-line react-doctor/only-export-components -- Studio config owners share this pure update helper with the block.
+export { toggleAgentConfigDisabledItem } from "@/components/blocks/agent-2/lib/agent-config-model";
+// react-doctor-disable-next-line react-doctor/only-export-components -- Consumers share the compact header nav contract through the skill-config barrel.
+export {
+	AGENT_COMPACT_HEADER_DEFAULT_NAV_ITEMS,
+	AGENT_COMPACT_HEADER_DETAILS_NAV_ITEM,
+	AgentCompactHeaderNav,
+} from "@/components/blocks/skill-config/components/agent-compact-header-nav";
+export type {
+	AgentCompactHeaderNavItem,
+	AgentCompactHeaderNavProps,
+	AgentCompactHeaderSection,
+} from "@/components/blocks/skill-config/components/agent-compact-header-nav";
 
 const AGENT_AVATAR_SRC = "/avatar-agent/teamwork-agents/blocker-checker.svg";
 const MAX_AGENT_CONVERSATION_STARTERS = 3;
@@ -287,11 +319,6 @@ function toMentionId(category: RichTextMentionItem["category"], id: string): str
 	return `${category}:${id.trim().replace(/\s+/g, "-")}`;
 }
 
-export type AgentConfigReferenceListFieldName = Extract<
-	AgentConfigListFieldName,
-	"knowledge" | "skills" | "subagents" | "tools" | "apps"
->;
-
 const AGENT_CONFIG_FIELD_BY_REFERENCE_CATEGORY: Record<RichTextReferenceCategory, AgentConfigReferenceListFieldName> = {
 	knowledge: "knowledge",
 	skill: "skills",
@@ -330,10 +357,6 @@ function isAgentConfigReferenceListField(
 	field: AgentConfigListFieldName,
 ): field is AgentConfigReferenceListFieldName {
 	return field in AGENT_REFERENCE_CATEGORY_BY_CONFIG_FIELD;
-}
-
-function getNormalizedAgentReferenceValue(value: string): string {
-	return value.trim().toLowerCase();
 }
 
 function getAgentReferenceKey(
@@ -406,30 +429,6 @@ function mergeMentionItems(
 	return items;
 }
 
-export type AgentConfigTextFieldName =
-	| "name"
-	| "description"
-	| "instructions"
-	| "contextDescription"
-	| "trigger"
-	| "guardrail"
-	// Mode selectors are single-value (string) config like the text fields, so
-	// they reuse the same onTextChange plumbing rather than a bespoke callback.
-	| "memoryMode"
-	| "reasoningMode"
-	| "knowledgeMode";
-
-export type AgentConfigListFieldName =
-	| "triggers"
-	| "skills"
-	| "tools"
-	| "subagents"
-	| "knowledge"
-	| "apps"
-	| "conversationStarters";
-
-export type AgentDirectoryKind = "knowledge" | "tools" | "apps" | "skills" | "memory" | "conversationStarters";
-
 // Maps a directory-backed "/" slash category to the config-panel directory it
 // opens from a nested empty state's "Browse all". "format" has no directory and
 // is intentionally absent (the renderer omits its button), so the map only
@@ -444,11 +443,6 @@ const AGENT_DIRECTORY_BY_SLASH_CATEGORY: Record<
 	app: "apps",
 };
 
-// Config rows that can be suppressed by callers (e.g. while editing a subagent,
-// where these capabilities can't be configured). Keyed by the canonical row key
-// used in `AgentFilledConfigSummary` and the `agentFieldName` used by the
-// compact empty-config nav and missing-config actions.
-export type AgentHideableConfigField = "trigger" | "subagents" | "conversationStarters";
 const SKILL_CONFIG_TOOLBAR_FIELD_NAMES: ReadonlySet<AgentConfigToolbarFieldName> =
 	new Set<AgentConfigToolbarFieldName>(["apps"]);
 
@@ -490,41 +484,6 @@ function getVisibleSkillConfigToolbarRows(
 	return rows.filter((row) => isSkillConfigToolbarFieldVisible(row.key, hiddenConfigFields));
 }
 
-export interface AgentConfigFormValue {
-	name?: string;
-	description?: string;
-	summary?: string;
-	instructions?: string;
-	contextDescription?: string;
-	trigger?: string;
-	triggers?: readonly string[];
-	automationRules?: readonly AgentAutomationRule[];
-	skills?: readonly string[];
-	guardrail?: string;
-	tools?: readonly string[];
-	subagents?: readonly string[];
-	knowledge?: readonly string[];
-	apps?: readonly string[];
-	conversationStarters?: readonly string[];
-	conversationStarterIcons?: readonly string[];
-	// Per-field set of disabled list items, keyed by the item's label (not index)
-	// so the disabled state survives reordering and removal. A configured item
-	// (tool / skill / knowledge / subagent) whose label appears here is shown in a
-	// disabled state in both the collapsed-nav dropdown and the filled summary,
-	// but stays listed until explicitly removed. Persisted on the agent draft
-	// alongside the other config fields (e.g. localStorage).
-	disabledItems?: Partial<Record<AgentConfigListFieldName, readonly string[]>>;
-	// Mode selectors, persisted on the agent draft. Stored loosely as `string`
-	// (matching the agent-result wire type); the option lists below
-	// (MEMORY_MODE_OPTIONS / REASONING_MODE_SECTIONS / KNOWLEDGE_MODE_OPTIONS)
-	// are the source of valid values, narrowed at the selector boundary.
-	memoryMode?: string;
-	reasoningMode?: string;
-	knowledgeMode?: string;
-	agentId?: string;
-	action?: string;
-}
-
 export type AgentProps = ComponentProps<"div">;
 
 export const Agent = memo(({ className, ...props }: Readonly<AgentProps>) => (
@@ -534,171 +493,8 @@ export const Agent = memo(({ className, ...props }: Readonly<AgentProps>) => (
 	/>
 ));
 
-const AGENT_COMPACT_HEADER_NAV_ITEMS = [
-	{ icon: <LayoutDashboardIcon size="small" />, label: "Details", value: "details" },
-	{ icon: <ChartTrendUpIcon label="" size="small" color="currentColor" />, label: "Insights", value: "insights" },
-	{ icon: <ViewsIcon label="" size="small" color="currentColor" />, label: "Surfaces", value: "surfaces" },
-	{ icon: <ScorecardIcon label="" size="small" color="currentColor" />, label: "Evaluation", value: "evaluation" },
-	{ icon: <PersonIcon label="" size="small" color="currentColor" />, label: "Users", value: "users" },
-	{ icon: <LockLockedIcon label="" size="small" color="currentColor" />, label: "Access", value: "access" },
-] as const;
-
-export type AgentCompactHeaderSection = (typeof AGENT_COMPACT_HEADER_NAV_ITEMS)[number]["value"];
-export type AgentCompactHeaderNavItem = (typeof AGENT_COMPACT_HEADER_NAV_ITEMS)[number];
-// react-doctor-disable-next-line react-doctor/only-export-components -- Consumers share this default nav contract with the compact agent header.
-export const AGENT_COMPACT_HEADER_DEFAULT_NAV_ITEMS = AGENT_COMPACT_HEADER_NAV_ITEMS.filter((item) => item.value !== "details");
-// react-doctor-disable-next-line react-doctor/only-export-components -- Consumers share this details nav item with the compact agent header.
-export const AGENT_COMPACT_HEADER_DETAILS_NAV_ITEM = AGENT_COMPACT_HEADER_NAV_ITEMS[0];
-
-const AGENT_COMPACT_HEADER_NAV_GAP = 4;
-const AGENT_COMPACT_HEADER_AVATAR_NAV_GAP = 8;
-const AGENT_COMPACT_HEADER_NAV_OVERFLOW_WIDTH = 24;
-
 function suppressMenuDismissal(event: { preventDefault: () => void }) {
 	event.preventDefault();
-}
-
-function AgentCompactHeaderNavButton({
-	activeSection,
-	item,
-	onSectionChange,
-}: Readonly<{
-	activeSection?: AgentCompactHeaderSection | null;
-	item: AgentCompactHeaderNavItem;
-	onSectionChange?: (section: AgentCompactHeaderSection) => void;
-}>) {
-	const isSelected = activeSection === item.value;
-
-	return (
-		<Button
-			type="button"
-			aria-pressed={isSelected ? true : undefined}
-			onClick={() => onSectionChange?.(item.value)}
-			size="compact"
-			variant={isSelected ? "outline" : "ghost"}
-			className={cn(
-				"h-6 gap-1.5 rounded px-2 text-sm font-medium leading-5",
-				isSelected
-					? "border-border-selected bg-bg-selected text-text-selected [&_svg]:text-icon-selected"
-					: "text-text-subtle [&_svg]:text-icon-subtle"
-			)}
-		>
-			<Icon render={item.icon} aria-hidden />
-			{item.label}
-		</Button>
-	);
-}
-
-export function AgentCompactHeaderNav({
-	activeSection = null,
-	avatarSrc = AGENT_AVATAR_SRC,
-	items = AGENT_COMPACT_HEADER_DEFAULT_NAV_ITEMS,
-	onSectionChange,
-}: Readonly<{
-	activeSection?: AgentCompactHeaderSection | null;
-	avatarSrc?: string;
-	items?: readonly AgentCompactHeaderNavItem[];
-	onSectionChange?: (section: AgentCompactHeaderSection) => void;
-}>) {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const measureRef = useRef<HTMLDivElement>(null);
-	const [visibleCount, setVisibleCount] = useState<number>(items.length);
-	const visibleItems = items.slice(0, visibleCount);
-	const hiddenItems = items.slice(visibleCount);
-
-
-	useLayoutEffect(() => {
-		const container = containerRef.current;
-		const measure = measureRef.current;
-		if (!container || !measure) {
-			return;
-		}
-
-		function recompute(): void {
-			const widths = Array.from(measure!.children).map((node) => (node as HTMLElement).offsetWidth);
-			setVisibleCount(
-				computeContextBarOverflow(
-					widths,
-					container!.clientWidth,
-					AGENT_COMPACT_HEADER_NAV_OVERFLOW_WIDTH,
-					AGENT_COMPACT_HEADER_NAV_GAP,
-				),
-			);
-		}
-
-		recompute();
-		const observer = new ResizeObserver(recompute);
-		observer.observe(container);
-		return () => observer.disconnect();
-	}, [items]);
-
-	return (
-		<div className="flex min-w-0 flex-1 items-center" style={{ gap: AGENT_COMPACT_HEADER_AVATAR_NAV_GAP }}>
-			<Avatar label="Agent" shape="hexagon" size="sm">
-				{isAtlassianLogoSource(avatarSrc) ? (
-					<AtlassianLogo name="atlassian" label="Agent" size="small" />
-				) : (
-					<AvatarImage alt="" src={avatarSrc} />
-				)}
-			</Avatar>
-			<div
-				// `overflow-x-clip` hides horizontally-overflowing items (the "…"
-				// menu absorbs them). The first item ("Insights") would otherwise sit
-				// flush at the clip box's left edge, so its 3px focus ring gets
-				// shorn flat on the left even with a clip margin. `pl-1` insets the
-				// content 4px inside the clip box so the ring clears the edge; `py-1
-				// -my-1` adds matching vertical room, and the clip margin covers the
-				// trailing "…" item on the right.
-				className="relative -my-1 flex min-w-0 flex-1 items-center overflow-x-clip overflow-y-visible py-1 pl-1 [overflow-clip-margin:6px]"
-				ref={containerRef}
-				style={{ gap: AGENT_COMPACT_HEADER_NAV_GAP }}
-			>
-				<div aria-hidden className="pointer-events-none absolute top-0 left-0 h-0 w-0 overflow-clip">
-					<div className="invisible flex items-center" ref={measureRef} style={{ gap: AGENT_COMPACT_HEADER_NAV_GAP }}>
-						{items.map((item) => (
-							<AgentCompactHeaderNavButton
-								activeSection={activeSection}
-								item={item}
-								key={`measure-${item.label}`}
-								onSectionChange={onSectionChange}
-							/>
-						))}
-					</div>
-				</div>
-				{visibleItems.map((item) => (
-					<AgentCompactHeaderNavButton
-						activeSection={activeSection}
-						item={item}
-						key={item.label}
-						onSectionChange={onSectionChange}
-					/>
-				))}
-				{hiddenItems.length > 0 ? (
-					<DropdownMenu>
-						<DropdownMenuTrigger
-							aria-label="More agent sections"
-							render={<Button className="size-6 rounded px-0" size="icon-compact" type="button" variant="ghost" />}
-						>
-							<MoreHorizontalIcon size="small" />
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuGroup>
-								{hiddenItems.map((item) => (
-									<DropdownMenuItem
-										elemBefore={item.icon}
-										key={item.label}
-										onSelect={() => onSectionChange?.(item.value)}
-									>
-										{item.label}
-									</DropdownMenuItem>
-								))}
-							</DropdownMenuGroup>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				) : null}
-			</div>
-		</div>
-	);
 }
 
 export type AgentCompactSurfacesPanelProps = ComponentProps<typeof AgentSurfaces>;
@@ -2199,69 +1995,6 @@ function AgentSectionLabel({ children }: Readonly<{ children: ReactNode }>) {
 	);
 }
 
-function getNonEmptyConfigItems(items: readonly string[] | undefined): readonly string[] {
-	return (items ?? [])
-		.map((item) => item.trim())
-		.filter(Boolean);
-}
-
-// Disabled-item lookups are label-keyed (trimmed) so they survive reordering and
-// removal of the underlying list. A missing field or label means "enabled".
-function getDisabledItemLabels(
-	config: AgentConfigFormValue | undefined,
-	field: AgentConfigListFieldName,
-): readonly string[] {
-	return config?.disabledItems?.[field] ?? [];
-}
-
-function isAgentListItemDisabled(
-	config: AgentConfigFormValue | undefined,
-	field: AgentConfigListFieldName,
-	label: string,
-): boolean {
-	const target = label.trim();
-	return getDisabledItemLabels(config, field).some((entry) => entry.trim() === target);
-}
-
-// Pure reducer: returns a new config with `label` added to / removed from the
-// field's disabled set. Used by owners that persist the config (e.g. the studio
-// draft saved to localStorage). Prunes empty field arrays and an empty
-// `disabledItems` map so the persisted shape stays minimal.
-// react-doctor-disable-next-line react-doctor/only-export-components -- Studio config owners share this pure update helper with the block.
-export function toggleAgentConfigDisabledItem(
-	config: AgentConfigFormValue,
-	field: AgentConfigListFieldName,
-	label: string,
-	enabled: boolean,
-): AgentConfigFormValue {
-	const target = label.trim();
-	if (!target) {
-		return config;
-	}
-	const current = getDisabledItemLabels(config, field);
-	const isCurrentlyDisabled = current.some((entry) => entry.trim() === target);
-	// No-op fast paths keep referential identity stable (avoids needless writes).
-	if (enabled && !isCurrentlyDisabled) {
-		return config;
-	}
-	if (!enabled && isCurrentlyDisabled) {
-		return config;
-	}
-	const nextField = enabled
-		? current.filter((entry) => entry.trim() !== target)
-		: [...current, target];
-	const nextDisabledItems: Partial<Record<AgentConfigListFieldName, readonly string[]>> = {
-		...config.disabledItems,
-	};
-	if (nextField.length > 0) {
-		nextDisabledItems[field] = nextField;
-	} else {
-		delete nextDisabledItems[field];
-	}
-	const hasAny = Object.keys(nextDisabledItems).length > 0;
-	return { ...config, disabledItems: hasAny ? nextDisabledItems : undefined };
-}
-
 function getConversationStarterSummaryItems(config: AgentConfigFormValue): ReadonlyArray<{
 	icon: StarterIconKey;
 	label: string;
@@ -2274,54 +2007,6 @@ function getConversationStarterSummaryItems(config: AgentConfigFormValue): Reado
 			label: item.trim(),
 		}))
 		.filter((item) => item.label.length > 0);
-}
-
-function getAgentAutomationRules(config: AgentConfigFormValue): readonly AgentAutomationRule[] {
-	if (Array.isArray(config.automationRules)) {
-		return config.automationRules;
-	}
-	const triggers = getNonEmptyConfigItems(config.triggers);
-	if (triggers.length > 0) {
-		return inferAutomationRules(triggers) ?? [];
-	}
-
-	const trigger = config.trigger?.trim();
-	return trigger ? inferAutomationRules([trigger]) ?? [] : [];
-}
-
-function getAgentAutomationItems(config: AgentConfigFormValue): readonly string[] {
-	return serializeAgentAutomationRuleLabels(getAgentAutomationRules(config));
-}
-
-function serializeAgentAutomationRuleLabels(rules: readonly AgentAutomationRule[] | undefined): string[] {
-	return (rules ?? [])
-		.map((rule, index) => getAgentAutomationRuleLabel(rule, index).trim())
-		.filter(Boolean);
-}
-
-function getNextAutomationRuleIndex(rules: readonly AgentAutomationRule[] | undefined): number {
-	const usedIndexes = (rules ?? [])
-		.map((rule) => /^automation-(\d+)$/u.exec(rule.id)?.[1])
-		.map((value) => Number(value))
-		.filter((value) => Number.isFinite(value));
-	return usedIndexes.length > 0 ? Math.max(...usedIndexes) + 1 : (rules?.length ?? 0) + 1;
-}
-
-function createAutomationRuleFromEvent(
-	providerId: Parameters<typeof createAgentTriggerValue>[0],
-	eventId: string,
-	existingRules: readonly AgentAutomationRule[] | undefined,
-): AgentAutomationRule | null {
-	const nextIndex = getNextAutomationRuleIndex(existingRules);
-	const nextTrigger = createAgentTriggerValue(providerId, eventId, 1);
-	return nextTrigger
-		? createAgentAutomationRule({
-				id: `automation-${nextIndex}`,
-				name: "",
-				prompt: "",
-				triggers: [nextTrigger],
-			})
-		: null;
 }
 
 const iconColorToTagColor: Readonly<Record<string, TagColor>> = {

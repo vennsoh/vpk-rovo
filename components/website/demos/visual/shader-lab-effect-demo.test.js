@@ -2,13 +2,15 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const ROOT = path.join(__dirname, "../../../..");
-const REGISTRY_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/registry.ts"), "utf8");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const COMPONENTS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/components.ts"), "utf8");
 const MANIFEST_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/component-manifest.ts"), "utf8");
 const NAV_UTILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/nav-utils.ts"), "utf8");
-const DETAILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/details/visual.ts"), "utf8");
+const DETAILS_SOURCE = readDetailCategorySource("visual");
 const DEFINITIONS_SOURCE = fs.readFileSync(
 	path.join(__dirname, "shader-lab-effect-definitions.ts"),
 	"utf8",

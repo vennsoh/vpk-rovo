@@ -1,0 +1,1111 @@
+{
+	"version": 1,
+	"items": [
+		{
+			"filePath": "app/layout.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-page-custom-font -- App Router root layout applies these fonts globally. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "backend/lib/rovo-app-background-streams.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/** @type {Map<string, {existingMessages: any[], abortFn: Function, chunks: Array<Buffer|string>, status: string, startedAt: number, detached: boolean, timeoutTimer: ReturnType<typeof setTimeout>}>} */",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = React.useContext(AnimateIconContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type AnyProps = Record<string, any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/animate-ui/icons/icon.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "const context = React.useContext(AnimateIconContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/animate-ui/primitives/animate/slot.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/animate-ui/primitives/animate/slot.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "children?: any;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/animate-ui/primitives/animate/slot.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/animate-ui/primitives/animate/slot.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": ") as React.ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/arts/personal-graph/personal-graph-neural-canvas.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/arts/personal-graph/personal-graph-surface.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/agent-card/components/agent-card.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/data-table/components/data-table.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/incompatible-library",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/product-sidebar/data/confluence-navigation.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/product-sidebar/data/confluence-navigation.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type IconComponent = React.ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/blocks/product-sidebar/data/jira-navigation.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/product-sidebar/data/jira-navigation.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type IconComponent = React.ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/blocks/terminal-switch/page.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 3,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 4,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 5,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 6,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 7,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 8,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/trigger-config/components/trigger-config.tsx",
+			"occurrence": 9,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @typescript-eslint/no-unused-vars */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/visual-waveform/page.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/visual-waveform/page.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/blocks/visual-waveform/smooth-gradient-waveform.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/control-plane/memories-surface.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- filters are fully represented by filterInput",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/control-plane/memories-surface.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- generation should only follow active view and explorer selection state",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/control-plane/skills-surface.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/jira/page.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo-core/components/rovo-app-browser-artifact.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @next/next/no-img-element */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo-core/components/rovo-app-browser-screenshot.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @next/next/no-img-element */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo-core/hooks/use-realtime-voice.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo-core/hooks/use-realtime-voice.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition ?? null;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/rovo-core/hooks/use-rovo-app-plan-retry.ts",
+			"occurrence": 1,
+			"reason": "preserves existing plan-retry monitor dependency contract while moving it out of use-rovo-app-core",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo/components/rovo-app-shell.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- only react to global sidebar changes",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/rovo/components/rovo-app-shell.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- only react to local sidebar changes",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/search/components/search-result-card.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/search/components/search-result-card.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "icon?: React.ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/search/components/search-result-card.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/search/components/search-result-card.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "Icon: React.ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/search/data/filter-data.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/search/data/filter-data.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "icon?: React.ComponentType<any> | string;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/shared/components/assistant-thinking-trace.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/shared/components/assistant-thinking-trace.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/shared/components/floating-rovo-button.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/shared/components/greeting-prompt-row.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/shared/components/greeting-prompt-row.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "icon?: ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/shared/hooks/use-reasoning-phase.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- re-run when phase changes via tick",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/shared/thread-message/thread-message-root.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- stable key fields + thinking signals for progressive streaming",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/sidebar-chat/page.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/skills/lib/skill-suggestions.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any -- RovoSuggestion.icon accepts any ADS icon component.",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/skills/lib/skill-suggestions.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type SkillStarterIcon = ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/projects/studio/components/rovo-app-shell.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- only react to global sidebar changes",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/studio/components/rovo-app-shell.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- only react to local sidebar changes",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/projects/studio/lib/agent-creation-domain-scope.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/bar-visualizer.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/matrix.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/orb.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/speech-input.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/transcript-viewer.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-audio/waveform.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/chart-config-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(ChartConfigContext) ?? DEFAULT_CHART_CONFIG;",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/chart-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/chart-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ChartStableContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/chart-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ChartHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/chart-legend-hover.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ChartLegendHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/choropleth/choropleth-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(ChoroplethZoomContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/choropleth/choropleth-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ChoroplethStableContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/choropleth/choropleth-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ChoroplethInteractionContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/heatmap/heatmap-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(HeatmapContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/heatmap/heatmap-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(HeatmapInteractionContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/heatmap/heatmap-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(HeatmapInteractionContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/heatmap/heatmap-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const existing = useContext(HeatmapInteractionContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/legend/legend-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(LegendContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/legend/legend-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(LegendItemContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/live-y-axis.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/path-stroke-utils.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/pie-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(PieStableContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/pie-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(PieHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/profit-loss-legend-hover.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(ProfitLossLegendHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/radar-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(RadarStableContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/radar-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(RadarHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/ring-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(RingStableContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/ring-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(RingHoverContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/sankey/sankey-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const context = useContext(SankeyContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/sankey/sankey-link.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/stat-card-choropleth-01/lib/use-world-data.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(WorldDataContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/static-chart-preview-context.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(StaticChartPreviewContext);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-charts/tooltip/chart-tooltip.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-charts/tooltip/tooltip-indicator.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/animated-icon-art.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "return useContext(RovoIconCtx)!;",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "components/ui-custom/animated-rovo.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/artifact-list/components/artifact-list.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @next/next/no-img-element -- Tile child-sizing CSS targets [&_img]; agent avatars render 20px inset on the neutral tile, not as a standalone hexagon Avatar.",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/artifact-list/components/artifact-list.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @next/next/no-img-element -- Tile child-sizing CSS targets [&_img]; mirrors logo-mark.tsx",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/attachments.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/entity-card/agent-expanded.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/image.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/image.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/jsx-preview.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/message.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/model-selector.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/prompt-input.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/queue.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/rich-text-editor/markdown-format.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @typescript-eslint/no-unused-vars -- These underscored compatibility props and inferred generic placeholders are intentionally retained for API shape. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/rovo-illustration/spot-illustration.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable react-hooks/exhaustive-deps -- These callbacks/effects intentionally read stable refs that bridge external animation, drag, preview, and editor state. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui-custom/web-preview-chromium.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable @next/next/no-img-element -- These component primitives render arbitrary preview/avatar/image payloads where Next Image sizing/loading would change the public API. */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "payload?: ReadonlyArray<any>",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "labelFormatter?: (label: any, payload: Record<string, unknown>[]) => React.ReactNode",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 3,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "formatter?: (value: any, name: any, item: any, index: number, payload: Record<string, unknown>[]) => React.ReactNode",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "{/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "{labelFormatter(value, payload as any[])}",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 4,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/chart.tsx",
+			"occurrence": 2,
+			"reason": "existing baseline",
+			"text": "payload?: ReadonlyArray<any>",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/ui/logo-mark.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "{/* eslint-disable-next-line @next/next/no-img-element -- brand asset; alignment-critical sizing handled here */}",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/ui/logo-mark.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "{/* eslint-disable-next-line @next/next/no-img-element -- Tile child-sizing CSS targets [&_img]; mirrors mention-visual.tsx */}",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/utils/gui.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/visual/ink-wash/index.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/visual/liquid-metal/vendor/metal-fx/src/engine/reflection/geometry.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/visual/liquid-metal/vendor/metal-fx/src/engine/reflection/geometry.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "const native = (ctx as any).roundRect;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "components/visual/liquid-metal/vendor/metal-fx/src/MetalFx.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps -- Instance lifecycle is keyed by shape; preset/theme/pause/scale/radius props are re-synced by dedicated effects above and below.",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/website/demos/utils/components/browser-preview-panel.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "/* eslint-disable-next-line @next/next/no-img-element */",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/website/demos/utils/image-generation-demo.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "{/* eslint-disable-next-line @next/next/no-img-element */}",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "components/website/demos/visual/shaders/particles.tsx",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line react-hooks/exhaustive-deps",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "lib/rovo-suggestions.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "// eslint-disable-next-line @typescript-eslint/no-explicit-any",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "lib/rovo-suggestions.ts",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "icon?: ComponentType<any>;",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "if (/eslint-disable(?:-next-line|-line)?/u.test(line)) {",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type: \"eslint-disable\",",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "if (/@ts-ignore\\b/u.test(line)) {",
+			"type": "ts-ignore"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"/* eslint-disable react-hooks/exhaustive-deps */\",",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"// @ts-ignore legacy boundary\",",
+			"type": "ts-ignore"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const value = payload as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const context = useContext(AppContext);\",",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const reactContext = React.useContext(AppContext);\",",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const other = payload as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"/* eslint-disable react-hooks/exhaustive-deps */\",",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "type: \"eslint-disable\",",
+			"type": "eslint-disable"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"// @ts-ignore legacy boundary\",",
+			"type": "ts-ignore"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const value = payload as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const context = useContext(AppContext);\",",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const reactContext = React.useContext(AppContext);\",",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const other = payload as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "assert.equal(hasBroadAny(\"type Item = Record<string, any>;\"), true);",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "assert.equal(hasLegacyReactContext(\"const context = useContext(Context);\"), true);",
+			"type": "legacy-react-context"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const allowed = value as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "\"const newValue = value as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const deleted = value as any;\",",
+			"type": "broad-any"
+		},
+		{
+			"filePath": "scripts/verify-source-guardrails.test.js",
+			"occurrence": 1,
+			"reason": "existing baseline",
+			"text": "text: \"const missing = value as any;\",",
+			"type": "broad-any"
+		}
+	]
+}

@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const TRIGGERS_SOURCE = readFileSync(join(__dirname, "page.tsx"), "utf8");
 const CATALOG_SOURCE = readFileSync(join(__dirname, "data", "trigger-catalog.ts"), "utf8");
@@ -9,14 +11,8 @@ const DEMO_SOURCE = readFileSync(
 	join(__dirname, "..", "..", "website", "demos", "blocks", "triggers-demo.tsx"),
 	"utf8",
 );
-const REGISTRY_SOURCE = readFileSync(
-	join(__dirname, "..", "..", "website", "registry.ts"),
-	"utf8",
-);
-const BLOCK_DETAILS_SOURCE = readFileSync(
-	join(__dirname, "..", "..", "..", "app", "data", "details", "blocks.ts"),
-	"utf8",
-);
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
+const BLOCK_DETAILS_SOURCE = readDetailCategorySource("blocks");
 const TRIGGER_BYLINES = require(
 	join(__dirname, "..", "..", "..", "app", "data", "directory", "trigger-bylines.json"),
 );

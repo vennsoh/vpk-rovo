@@ -37,6 +37,26 @@ Run on every change:
 1. `pnpm run lint`
 2. `pnpm run typecheck`
 
+Run before shipping broad local changes:
+
+1. `pnpm run validate:local` for the full local gate that mirrors the PR guard
+   set: lockfile, route manifest, API surfaces, repo map, file size, catalog,
+   lazy load, documented script references, lint, typecheck, Rovo core tests,
+   and JS unit tests.
+
+Run for bundle-sensitive changes:
+
+1. `pnpm run perf:budget:warn` to measure a fresh manual baseline and report
+   warnings.
+2. `pnpm run perf:budget` to measure a fresh baseline and enforce the strict budget
+   before shipping performance or bundle work.
+3. `pnpm run perf:budget:check:warn` or `pnpm run perf:budget:check` to verify
+   an existing `output/perf-baseline.json` without regenerating it.
+4. For route load timing, run `pnpm run perf:baseline`, start the dev stack,
+   read the Portless URL from `pnpm ports`, then run
+   `pnpm run perf:baseline:timing -- --base-url <URL>`.
+5. Do not commit `output/perf-baseline.json`; it is local evidence.
+
 Run additionally for UI changes:
 
 1. Visual checks via `agent-browser` (`npx agent-browser`) by default for local/isolated web work, screenshots, UI probes, visual debugging, and responsive checks. Load and follow the `agent-browser` skill before using it so command patterns match the installed version. Fall back to the Playwright CLI only when `agent-browser` is unavailable or blocked, and load the `playwright` skill before using that fallback. In parallel worktrees, prefer the worktree's Portless URL from `pnpm ports` (the `🌐 https://…` entry — it survives dev-server restarts and is origin-isolated per worktree); fall back to the frontend URL from `.dev-frontend-port` only when no portless route exists. Do not assume the default frontend port.

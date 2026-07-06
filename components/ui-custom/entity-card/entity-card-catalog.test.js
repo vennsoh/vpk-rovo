@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = join(__dirname, "..", "..", "..");
 
@@ -11,8 +13,8 @@ function readProjectFile(...segments) {
 
 const COMPONENTS_SOURCE = readProjectFile("app/data/components.ts");
 const MANIFEST_SOURCE = readProjectFile("app/data/component-manifest.ts");
-const DETAILS_SOURCE = readProjectFile("app/data/details/ui-custom.ts");
-const REGISTRY_SOURCE = readProjectFile("components/website/registry.ts");
+const DETAILS_SOURCE = readDetailCategorySource("ui-custom");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const DEMO_SOURCE = readProjectFile("components/website/demos/ui-custom/entity-card-demo.tsx");
 const COMPONENT_PAGE_SOURCE = readProjectFile("app/components/[category]/[slug]/page.tsx");
 const PREVIEW_PAGE_SOURCE = readProjectFile("app/preview/ui-custom/[slug]/page.tsx");

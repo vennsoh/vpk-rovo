@@ -12,6 +12,15 @@ description: >-
   `.next`, or they want to clean the system, free space, kill runaway dev
   servers, schedule cleanup, see cleanup records, check the maintenance job/log,
   change thresholds, or repair the launchd agent or sudoers rule.
+purpose: Diagnose and remediate high local-dev CPU, RAM, disk, tmux, and cache pressure on the user's Mac without touching source work.
+owner: VPK
+category: local-maintenance
+inputs: Process list, tmux sessions, worktree inventory, Next.js cache sizes, cleanup records, and user-approved remediation scope.
+outputs: Restarted or stopped runaway dev processes, removed proven disposable caches, cleanup records, and prevention guidance.
+required_tools: shell, ps, pgrep, tmux, du, pnpm
+validation_command: zsh scripts/status.sh
+generated_artifacts: Cleanup logs and maintenance records under the configured local records path.
+common_failure_modes: Killing unrelated active work, deleting ambiguous workspace files, pruning global Portless state, or running cleanup from the wrong checkout.
 ---
 
 # vpk-system-clean

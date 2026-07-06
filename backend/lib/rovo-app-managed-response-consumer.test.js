@@ -1,0 +1,278 @@
+const assert = require("node:assert/strict");
+const test = require("node:test");
+
+const {
+	createRovoAppManagedResponseConsumer,
+} = require("./rovo-app-managed-response-consumer");
+const { formatRouteDecisionSSE } = require("./route-decision");
+
+function createStreamResponse({
+	chunks = ["data: first\n\n", "data: second\n\n"],
+	headers = {},
+} = {}) {
+	return new Response(
+		new ReadableStream({
+			start(controller) {
+				for (const chunk of chunks) {
+					controller.enqueue(chunk);
+				}
+				controller.close();
+			},
+		}),
+		{
+			headers: {
+				"content-type": "text/event-stream",
+				...headers,
+			},
+		},
+	);
+}
+
+function createHarness(overrides = {}) {
+	const calls = [];
+	const marks = [];
+	const finalMessages = [
+		{
+			id: "assistant-1",
+			role: "assistant",
+			parts: [{ type: "text", text: "Done." }],
+		},
+	];
+	const dependencies = {
+		areHermesCompanionsEnabled: () => false,
+		collectUiMessagesFromResponseStream: async (input) => {
+			calls.push(["collectUiMessagesFromResponseStream", {
+				initialMessages: input.initialMessages,
+				routeDecisionToSuppress: input.routeDecisionToSuppress,
+			}]);
+			input.onMessagesUpdated?.([{ id: "snapshot-1", parts: [] }]);
+			return finalMessages;
+		},
+		createUiMessageChunkSseStream: ({ stream }) => stream,
+		finalizeRovoAppRun: async (threadId, run, messages) => {
+			calls.push(["finalizeRovoAppRun", threadId, { ...run }, messages]);
+		},
+		getLatestAssistantTextFromMessages: () => "Done.",
+		hermesSkillDraftManager: {
+			listPendingDraftIdsForThread: async (threadId) => {
+				calls.push(["listPendingDraftIdsForThread", threadId]);
+				return ["skill-draft-1"];
+			},
+			upsertDraft: async () => null,
+		},
+		logger: {
+			info: (...args) => calls.push(["info", args]),
+			warn: (...args) => calls.push(["warn", args]),
+		},
+		mapUiMessagesToConversation: () => ({
+			conversationHistory: [{ type: "user", content: "Do it" }],
+			message: "Do it",
+		}),
+		messagePersistDebounceMs: 1,
+		persistRovoAppRunMessagesSnapshot: async (threadId, messages) => {
+			calls.push(["persistRovoAppRunMessagesSnapshot", threadId, messages]);
+		},
+		persistRovoAppRunState: async (threadId, run) => {
+			calls.push(["persistRovoAppRunState", threadId, { ...run }]);
+		},
+		rovoAppRunManager: {
+			appendChunk: (threadId, chunk) => {
+				calls.push(["appendChunk", threadId, chunk]);
+			},
+		},
+		rovoAppThreadManager: {
+			getThread: async (threadId) => {
+				calls.push(["getThread", threadId]);
+				return {
+					id: threadId,
+					hermesContext: {
+						selectedSkillIds: ["existing-skill"],
+					},
+				};
+			},
+			updateThread: async (threadId, patch) => {
+				calls.push(["updateThread", threadId, patch]);
+				return {
+					id: threadId,
+					...patch,
+				};
+			},
+		},
+		runHermesMemoryCompanionReview: async () => ({
+			didReview: false,
+			structuredMemoryActions: [],
+		}),
+		runHermesSkillCompanionReview: async () => ({
+			didReview: false,
+			structuredSkillActions: [],
+		}),
+		syncRovoAppThreadSession: async (threadId, rovoPort, { thread }) => {
+			calls.push(["syncRovoAppThreadSession", threadId, rovoPort, thread]);
+			return {
+				...thread,
+				sessionId: "session-1",
+				sessionMode: "persistent",
+			};
+		},
+		syncWikiBackedMemory: async () => null,
+		syncWikiQmdIndex: async () => null,
+		...overrides,
+	};
+	const { consumeRovoAppManagedResponse } = createRovoAppManagedResponseConsumer(dependencies);
+	const stageTrace = {
+		mark: (name, data) => marks.push([name, data]),
+	};
+
+	return {
+		calls,
+		consumeRovoAppManagedResponse,
+		finalMessages,
+		marks,
+		stageTrace,
+	};
+}
+
+test("consumeRovoAppManagedResponse persists resolved port, chunks, messages, and finalized run", async () => {
+	const { calls, consumeRovoAppManagedResponse, finalMessages, marks, stageTrace } = createHarness();
+	const run = {
+		id: "run-1",
+		rovoPort: 1111,
+	};
+	const routeDecision = {
+		intent: "chat",
+		presentation: "text",
+		confidence: 0.95,
+		reason: "conversational_pattern",
+		origin: "text",
+	};
+
+	await consumeRovoAppManagedResponse({
+		initialMessages: [{ id: "user-1", parts: [] }],
+		prependChunk: formatRouteDecisionSSE(routeDecision),
+		response: createStreamResponse({
+			headers: {
+				"x-vpk-rovo-port": "4321",
+			},
+		}),
+		run,
+		stageTrace,
+		threadId: "thread-1",
+	});
+
+	assert.equal(run.rovoPort, 4321);
+	assert.equal(run.sessionId, "session-1");
+	assert.deepEqual(calls.find((call) => call[0] === "persistRovoAppRunState"), [
+		"persistRovoAppRunState",
+		"thread-1",
+		{
+			id: "run-1",
+			rovoPort: 4321,
+			updatedAt: run.updatedAt,
+		},
+	]);
+	assert.deepEqual(
+		calls.filter((call) => call[0] === "appendChunk").map((call) => call.slice(1)),
+		[
+			["thread-1", formatRouteDecisionSSE(routeDecision)],
+			["thread-1", "data: first\n\n"],
+			["thread-1", "data: second\n\n"],
+		],
+	);
+	assert.deepEqual(marks, [
+		["future_chat_first_chunk", { bytes: Buffer.byteLength("data: first\n\n") }],
+	]);
+	assert.deepEqual(calls.find((call) => call[0] === "persistRovoAppRunMessagesSnapshot"), [
+		"persistRovoAppRunMessagesSnapshot",
+		"thread-1",
+		finalMessages,
+	]);
+	assert.deepEqual(calls.find((call) => call[0] === "finalizeRovoAppRun"), [
+		"finalizeRovoAppRun",
+		"thread-1",
+		{
+			id: "run-1",
+			rovoPort: 4321,
+			sessionId: "session-1",
+			sessionMode: "persistent",
+			updatedAt: run.updatedAt,
+		},
+		finalMessages,
+	]);
+});
+
+test("consumeRovoAppManagedResponse runs Hermes memory review when companions are enabled", async () => {
+	const { calls, consumeRovoAppManagedResponse, stageTrace } = createHarness({
+		areHermesCompanionsEnabled: () => true,
+		runHermesMemoryCompanionReview: async (input) => {
+			calls.push(["runHermesMemoryCompanionReview", input]);
+			return {
+				didReview: true,
+				responseText: "Memory updated",
+				structuredMemoryActions: [
+					{ proposal: { id: "memory-proposal-1" } },
+				],
+			};
+		},
+		runHermesSkillCompanionReview: async (input) => {
+			calls.push(["runHermesSkillCompanionReview", input]);
+			return {
+				didReview: false,
+				structuredSkillActions: [],
+			};
+		},
+		syncWikiBackedMemory: async (input) => {
+			calls.push(["syncWikiBackedMemory", input]);
+		},
+	});
+
+	await consumeRovoAppManagedResponse({
+		initialMessages: [],
+		response: createStreamResponse(),
+		run: {
+			id: "run-1",
+			rovoPort: 1234,
+		},
+		stageTrace,
+		threadId: "thread-1",
+	});
+
+	const memoryReview = calls.find((call) => call[0] === "runHermesMemoryCompanionReview");
+	assert.equal(memoryReview[1].latestAssistantMessage, "Done.");
+	assert.equal(memoryReview[1].latestUserMessage, "Do it");
+	assert.equal(memoryReview[1].sourceThreadId, "thread-1");
+	assert.deepEqual(
+		calls.filter((call) => call[0] === "updateThread").map((call) => call.slice(1)),
+		[
+			[
+				"thread-1",
+				{
+					hermesContext: {
+						autoSelectedSkillIds: [],
+						pendingDraftIds: [],
+						selectedSkillIds: ["existing-skill"],
+						recentMemoryProposalIds: ["memory-proposal-1"],
+					},
+				},
+			],
+		],
+	);
+	assert.equal(calls.some((call) => call[0] === "syncWikiBackedMemory"), true);
+	assert.equal(calls.some((call) => call[0] === "runHermesSkillCompanionReview"), true);
+});
+
+test("consumeRovoAppManagedResponse rejects non-event-stream responses", async () => {
+	const { consumeRovoAppManagedResponse, stageTrace } = createHarness();
+
+	await assert.rejects(
+		consumeRovoAppManagedResponse({
+			initialMessages: [],
+			response: new Response("not a stream", {
+				headers: { "content-type": "application/json" },
+			}),
+			run: { id: "run-1" },
+			stageTrace,
+			threadId: "thread-1",
+		}),
+		/Rovo expected an event stream response/u,
+	);
+});

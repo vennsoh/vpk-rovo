@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Artifact List is registered as a UI Custom component in all four registrie
 		/customComponent\("artifact-list", "Artifact List"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/ui-custom.ts"),
+		readDetailCategorySource("ui-custom"),
 		/import \{ ArtifactList \} from "@\/components\/ui-custom\/artifact-list";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"artifact-list": dynamic\(\(\) => import\("\.\/demos\/ui-custom\/artifact-list-demo"\)/u,
 	);
 });

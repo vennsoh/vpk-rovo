@@ -2,15 +2,17 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const ROOT = path.join(__dirname, "../../../..");
 const MELT_SOURCE = fs.readFileSync(path.join(__dirname, "melt.tsx"), "utf8");
 const DEMO_SOURCE = fs.readFileSync(path.join(__dirname, "melt-demo.tsx"), "utf8");
-const REGISTRY_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/registry.ts"), "utf8");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const COMPONENTS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/components.ts"), "utf8");
 const MANIFEST_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/component-manifest.ts"), "utf8");
 const NAV_UTILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/nav-utils.ts"), "utf8");
-const DETAILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/details/visual.ts"), "utf8");
+const DETAILS_SOURCE = readDetailCategorySource("visual");
 
 test("Melt exposes the SVG filter shape from the reference effect", () => {
 	assert.match(MELT_SOURCE, /<feTurbulence/);
@@ -58,5 +60,5 @@ test("Melt is wired into the visual catalog", () => {
 	assert.ok(COMPONENTS_SOURCE.includes('visualComponent("melt", "Melt"'));
 	assert.ok(MANIFEST_SOURCE.includes('visualComponent("melt", "Melt"'));
 	assert.ok(NAV_UTILS_SOURCE.includes('"melt"'));
-	assert.ok(DETAILS_SOURCE.includes('"melt"'));
+	assert.match(DETAILS_SOURCE, /(?:"melt"|melt): \{/u);
 });

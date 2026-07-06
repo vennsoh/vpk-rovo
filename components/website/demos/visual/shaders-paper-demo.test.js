@@ -2,13 +2,16 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const ROOT = path.join(__dirname, "../../../..");
 const COMPONENTS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/components.ts"), "utf8");
 const MANIFEST_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/component-manifest.ts"), "utf8");
-const DETAILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/details/visual.ts"), "utf8");
+const DETAILS_SOURCE = readDetailCategorySource("visual");
 const NAV_UTILS_SOURCE = fs.readFileSync(path.join(ROOT, "app/data/nav-utils.ts"), "utf8");
-const REGISTRY_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/registry.ts"), "utf8");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
+const WEBSITE_PREVIEW_SOURCE = fs.readFileSync(path.join(ROOT, "components/website/website-preview.tsx"), "utf8");
 const DEMO_SOURCE = fs.readFileSync(path.join(__dirname, "shaders-paper-demo.tsx"), "utf8");
 const PACKAGE_SOURCE = fs.readFileSync(path.join(ROOT, "package.json"), "utf8");
 
@@ -121,6 +124,14 @@ test("Paper shader demos expose generated GUI controls", () => {
 
 test("Paper shader preview centers inside the full-width docs shell", () => {
 	assert.match(DEMO_SOURCE, /className="mx-auto flex w-full max-w-2xl flex-col"/u);
+});
+
+test("Paper shader catalog previews use the component slug instead of the current route", () => {
+	assert.match(WEBSITE_PREVIEW_SOURCE, /<PreviewDemo slug=\{slug\} \/>/u);
+	assert.match(DEMO_SOURCE, /type PaperShadersDemoProps = \{\n\tslug\?: string;\n\};/u);
+	assert.match(DEMO_SOURCE, /function getPaperShaderSlug\(previewSlug: string \| undefined, pathname: string \| null\): PaperShaderSlug/u);
+	assert.match(DEMO_SOURCE, /if \(previewSlug && previewSlug in PAPER_SHADER_DEMOS\) \{/u);
+	assert.match(DEMO_SOURCE, /const slug = getPaperShaderSlug\(previewSlug, pathname\);/u);
 });
 
 test("Paper shader controls match the live site control surface", () => {

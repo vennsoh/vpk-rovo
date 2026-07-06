@@ -17,13 +17,12 @@ const MENTION_EXTENSIONS_SOURCE = fs.readFileSync(path.join(__dirname, "../../..
 const MENTION_NODE_VIEW_SOURCE = fs.readFileSync(path.join(__dirname, "../../../ui-custom/rich-text-editor/mention-node-view.tsx"), "utf8");
 const TAG_SOURCE = fs.readFileSync(path.join(__dirname, "../../../ui/tag.tsx"), "utf8");
 const SKILL_TAG_SOURCE = fs.readFileSync(path.join(__dirname, "../../../ui-custom/skill-tag.tsx"), "utf8");
-const ROVO_CLICKY_OVERLAY_SOURCE = fs.readFileSync(path.join(__dirname, "../../rovo/components/clicky/clicky-overlay.tsx"), "utf8");
-const STUDIO_CLICKY_OVERLAY_SOURCE = fs.readFileSync(path.join(__dirname, "../../studio/components/clicky/clicky-overlay.tsx"), "utf8");
+const CLICKY_OVERLAY_SOURCE = fs.readFileSync(path.join(__dirname, "../../rovo-core/components/clicky/clicky-overlay.tsx"), "utf8");
 const ROVO_CURSOR_SOURCE = fs.readFileSync(path.join(__dirname, "../../../ui-custom/rovo-cursor.tsx"), "utf8");
 const VERTICAL_OVERFLOW_HOOK_SOURCE = fs.readFileSync(path.join(__dirname, "../../../hooks/use-has-vertical-overflow.ts"), "utf8");
 
 test("RovoAppComposer uses the shared edit context bar for open artifacts", () => {
-	assert.match(COMPOSER_SOURCE, /import ChatContextBar from "@\/components\/projects\/sidebar-chat\/components\/chat-context-bar";/u);
+	assert.match(COMPOSER_SOURCE, /import ChatContextBar from "@\/components\/projects\/shared\/components\/chat-context-bar";/u);
 	assert.match(COMPOSER_SOURCE, /variant: "edit" as const/u);
 	assert.match(COMPOSER_SOURCE, /iconName: "artifact" as const/u);
 	assert.match(COMPOSER_SOURCE, /<ChatContextBar context=\{artifactContextBar\} onDismiss=\{onDismissArtifactContext\} \/>/u);
@@ -153,18 +152,12 @@ test("Rovo Cursor is gated behind active live voice in shared composer chrome", 
 	assert.match(SEND_CONTROLS_SOURCE, /height="100%"/u);
 	assert.doesNotMatch(SEND_CONTROLS_SOURCE, /className="flex size-4 min-w-0 items-center justify-center overflow-hidden"/u);
 	assert.doesNotMatch(SEND_CONTROLS_SOURCE, /height="16px"/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /button\[aria-label="Rovo cursor"\], button\[aria-label="Rovo Cursor"\]/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /button\[aria-label="Rovo cursor"\], button\[aria-label="Rovo Cursor"\]/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /const shouldUseFlightTransform = flightPhase === "flying" \|\| flightPhase === "returning";/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /paintingActive\?: boolean;/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /paintingActive=\{paintingActive\}/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /rotation=\{shouldUseFlightTransform \? rotation : IDLE_ROTATION\}/u);
-	assert.match(ROVO_CLICKY_OVERLAY_SOURCE, /flightScale=\{shouldUseFlightTransform \? flightScale : 1\}/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /const shouldUseFlightTransform = flightPhase === "flying" \|\| flightPhase === "returning";/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /paintingActive\?: boolean;/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /paintingActive=\{paintingActive\}/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /rotation=\{shouldUseFlightTransform \? rotation : IDLE_ROTATION\}/u);
-	assert.match(STUDIO_CLICKY_OVERLAY_SOURCE, /flightScale=\{shouldUseFlightTransform \? flightScale : 1\}/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /button\[aria-label="Rovo cursor"\], button\[aria-label="Rovo Cursor"\]/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /const shouldUseFlightTransform = flightPhase === "flying" \|\| flightPhase === "returning";/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /paintingActive\?: boolean;/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /paintingActive=\{paintingActive\}/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /rotation=\{shouldUseFlightTransform \? rotation : IDLE_ROTATION\}/u);
+	assert.match(CLICKY_OVERLAY_SOURCE, /flightScale=\{shouldUseFlightTransform \? flightScale : 1\}/u);
 });
 
 test("shared composer forwards screen-assistant target prefixes to cursor controls", () => {

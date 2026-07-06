@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { getSSRAutoScript, getThemeStyles } from "@atlaskit/tokens";
 import { Providers } from "@/app/providers";
 import { DevRootTools } from "@/components/utils/dev-root-tools";
+import { DocumentTitlePrefix } from "@/components/utils/document-title-prefix";
 import { PreHydrationScript } from "@/components/utils/pre-hydration-script";
 import { Geist } from "next/font/google";
 import localFont from "next/font/local";
@@ -249,6 +250,7 @@ ${devStylesheetGuardScript}
 			</head>
 			<body suppressHydrationWarning className="antialiased">
 				<PreHydrationScript id="vpk-pre-hydration">{preHydrationScript}</PreHydrationScript>
+				<DocumentTitlePrefix />
 				<a
 					href="#main-content"
 					className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:rounded-sm focus:bg-surface-raised focus:px-3 focus:py-2 focus:text-text focus:shadow-overlay focus:outline-2 focus:outline-offset-2 focus:outline-[color:var(--color-ring)]"

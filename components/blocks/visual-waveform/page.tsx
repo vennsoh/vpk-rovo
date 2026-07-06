@@ -9,7 +9,7 @@ import {
 	createRealtimeTextMessage,
 	updateRealtimeTextMessage,
 	upsertRealtimeMessage,
-} from "@/components/projects/rovo/lib/rovo-app-realtime-message-state";
+} from "@/components/projects/rovo-core/lib/rovo-app-realtime-message-state";
 import {
 	useRealtimeVoice,
 } from "@/components/projects/rovo/hooks/use-realtime-voice";

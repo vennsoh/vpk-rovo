@@ -125,3 +125,31 @@ test("POST /api/chat-sdk defaults /agents requests to AI Gateway", async (t) => 
 	assert.equal(requests.length, 1);
 	assert.equal(JSON.parse(requests[0].body).backendPreference, "ai-gateway");
 });
+
+test("POST /api/chat-sdk preserves event-stream response headers", async (t) => {
+	const { POST } = await loadBundledRoute(t);
+	mockBackendFetch(t, () => new Response("data: {}\n\n", {
+		headers: { "Content-Type": "text/event-stream; charset=utf-8" },
+		status: 200,
+	}));
+
+	const response = await POST(new Request("http://localhost/api/chat-sdk", {
+		body: JSON.stringify({
+			messages: [
+				{
+					id: "user-1",
+					role: "user",
+					parts: [{ type: "text", text: "hi" }],
+				},
+			],
+		}),
+		headers: { "Content-Type": "application/json" },
+		method: "POST",
+	}));
+
+	assert.equal(response.status, 200);
+	assert.equal(response.headers.get("Content-Type"), "text/event-stream");
+	assert.equal(response.headers.get("Cache-Control"), "no-cache");
+	assert.equal(response.headers.get("Connection"), "keep-alive");
+	assert.equal(await response.text(), "data: {}\n\n");
+});

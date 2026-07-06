@@ -3,6 +3,13 @@ const { randomUUID } = require("node:crypto");
 const STAGE_TRACE_ID_HEADER = "x-vpk-stage-trace-id";
 const STAGE_TRACE_START_HEADER = "x-vpk-stage-start-ms";
 
+function requireFunction(name, value) {
+	if (typeof value !== "function") {
+		throw new Error(`createStageTraceFromRequestResolver requires ${name}`);
+	}
+	return value;
+}
+
 function getNonEmptyString(value) {
 	return typeof value === "string" && value.trim().length > 0
 		? value.trim()
@@ -88,8 +95,28 @@ function createStageTrace({
 	};
 }
 
+function createStageTraceFromRequestResolver({
+	createStageTraceImpl = createStageTrace,
+	logger = console,
+	stageTraceIdHeader = STAGE_TRACE_ID_HEADER,
+	stageTraceStartHeader = STAGE_TRACE_START_HEADER,
+} = {}) {
+	requireFunction("createStageTraceImpl", createStageTraceImpl);
+
+	return function resolveStageTraceFromRequest(req, scope, baseMeta) {
+		return createStageTraceImpl({
+			scope,
+			requestId: req.get(stageTraceIdHeader),
+			startedAtMs: req.get(stageTraceStartHeader),
+			logger,
+			baseMeta,
+		});
+	};
+}
+
 module.exports = {
 	STAGE_TRACE_ID_HEADER,
 	STAGE_TRACE_START_HEADER,
 	createStageTrace,
+	createStageTraceFromRequestResolver,
 };

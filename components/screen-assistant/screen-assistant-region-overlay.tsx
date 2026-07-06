@@ -10,7 +10,7 @@ import {
 	type StudioScreenAssistantRegion,
 	type StudioScreenAssistantRegionPoint,
 	type StudioScreenAssistantVisibleTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
 
 const MIN_POINT_DISTANCE = 5;
 const TIPTOUR_BRUSH_COLOR = token("color.border.accent.blue");

@@ -6,27 +6,31 @@ const test = require("node:test");
 const WRAPPER_SOURCE = fs.readFileSync(path.join(__dirname, "rovo-app-composer.tsx"), "utf8");
 const SHELL_SOURCE = fs.readFileSync(path.join(__dirname, "rovo-app-shell.tsx"), "utf8");
 const CLICKY_VOICE_HOOK_SOURCE = fs.readFileSync(
-	path.join(__dirname, "..", "hooks", "use-clicky-voice.ts"),
+	path.join(process.cwd(), "components/projects/rovo-core/hooks/use-default-clicky-voice.ts"),
+	"utf8",
+);
+const CLICKY_VOICE_CORE_HOOK_SOURCE = fs.readFileSync(
+	path.join(process.cwd(), "components/projects/rovo-core/hooks/use-clicky-voice.ts"),
 	"utf8",
 );
 const REALTIME_VOICE_HOOK_SOURCE = fs.readFileSync(
-	path.join(__dirname, "..", "hooks", "use-realtime-voice.ts"),
+	path.join(process.cwd(), "components/projects/rovo-core/hooks/use-realtime-voice.ts"),
 	"utf8",
 );
 const CLICKY_OVERLAY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "clicky", "clicky-overlay.tsx"),
+	path.join(process.cwd(), "components/projects/rovo-core/components/clicky/clicky-overlay.tsx"),
 	"utf8",
 );
 const CLICKY_RESPONSE_OVERLAY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "clicky", "clicky-response-overlay.tsx"),
+	path.join(process.cwd(), "components/projects/rovo-core/components/clicky/clicky-response-overlay.tsx"),
 	"utf8",
 );
 const CLICKY_SPEECH_BUBBLE_SOURCE = fs.readFileSync(
-	path.join(__dirname, "clicky", "clicky-speech-bubble.tsx"),
+	path.join(process.cwd(), "components/projects/rovo-core/components/clicky/clicky-speech-bubble.tsx"),
 	"utf8",
 );
 const CLICKY_CURSOR_SOURCE = fs.readFileSync(
-	path.join(__dirname, "clicky", "clicky-cursor.tsx"),
+	path.join(process.cwd(), "components/projects/rovo-core/components/clicky/clicky-cursor.tsx"),
 	"utf8",
 );
 const REGION_OVERLAY_SOURCE = fs.readFileSync(
@@ -84,6 +88,11 @@ test("RovoAppShell wires dictation separately from realtime live voice", () => {
 	assert.match(SHELL_SOURCE, /realtime\.connect\(\{ transcriptionOnly: true \}\);/u);
 });
 
+test("RovoAppShell imports screen-assistant helpers from rovo-core", () => {
+	assert.match(SHELL_SOURCE, /from "@\/components\/projects\/rovo-core\/lib\/screen-assistant"/u);
+	assert.doesNotMatch(SHELL_SOURCE, /from "@\/components\/projects\/studio\/lib\/studio-screen-assistant"/u);
+});
+
 test("Rovo cursor activation starts live voice while cursor deactivation leaves live voice running", () => {
 	const realtimeToggleSource = sourceBetween(SHELL_SOURCE, "const handleToggleRealtimeVoice", "const handleToggleClicky");
 	const clickyToggleSource = sourceBetween(SHELL_SOURCE, "const handleToggleClicky", "// Keyboard shortcuts for Rovo");
@@ -105,8 +114,9 @@ test("Rovo cursor activation starts live voice while cursor deactivation leaves 
 	assert.match(keyboardShortcutSource, /if \(e\.key === "Escape" && isClickyActive\) \{[\s\S]*deactivateClicky\(\);/u);
 	assert.doesNotMatch(SHELL_SOURCE, /toggleClicky/u);
 	assert.match(CLICKY_VOICE_HOOK_SOURCE, /Cursor deactivation must not tear down/u);
-	assert.match(CLICKY_VOICE_HOOK_SOURCE, /started[\s\S]*voice first and then enabled the cursor/u);
-	assert.doesNotMatch(CLICKY_VOICE_HOOK_SOURCE, /connectedForCursorRef\.current &&[\s\S]*!hasInjectedPromptRef\.current/u);
+	assert.match(CLICKY_VOICE_HOOK_SOURCE, /useClickyVoiceCore/u);
+	assert.match(CLICKY_VOICE_CORE_HOOK_SOURCE, /isClickyActive &&[\s\S]*isRealtimeConnected &&[\s\S]*!hasInjectedPromptRef\.current/u);
+	assert.doesNotMatch(CLICKY_VOICE_CORE_HOOK_SOURCE, /connectedForCursorRef\.current &&[\s\S]*!hasInjectedPromptRef\.current/u);
 	assert.doesNotMatch(CLICKY_VOICE_HOOK_SOURCE, /disconnectRealtime\(\)/u);
 	assert.match(REALTIME_VOICE_HOOK_SOURCE, /onEndVoiceSession\?: \(\) => void;/u);
 	assert.match(endVoiceSessionSource, /onEndVoiceSessionRef\.current\?\.\(\);[\s\S]*setTimeout\(\(\) => \{[\s\S]*disconnectRef\.current\(\);/u);

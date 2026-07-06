@@ -8,7 +8,7 @@ import type {
 	WorkItemRfpTeamMember,
 } from "@/app/contexts/context-work-item-modal";
 import type { KanbanBoardCardData, KanbanBoardCardTag } from "@/components/blocks/kanban-board";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import PersonAddIcon from "@atlaskit/icon/core/person-add";
 import { defaultSuggestions, type RovoSuggestion } from "@/lib/rovo-suggestions";
 import { BOARD_COLUMNS, RFP_CLIENT_NAMES_BY_CODE } from "./board-data";

@@ -12,19 +12,13 @@
 // oxlint-disable react-doctor/prefer-module-scope-static-value -- These values are intentionally colocated with the component/demo contract for readability and token context.
 
 import type { FileUIPart } from "ai";
-import { animate, AnimatePresence, motion, useMotionValue, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
-import { type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from "react";
-import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
+import { type CSSProperties, type ReactNode, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArtifactPanel } from "@/components/blocks/artifact";
-import { TWGAppstack, type TwgToolSource } from "@/components/ui-custom/twg-appstack";
 import { ChatTimelineNavigator } from "@/components/blocks/chat-timeline/chat-timeline-navigator";
 import { useLazyRef } from "@/lib/use-lazy-ref";
-import {
-	DEFAULT_STARTER_ICON,
-	getStarterIcon,
-	type StarterIconKey,
-} from "@/components/blocks/conversation-starters";
+import type { RovoAgentProfile } from "@/app/data/directory/agents";
 import { CreateButton } from "@/components/blocks/top-navigation/components/create-button";
 import { AgentsDirectoryDialog, type AgentsDirectoryTemplateBuildOptions } from "@/components/blocks/agent-directory";
 import { inferAutomationRules } from "@/components/blocks/triggers/data/trigger-catalog";
@@ -33,43 +27,47 @@ import {
 	DEMO_AGENT_TEMPLATES,
 	DEMO_AGENT_TEMPLATES_SESSION,
 } from "@/components/blocks/agent-templates/data/demo-template-agents";
-import { RovoAppBrowserArtifact } from "@/components/projects/studio/components/rovo-app-browser-artifact";
+import { RovoAppBrowserArtifact } from "@/components/projects/rovo-core/components/rovo-app-browser-artifact";
 import { RovoAppComposer } from "@/components/projects/studio/components/rovo-app-composer";
+import { RovoAppHomeStarterBento } from "@/components/projects/studio/components/rovo-app-home-starter-bento";
+import { HOME_STARTER_DEFAULT_CATEGORY, type HomeStarterCategory } from "@/components/projects/studio/data/home-starter-templates";
 import { StudioAgentsSection } from "@/components/projects/studio/components/rovo-app-custom-agents-table";
 import {
 	parseStudioAutomationArtifactListPayload,
-	RovoAppMessages,
 	STUDIO_AUTOMATION_ARTIFACT_LIST_TYPE,
+} from "@/components/projects/studio/lib/studio-automation-artifact-list";
+import {
 	StudioAutomationArtifactListWidget,
+} from "@/components/projects/studio/components/studio-automation-artifact-list-widget";
+import { isStudioAutomationDiscoveryDemoPrompt } from "@/components/projects/studio/lib/studio-automation-discovery-prompt";
+import {
+	RovoAppMessages,
 } from "@/components/projects/studio/components/rovo-app-messages";
-import { RovoAppHermesSkillDraftBar } from "@/components/projects/studio/components/rovo-app-hermes-skill-draft-bar";
+import { RovoAppHermesSkillDraftBar } from "@/components/projects/rovo-core/components/rovo-app-hermes-skill-draft-bar";
 import { RovoAppAgentConfigPanel, type AgentConfigView } from "@/components/projects/studio/components/rovo-app-agent-config-panel";
 import { RovoCursorOnboardingTour } from "@/components/projects/studio/components/rovo-cursor-onboarding-tour";
 import { AgentTestPanel } from "@/components/blocks/agent-test";
 import { useAgentOnboardingTour } from "@/components/projects/studio/hooks/use-agent-onboarding-tour";
-import { AGENT_ONBOARDING_TOUR_STEPS, type AgentOnboardingTourStep } from "@/components/projects/studio/data/agent-onboarding-tour";
-import { RovoAppShellPaneLayout } from "@/components/projects/studio/components/rovo-app-shell-pane-layout";
+import { RovoAppShellPaneLayoutCore as RovoAppShellPaneLayout } from "@/components/projects/rovo-core/components/rovo-app-shell-pane-layout";
 import { RovoAppSidebar } from "@/components/projects/studio/components/rovo-app-sidebar";
 import { isGeneratedAgentResult } from "@/components/projects/sidebar-chat/components/agent-result-card";
 import { useArtifactAnnotations } from "@/components/ui-custom/hooks/use-artifact-annotations";
-import { useBentoDescriptionClamp } from "@/components/ui-custom/hooks/use-bento-description-clamp";
-import { useHasHorizontalOverflow } from "@/components/hooks/use-has-horizontal-overflow";
-import { BENTO_CAROUSEL_CONTAINER_CLASS, BENTO_CAROUSEL_TILE_CLASS, CarouselArrow, getBentoEdgeMaskStyle } from "@/components/ui-custom/bento-carousel";
 import { formatAnnotationsForVoiceContext } from "@/components/ui-custom/lib/artifact-annotations";
 import type { ArtifactAnnotation } from "@/components/ui-custom/lib/artifact-annotations";
 import { useRovoApp } from "@/components/projects/studio/hooks/use-rovo-app";
-import { useHmrReloadSuppression } from "@/components/projects/studio/hooks/use-hmr-reload-suppression";
+import { useHmrReloadSuppression } from "@/components/projects/rovo-core/hooks/use-hmr-reload-suppression";
 import { useStudioDemoReset } from "@/components/projects/studio/hooks/use-studio-demo-reset";
+import { useStudioAgentResultRegistration } from "@/components/projects/studio/hooks/use-studio-agent-result-registration";
 import { useAgentUrlSync } from "@/hooks/use-agent-url-sync";
 import {
 	buildRovoAppBrowserArtifactKey,
 	shouldAutoOpenRovoAppBrowserArtifact,
 	shouldShowReopenRovoAppBrowserArtifactControl,
-} from "@/components/projects/studio/lib/rovo-app-browser-preview";
+} from "@/components/projects/rovo-core/lib/rovo-app-browser-preview";
 import { resolveRovoAppComposerPlaceholder } from "@/components/projects/shared/lib/rovo-app-composer-placeholder";
-import { ROVO_APP_MAX_CHAT_PANE_WIDTH, ROVO_APP_MIN_ARTIFACT_PANE_WIDTH, ROVO_APP_MIN_CHAT_PANE_WIDTH, ROVO_APP_STUDIO_CONTENT_MAX_WIDTH_CLASS, getRovoAppShellLayout } from "@/components/projects/studio/lib/rovo-app-shell-layout";
-import { getRovoAppSmartGenerationLayoutContext } from "@/components/projects/studio/lib/rovo-app-smart-generation-layout";
-import { deriveRovoAppTimelineItems } from "@/components/projects/studio/lib/rovo-app-timeline";
+import { ROVO_APP_MAX_CHAT_PANE_WIDTH, ROVO_APP_MIN_ARTIFACT_PANE_WIDTH, ROVO_APP_MIN_CHAT_PANE_WIDTH, getRovoAppShellLayout } from "@/components/projects/rovo-core/lib/rovo-app-shell-layout";
+import { getRovoAppSmartGenerationLayoutContext } from "@/components/projects/rovo-core/lib/rovo-app-smart-generation-layout";
+import { deriveRovoAppTimelineItems } from "@/components/projects/rovo-core/lib/rovo-app-timeline";
 import {
 	buildDeterministicTriggerThinkingParts,
 	DETERMINISTIC_TRIGGER_TRACE_INITIAL_DELAY_MS,
@@ -79,27 +77,48 @@ import {
 import {
 	adoptStudioGenerationTranscript,
 	createStudioAgentEditCards,
-	createStudioAgentOnboardingLocalConversation,
 } from "@/components/projects/studio/lib/studio-chat-helpers";
-import { buildComposerHermesContext, shouldResetComposerHermesSkillSelection } from "@/components/projects/studio/lib/rovo-app-hermes-skill-selection";
+import { mergeContextDescriptions } from "@/components/projects/studio/lib/studio-context-descriptions";
+import {
+	normalizeStudioAgentResult,
+	resolveRegisteredStudioAgentId,
+	type StudioAgentRegistrationResult,
+} from "@/components/projects/studio/lib/studio-agent-result-normalization";
+import {
+	createStudioAgentOnboardingGuideMessage,
+	createStudioAgentOnboardingLocalConversation,
+	getStudioAgentOnboardingGuideGreeting,
+	getStudioAgentOnboardingGuideStepByIndex,
+	getStudioAgentOnboardingGuideStepNarration,
+	resolveStudioAgentOnboardingGuideCommand,
+	STUDIO_AGENT_ONBOARDING_GUIDE_SUPPORTED_COMMANDS,
+} from "@/components/projects/studio/lib/studio-agent-onboarding-guide";
+import {
+	buildStudioRealtimeArtifactContextSummary,
+	buildStudioRealtimeResultSummary,
+	buildStudioRealtimeThreadSummary,
+	resolveStudioRealtimeSessionIdentity,
+	resolveStudioRealtimeStatusMessage,
+} from "@/components/projects/studio/lib/studio-realtime-context";
+import { buildFallbackTemplatePrompt } from "@/components/projects/studio/lib/studio-template-prompts";
+import { buildComposerHermesContext, shouldResetComposerHermesSkillSelection } from "@/components/projects/rovo-core/lib/rovo-app-hermes-skill-selection";
 import { getStudioAutomationGeneratingAgents } from "@/components/projects/studio/lib/studio-automation-generating-agents";
 import { prepareStudioAgentDraftPatch } from "@/components/projects/studio/lib/studio-agent-draft-patch";
 import { useHermesEmbedEnabled } from "@/lib/hermes-feature-flags";
 import { buildRovoAppThreadPath } from "@/components/projects/studio/lib/rovo-app-thread-route-sync";
-import { createRovoAppUserMessage } from "@/components/projects/studio/lib/rovo-app-user-message";
+import { createRovoAppUserMessage } from "@/components/projects/rovo-core/lib/rovo-app-user-message";
 import { appendDictationTranscript, resolveComposerDictationState } from "@/lib/composer-dictation";
-import { readSessionAgentRecords } from "@/components/projects/studio/lib/studio-session-agent-storage";
+import { readSessionAgentRecords } from "@/components/projects/rovo-core/lib/agent-records/session-agent-storage";
 import {
 	applyTemplateDefaultsToResult,
 	buildCreationTemplateContextFromAgent,
-	buildCreationTemplateContextFromStarter,
 	buildStudioAgentCreationContext,
 	buildStudioAgentCreationContinuationContext,
 	buildStudioAssistantKnowledgeContext,
 	buildTemplateAgentResultFromAgent,
 	resolveTemplateConfigForResult,
 	type StudioCreationTemplateContext,
-} from "@/components/projects/studio/lib/studio-agent-creation-context";
+} from "@/components/projects/rovo-core/lib/agent-records/agent-creation-context";
 import {
 	deriveTemplateCategoryIds,
 	omitDomainScopeAnswer,
@@ -108,6 +127,7 @@ import {
 } from "@/components/projects/studio/lib/agent-creation-domain-scope";
 import { repairGeneratedAgentCatalog } from "@/app/data/directory/repair-agent-result";
 import { type DelegationRequest, useRealtimeVoice } from "@/components/projects/studio/hooks/use-realtime-voice";
+import { type RovoRealtimeShellAdapter, useRovoRealtimeShellBridge } from "@/components/projects/rovo-core/hooks/use-rovo-realtime-shell-bridge";
 import type { ConversationFollowMode } from "@/components/ui-custom/conversation";
 import { useSidebar as useGlobalSidebar } from "@/app/contexts/context-sidebar";
 import { LeftNavigation } from "@/components/blocks/top-navigation/components/left-navigation";
@@ -121,16 +141,14 @@ import {
 	TOP_NAV_PADDING_PX,
 } from "@/components/blocks/top-navigation/layout-constants";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SkillTag, SkillTagGroup, type SkillTagColor } from "@/components/ui-custom/skill-tag";
 import SearchIcon from "@atlaskit/icon/core/search";
 import { SidebarProvider, SidebarResizeHandle } from "@/components/ui/sidebar";
 import { Footer } from "@/components/ui-custom/footer";
-import { useClicky } from "@/components/projects/studio/hooks/use-clicky";
+import { useClicky } from "@/components/projects/rovo-core/hooks/use-clicky";
 import { useClickyVoice } from "@/components/projects/studio/hooks/use-clicky-voice";
-import { ClickyOverlay } from "@/components/projects/studio/components/clicky/clicky-overlay";
+import { ClickyOverlay } from "@/components/projects/rovo-core/components/clicky/clicky-overlay";
 import { ScreenAssistantRegionOverlay } from "@/components/screen-assistant/screen-assistant-region-overlay";
 import {
 	activateStudioScreenAssistantTarget,
@@ -139,11 +157,11 @@ import {
 	groundStudioScreenAssistantTarget,
 	type StudioScreenAssistantRegion,
 	type StudioScreenAssistantTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
-import { useSidebarResize } from "@/components/projects/studio/hooks/use-sidebar-resize";
-import { useSidebarResize as useStudioAskRovoChatResize } from "@/components/projects/rovo/hooks/use-sidebar-resize";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
+import { useSidebarResize } from "@/components/projects/rovo-core/hooks/use-sidebar-resize";
+import { useSidebarResize as useStudioAskRovoChatResize } from "@/components/projects/rovo-core/hooks/use-sidebar-resize";
 import ChatPanel, { type ChatPanelGreetingProps, type ChatPanelLocalConversation } from "@/components/projects/sidebar-chat/page";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import RefreshIcon from "@atlaskit/icon/core/refresh";
 import {
 	AGENT_EDIT_GREETING_HEADING,
@@ -158,10 +176,9 @@ import {
 } from "@/components/projects/studio/data/rfp-demo-agent";
 import { clamp, cn, createId } from "@/lib/utils";
 import { getRandomAgentAvatarSrc } from "@/lib/agent-avatars";
-import { getSkillIcon } from "@/lib/skill-icons";
 import { token } from "@/lib/tokens";
-import { getAllDataParts, getLatestDataPart, getLatestUserMessageId, getMessageAgentResult, getMessageArtifactResult, getMessageText, hasTurnCompleteSignal, type RovoDataParts, type RovoRenderableUIMessage, type RovoUIMessage } from "@/lib/rovo-ui-messages";
-import { getRovoAppArtifactKindLabel, getRovoAppArtifactTypeLabel, sortRovoAppArtifacts } from "@/components/projects/rovo/lib/rovo-app-artifacts";
+import { getLatestDataPart, getLatestUserMessageId, getMessageAgentResult, getMessageArtifactResult, getMessageText, hasTurnCompleteSignal, type RovoDataParts, type RovoRenderableUIMessage, type RovoUIMessage } from "@/lib/rovo-ui-messages";
+import { getRovoAppArtifactKindLabel, getRovoAppArtifactTypeLabel, sortRovoAppArtifacts } from "@/components/projects/rovo-core/lib/rovo-app-artifacts";
 import { RovoAppHeader } from "@/components/projects/studio/components/rovo-app-header";
 import { ApprovalCard } from "@/components/blocks/approval-card/page";
 import { ClarificationQuestionCard } from "@/components/projects/shared/components/clarification-question-card";
@@ -174,30 +191,11 @@ import { approveSkillDraft, fetchSkillDraftDetail, fetchSkillDrafts, rejectSkill
 import type { HermesSkillDraftDetail, HermesSkillDraftSummary } from "@/lib/rovo-runtime-types";
 import type { RovoAppHermesContext } from "@/lib/rovo-app-types";
 import { getStudioSessionAgentDisplayName, useRovoSelectedAgent, type SendPromptOptions } from "@/app/contexts";
-import { ROVO_DIRECTORY_AGENT_PROFILES, getRovoAgentPromptContext, isRovoAgentProfile, type RovoAgentProfile } from "@/app/data/directory/agents";
+import { ROVO_DIRECTORY_AGENT_PROFILES, getRovoAgentPromptContext, isRovoAgentProfile } from "@/app/data/directory/agents";
 
 interface RovoAppShellProps {
 	embedded?: boolean;
 	initialThreadId?: string | null;
-}
-
-function getStudioAutomationArtifactListAgents(
-	message: Pick<RovoRenderableUIMessage, "parts">,
-): RovoDataParts["agent-result"][] {
-	const widgetParts = getAllDataParts(message, "data-widget-data");
-	for (let index = widgetParts.length - 1; index >= 0; index -= 1) {
-		const widget = widgetParts[index].data;
-		if (widget.type !== STUDIO_AUTOMATION_ARTIFACT_LIST_TYPE) {
-			continue;
-		}
-
-		const payload = parseStudioAutomationArtifactListPayload(widget.payload);
-		if (payload) {
-			return payload.agents.map((agent) => agent.agentResult);
-		}
-	}
-
-	return [];
 }
 
 const ROVO_APP_SIDEBAR_MOTION_DURATION = "--duration-medium";
@@ -208,7 +206,6 @@ const ROVO_APP_SIDEBAR_MOTION_FALLBACK_MS = 200;
 const ROVO_APP_SIDEBAR_DEFAULT_WIDTH = 216;
 const ROVO_APP_SIDEBAR_MIN_WIDTH = 216;
 const ROVO_APP_SIDEBAR_MAX_WIDTH = 480;
-const STUDIO_AGENT_MAX_CONVERSATION_STARTERS = 3;
 const STUDIO_LANDING_ENTER_TRANSITION = {
 	type: "spring",
 	visualDuration: 0.32,
@@ -231,42 +228,8 @@ const STUDIO_LANDING_REDUCED_CONTENT_INITIAL = {
 const STUDIO_LANDING_REDUCED_CONTENT_VISIBLE = {
 	opacity: 1,
 } as const;
-const STUDIO_HOME_BENTO_INSTANT_EXIT = {
-	height: 0,
-	marginBottom: 0,
-	opacity: 0,
-	overflow: "hidden",
-	transition: { duration: 0 },
-} as const;
-const STUDIO_HOME_BENTO_COLLAPSE_EXIT = {
-	height: 0,
-	marginBottom: 0,
-	opacity: 0,
-	overflow: "hidden",
-	transform: "translateY(-8px)",
-	transition: { type: "spring", visualDuration: 0.35, bounce: 0 },
-} as const;
-type StudioHomeBentoExitContext = {
-	instant: boolean;
-	reduceMotion: boolean;
-};
-const STUDIO_HOME_BENTO_VARIANTS = {
-	hidden: {
-		opacity: 0,
-		transform: "translateY(-8px)",
-	},
-	visible: {
-		opacity: 1,
-		transform: "translateY(0px)",
-		transition: STUDIO_LANDING_ENTER_TRANSITION,
-	},
-	exit: ({ instant, reduceMotion }: StudioHomeBentoExitContext) =>
-		instant || reduceMotion ? STUDIO_HOME_BENTO_INSTANT_EXIT : STUDIO_HOME_BENTO_COLLAPSE_EXIT,
-} as const;
 
 const DEFAULT_COMPOSER_PLACEHOLDER = "Describe the agent you want to build";
-const REALTIME_THREAD_SUMMARY_MAX_MESSAGES = 10;
-const REALTIME_RESULT_SUMMARY_MAX_CHARS = 500;
 const ROVO_APP_SPLIT_CHAT_PANEL_ID = "rovo-app-chat-pane";
 const ROVO_APP_SPLIT_ARTIFACT_PANEL_ID = "rovo-app-artifact-pane";
 const STUDIO_LIVE_CHAT_ANCHOR_CANDIDATES = [
@@ -290,575 +253,6 @@ const STUDIO_LIVE_CHAT_ANCHOR_CANDIDATES = [
 const STUDIO_LIVE_CHAT_ANCHOR_RESOLVE_FRAMES = 180;
 const STUDIO_AGENT_ONBOARDING_TOUR_PREVIEW_PARAM = "onboarding";
 const STUDIO_AGENT_ONBOARDING_TOUR_PREVIEW_VALUE = "rovo-cursor";
-const STUDIO_AGENT_ONBOARDING_GUIDE_SUPPORTED_COMMANDS = "\"next\", \"go back\", or \"done\"";
-const STUDIO_AUTOMATION_DISCOVERY_SOURCE_PATTERN = /\b(?:slack|jira|confluence|loom|figma|github|bitbucket|calendar|atlas|twg|teamwork graph)\b/giu;
-type HomeStarterCategory = "analyze" | "brainstorm" | "review" | "summarize" | "create";
-
-type StudioAgentOnboardingGuideCommand = "next" | "back" | "done" | "unknown";
-type StudioAgentOnboardingGuideRole = Extract<RovoUIMessage["role"], "assistant" | "user">;
-
-function normalizeStudioAgentOnboardingGuideCommand(text: string): string {
-	return text
-		.toLowerCase()
-		.replace(/[^a-z0-9\s]/gu, " ")
-		.replace(/\s+/gu, " ")
-		.trim();
-}
-
-function resolveStudioAgentOnboardingGuideCommand(text: string): StudioAgentOnboardingGuideCommand {
-	const command = normalizeStudioAgentOnboardingGuideCommand(text);
-	if (["next", "continue", "forward", "go next", "move on", "show next"].includes(command)) {
-		return "next";
-	}
-	if (["back", "go back", "previous", "prev", "go previous", "last step"].includes(command)) {
-		return "back";
-	}
-	if (["done", "finish", "finished", "end", "skip", "close", "dismiss"].includes(command)) {
-		return "done";
-	}
-
-	return "unknown";
-}
-
-function createStudioAgentOnboardingGuideMessage({
-	createdAt = new Date().toISOString(),
-	role,
-	text,
-}: {
-	createdAt?: string;
-	role: StudioAgentOnboardingGuideRole;
-	text: string;
-}): RovoUIMessage {
-	return {
-		id: createId(`studio-agent-onboarding-guide-${role}`),
-		role,
-		metadata: {
-			origin: "rovo",
-			createdAt,
-			updatedAt: createdAt,
-		},
-		parts: [
-			{
-				type: "text",
-				text,
-				state: "done",
-			},
-		],
-	};
-}
-
-function getStudioAgentOnboardingGuideGreeting(agentName: string | null): string {
-	const subject = agentName ? `${agentName} is ready` : "Your agent is ready";
-	return `Congrats - ${subject}. This is step 1 of 4: the agent card is your home base, with the name, summary, and entry point teammates will recognize. Say ${STUDIO_AGENT_ONBOARDING_GUIDE_SUPPORTED_COMMANDS} when you want to steer the tour.`;
-}
-
-function getStudioAgentOnboardingGuideStepNarration(step: AgentOnboardingTourStep | null): string {
-	switch (step?.key) {
-		case "agent-result-card":
-			return "The agent card is the launchpad: it shows what you built, what it is for, and where people can open it later.";
-		case "ask-rovo-composer":
-			return "This side chat is for fast refinements. Ask for changes to instructions, tools, triggers, or tone, and the draft can keep evolving.";
-		case "chat-starters":
-			return "These starter prompts are quick test cases. Use them to see whether the agent answers the first teammate requests clearly.";
-		case "activate-button":
-			return "This is the activation checkpoint. Once the test behavior feels right, activate the agent so it can show up where work happens.";
-		default:
-			return "This step highlights the next part of the testing flow.";
-	}
-}
-
-function getStudioAgentOnboardingGuideStepByIndex(stepIndex: number): AgentOnboardingTourStep | null {
-	return AGENT_ONBOARDING_TOUR_STEPS[stepIndex] ?? null;
-}
-
-interface HomeStarterCategoryOption {
-	iconClassName?: string;
-	iconSrc?: string;
-	id: HomeStarterCategory;
-	label: string;
-}
-
-interface HomeStarterHeroSkill {
-	color?: SkillTagColor;
-	icon?: React.ReactNode;
-	label: string;
-}
-
-interface HomeStarterHeroDecoration {
-	bannerClassName: string;
-	skills: ReadonlyArray<HomeStarterHeroSkill>;
-	sources: ReadonlyArray<TwgToolSource>;
-}
-
-function isStudioAutomationDiscoveryDemoPrompt(prompt: string): boolean {
-	const normalized = prompt
-		.toLowerCase()
-		.replace(/[^\p{L}\p{N}]+/gu, " ")
-		.replace(/\s+/g, " ")
-		.trim();
-	if (!normalized) {
-		return false;
-	}
-
-	const sourceMatches = new Set(normalized.match(STUDIO_AUTOMATION_DISCOVERY_SOURCE_PATTERN) ?? []).size;
-	const hasRecentWorkSignal =
-		/\b(?:last|past|recent)\s+(?:30|thirty)\s+days?\b/u.test(normalized) ||
-		/\b(?:last|past|recent)\s+month\b/u.test(normalized) ||
-		normalized.includes("work history") ||
-		normalized.includes("recent work");
-	const hasAutomationSignal =
-		normalized.includes("manual workflow") ||
-		normalized.includes("manual workflows") ||
-		normalized.includes("repeated workflow") ||
-		normalized.includes("automation") ||
-		normalized.includes("agentic") ||
-		/\bcreate\s+(?:an?\s+)?agents?\b/u.test(normalized);
-
-	return hasRecentWorkSignal && hasAutomationSignal && sourceMatches >= 3;
-}
-
-interface HomeStarterTemplate {
-	description: string;
-	hero?: HomeStarterHeroDecoration;
-	iconSrc: string;
-	layoutClassName: string;
-	prompt: string;
-	title: string;
-}
-
-type HomeStarterCardGlowCSSProperties = CSSProperties & Record<`--card-glow-${string}`, string | number>;
-
-const RICH_ICON_ROOT = "/illustration/rich-icon";
-const HOME_STARTER_DEFAULT_CATEGORY: HomeStarterCategory = "brainstorm";
-
-const HOME_STARTER_CATEGORIES: ReadonlyArray<HomeStarterCategoryOption> = [
-	{ id: "brainstorm", label: "Planning", iconSrc: `${RICH_ICON_ROOT}/lightbulb/standard.svg`, iconClassName: "-translate-y-px scale-[1.08]" },
-	{ id: "analyze", label: "Insights", iconSrc: `${RICH_ICON_ROOT}/marketing/standard.svg`, iconClassName: "scale-[1.08]" },
-	{ id: "review", label: "Operations", iconSrc: `${RICH_ICON_ROOT}/product-management/standard.svg`, iconClassName: "translate-x-0.5 -translate-y-0.5 scale-[1.14]" },
-	{ id: "summarize", label: "Writing", iconSrc: `${RICH_ICON_ROOT}/illustrations/standard.svg`, iconClassName: "-translate-y-px scale-[0.88]" },
-	{ id: "create", label: "Work management", iconSrc: `${RICH_ICON_ROOT}/project-management/standard.svg`, iconClassName: "scale-[1.08]" },
-];
-
-// The hover glow uses each tile's own agent-avatar color so the stroke always
-// matches the avatar shown on the tile. Avatars are grouped by agent family
-// under /avatar-agent/<group>/, and every avatar in a family shares one brand
-// color, so we derive the accent from the avatar group in `iconSrc`.
-const HOME_STARTER_AVATAR_GROUP_ACCENTS: Readonly<Record<string, string>> = {
-	"dev-agents": "#82B536",
-	"product-agents": "#BF63F3",
-	"service-agents": "#FFC716",
-	"strategy-agents": "#FCA700",
-	"teamwork-agents": "#1868DB",
-};
-const HOME_STARTER_CARD_GLOW_FALLBACK_ACCENT = "#1868DB";
-
-const HOME_STARTER_CARD_GLOW_EFFECT_STYLE: HomeStarterCardGlowCSSProperties = {
-	"--card-glow-border-core": 36,
-	"--card-glow-border-spread": 120,
-	"--card-glow-border-width": 1,
-	"--card-glow-icon-blur": 28,
-	"--card-glow-icon-brightness": 1.3,
-	"--card-glow-icon-contrast": 1.4,
-	"--card-glow-icon-opacity": 0.25,
-	"--card-glow-icon-saturate": 5,
-	"--card-glow-icon-scale": 3.4,
-};
-
-const HOME_STARTER_CARD_GLOW_LAYER_STYLE: CSSProperties = {
-	filter: [
-		"blur(calc(var(--card-glow-icon-blur) * 1px))",
-		"saturate(var(--card-glow-icon-saturate))",
-		"brightness(var(--card-glow-icon-brightness))",
-		"contrast(var(--card-glow-icon-contrast))",
-	].join(" "),
-	scale: "var(--card-glow-icon-scale)",
-	translate: "calc(var(--card-glow-pointer-x, -10) * 50cqi) calc(var(--card-glow-pointer-y, -10) * 50cqh)",
-	willChange: "translate, scale, filter, opacity",
-};
-
-const HOME_STARTER_CARD_BASE_BORDER_STYLE: CSSProperties = {
-	boxShadow: `inset 0 0 0 calc(var(--card-glow-border-width) * 1px) ${token("color.border")}`,
-};
-
-// The hover glow is a plain accent radial-gradient painted onto the same 1px
-// ring as the base grey border (same border-box geometry + radius). It is fully
-// transparent away from the pointer, so the grey stroke shows through everywhere
-// except where the accent overlays it. Deliberately NO backdrop-filter here — an
-// always-on filter recolors the ring even where the gradient is transparent,
-// which crushes the grey border underneath and breaks coexistence.
-const HOME_STARTER_CARD_BORDER_GLOW_STYLE: CSSProperties = {
-	background: [
-		"radial-gradient(",
-		"circle at ",
-		"calc((var(--card-glow-pointer-x, -10) + 1) * 50%) ",
-		"calc((var(--card-glow-pointer-y, -10) + 1) * 50%), ",
-		"var(--card-glow-tile-accent) 0 calc(var(--card-glow-border-core) * 1px), ",
-		"transparent calc(var(--card-glow-border-spread) * 1px)",
-		") border-box",
-	].join(""),
-	borderColor: "transparent",
-	borderWidth: "calc(var(--card-glow-border-width) * 1px)",
-	mask: "linear-gradient(#fff 0 100%) border-box, linear-gradient(#fff 0 100%) padding-box",
-	maskComposite: "exclude",
-	WebkitMask: "linear-gradient(#fff 0 100%) border-box, linear-gradient(#fff 0 100%) padding-box",
-	WebkitMaskComposite: "xor",
-};
-
-const HOME_STARTER_VIEWS: Readonly<Record<HomeStarterCategory, ReadonlyArray<HomeStarterTemplate>>> = {
-	analyze: [
-		{
-			description: "Synthesize feedback into themes, customer needs, risks, and recommended product actions.",
-			iconSrc: "/avatar-agent/teamwork-agents/customer-insights.svg",
-			layoutClassName: "sm:col-span-2 lg:col-start-1 lg:col-span-1 lg:row-start-1",
-			prompt: "Build a Rovo agent named Customer Insights that analyzes customer feedback from Confluence pages, Jira Product Discovery, and Dovetail, then returns themes, needs, risks, and recommended actions.",
-			title: "Customer Insights",
-		},
-		{
-			description: "Scan Jira work items to find themes, candidate epics, and patterns worth acting on.",
-			hero: {
-				bannerClassName: "bg-[#82B536]",
-				skills: [
-					{ color: "strategy", label: "theme-mining" },
-					{ color: "teamwork", label: "quote-selection" },
-					{ color: "software", label: "decision-brief" },
-					{ color: "service", label: "transcript-review" },
-				],
-				sources: [
-					{ id: "jira", label: "Jira", provider: "jira" },
-					{ id: "jira-product-discovery", label: "Jira Product Discovery", provider: "jira-product-discovery" },
-					{ id: "confluence", label: "Confluence", provider: "confluence" },
-				],
-			},
-			iconSrc: "/avatar-agent/dev-agents/code-reviewer.svg",
-			layoutClassName: "sm:col-span-2 sm:row-span-2 lg:col-start-2 lg:row-start-1",
-			prompt: "Build a Rovo agent named Jira Theme Analyzer that scans Jira work items with the JQL query builder, then identifies themes, recommends epic groupings, and logs them to Jira Product Discovery.",
-			title: "Jira Theme Analyzer",
-		},
-		{
-			description: "Turn transcripts into decisions, insights, recommendations, owners, and follow-up actions.",
-			iconSrc: "/avatar-agent/strategy-agents/wildcard-1.svg",
-			layoutClassName: "sm:row-span-2 lg:col-start-4 lg:row-start-1",
-			prompt: "Build a Rovo agent named Transcript Insights Reporter that turns Loom and Microsoft Teams meeting transcripts into decisions, insights, recommendations, owners, and follow-up action items.",
-			title: "Transcript Insights Reporter",
-		},
-		{
-			description: "Find decisions, action items, highlights, and useful context across meeting notes.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-6.svg",
-			layoutClassName: "sm:row-span-2 lg:col-start-5 lg:row-start-1",
-			prompt: "Build a Rovo agent named Meeting Insights that searches Confluence notes and Microsoft Teams transcripts, then runs Summarize thread to surface decisions, action items, highlights, and useful context.",
-			title: "Meeting Insights",
-		},
-		{
-			description: "Spot emerging trends across notes and feedback.",
-			iconSrc: "/avatar-agent/service-agents/wildcard-5.svg",
-			layoutClassName: "lg:col-start-1 lg:row-start-2",
-			prompt: "Build a Rovo agent named Trend Spotter that scans Confluence notes and Dovetail feedback with Run deep research to surface emerging themes, leading indicators, and worth-watching shifts.",
-			title: "Trend Spotter",
-		},
-		{
-			description: "Map sentiment shifts across customer signals.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-4.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Sentiment Mapper that clusters Zendesk and Salesforce customer comments by sentiment, intent, and impact, then highlights the shifts that need a response.",
-			title: "Sentiment Mapper",
-		},
-		{
-			description: "Trace product drop-offs, connect them to feedback, and suggest the next investigation.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-5.svg",
-			layoutClassName: "",
-			prompt: "Build a Rovo agent named Funnel Analyzer that runs Funnel analytics over Amplitude event data and feedback to identify drop-off points, the most likely causes, and the next investigation step.",
-			title: "Funnel Analyzer",
-		},
-		{
-			description: "Pull research into a single, decision-ready brief.",
-			iconSrc: "/avatar-agent/teamwork-agents/work-organizer.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Research Synthesizer that pulls together Confluence notes and Dovetail interviews with Run deep research into a single brief with insights, supporting quotes, and recommended decisions.",
-			title: "Research Synthesizer",
-		},
-	],
-	brainstorm: [
-		{
-			description: "Review DACI decisions, close context gaps, and suggest the next decision-ready resources.",
-			hero: {
-				bannerClassName: "bg-[#1868DB]",
-				skills: [
-					{ color: "platform", label: "stakeholder-input" },
-					{ color: "2p3p", label: "opportunity-sizing" },
-					{ color: "default", label: "option-mapping" },
-					{ color: "product", label: "risk-spotting" },
-					{ color: "strategy", label: "constraint-mapping" },
-					{ color: "teamwork", label: "rubric-building" },
-					{ color: "software", label: "evidence-gap-check" },
-					{ color: "service", label: "idea-ranking" },
-				],
-				sources: [
-					{ id: "powerbi", label: "Power BI", provider: "teams", name: "powerbi" },
-					{ id: "jira-service-management", label: "Jira Service Management", provider: "jira-service-management" },
-					{ id: "figma", label: "Figma", provider: "teams", name: "figma" },
-					{ id: "jira", label: "Jira", provider: "jira" },
-					{ id: "microsoft-teams", label: "Microsoft Teams", provider: "teams", name: "microsoft-teams" },
-					{ id: "salesforce", label: "Salesforce", provider: "salesforce" },
-					{ id: "slack", label: "Slack", provider: "teams", name: "slack" },
-				],
-			},
-			iconSrc: "/avatar-agent/teamwork-agents/decision-director.svg",
-			layoutClassName: "sm:col-span-2 sm:row-span-2 lg:col-start-1 lg:col-span-2 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Decision Director that reviews DACI decision documents in Confluence, suggests improvements, identifies missing context, and points to useful Jira Product Discovery resources.",
-			title: "Decision Director",
-		},
-		{
-			description: "Create and review clear, measurable OKRs against examples, team priorities, and outcome guidance.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-2.svg",
-			layoutClassName: "lg:col-start-3 lg:col-span-2 lg:row-start-1",
-			prompt: "Build a Rovo agent named OKR Generator that creates effective OKRs in Jira Product Discovery, reviews draft OKRs in Confluence, finds similar examples, and shares guidance for stronger objectives and key results.",
-			title: "OKR Generator",
-		},
-		{
-			description: "Explore non-obvious directions before committing.",
-			iconSrc: "/avatar-agent/dev-agents/code-planner.svg",
-			layoutClassName: "lg:col-start-5 lg:row-start-1",
-			prompt: "Build a Rovo agent named Opportunity Explorer that explores ideas in Jira Product Discovery to expand a rough idea into distinct approaches, adjacent opportunities, risks, and the strongest path to investigate first.",
-			title: "Opportunity Explorer",
-		},
-		{
-			description: "Turn ideas into experiments and decision points.",
-			iconSrc: "/avatar-agent/service-agents/wildcard-1.svg",
-			layoutClassName: "lg:col-start-3 lg:col-span-2 lg:row-start-2",
-			prompt: "Build a Rovo agent named Experiment Planner that turns Jira Product Discovery ideas into experiments with hypotheses, success criteria, owners, decision points, and next steps, then tracks them with LaunchDarkly.",
-			title: "Experiment Planner",
-		},
-		{
-			description: "Compare options by upside, cost, and risk.",
-			iconSrc: "/avatar-agent/strategy-agents/wildcard-2.svg",
-			layoutClassName: "lg:col-start-5 lg:row-start-2",
-			prompt: "Build a Rovo agent named Tradeoff Mapper that compares competing options in Jira Product Discovery by upside, cost, risk, reversibility, confidence, and team fit before recommending a direction.",
-			title: "Tradeoff Mapper",
-		},
-		{
-			description: "Stress-test ideas against weak assumptions.",
-			iconSrc: "/avatar-agent/dev-agents/basic-coding-agent-template.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Assumption Tester that reads a Confluence brief and lists likely failure modes, weak assumptions, unknowns, and the evidence that would change the recommendation.",
-			title: "Assumption Tester",
-		},
-		{
-			description: "Define practical criteria for choosing a path.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-3.svg",
-			layoutClassName: "",
-			prompt: "Build a Rovo agent named Criteria Builder that uses Jira Product Discovery to define must-haves, nice-to-haves, risks, disqualifiers, and a comparison rubric for evaluating options.",
-			title: "Criteria Builder",
-		},
-	],
-	review: [
-		{
-			description: "Triage service requests, recommend field updates, and ask for missing details when needed.",
-			iconSrc: "/avatar-agent/service-agents/service-triage.svg",
-			layoutClassName: "sm:col-span-2 lg:col-start-1 lg:col-span-1 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Service Triage that triages Jira Service Management requests, recommends field updates, explains automation-ready output, and asks for missing details when needed.",
-			title: "Service Triage",
-		},
-		{
-			description: "Draft support responses, suggest assignees, and summarize requests for faster resolution.",
-			hero: {
-				bannerClassName: "bg-[#FCA700]",
-				skills: [
-					{ color: "platform", label: "handoff" },
-					{ color: "2p3p", label: "postmortem-scan" },
-					{ color: "default", label: "incident-routing" },
-					{ color: "product", label: "readiness-review" },
-					{ color: "strategy", label: "escalation-drafting" },
-					{ color: "teamwork", label: "status-update" },
-					{ color: "software", label: "owner-mapping" },
-					{ color: "service", label: "compliance-note" },
-				],
-				sources: [
-					{ id: "jira-service-management", label: "Jira Service Management", provider: "jira-service-management" },
-					{ id: "salesforce", label: "Salesforce", provider: "salesforce" },
-					{ id: "microsoft-teams", label: "Microsoft Teams", provider: "teams", name: "microsoft-teams" },
-				],
-			},
-			iconSrc: "/avatar-agent/strategy-agents/strategic-insight.svg",
-			layoutClassName: "sm:col-span-2 sm:row-span-2 lg:col-start-2 lg:col-span-2 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Service Request Helper that drafts Jira Service Management responses using prior request insights, suggests assignees and skills, and summarizes requests for faster resolution.",
-			title: "Service Request Helper",
-		},
-		{
-			description: "Guide incident response, on-call actions, mitigation, status updates, and recovery.",
-			iconSrc: "/avatar-agent/dev-agents/code-standardizer.svg",
-			layoutClassName: "lg:col-start-4 lg:col-span-2 lg:row-start-1",
-			prompt: "Build a Rovo agent named Rovo Ops that works as an Incident responder across Opsgenie and Jira Service Management for on-call duties, mitigation guidance, and faster detection, response, and recovery.",
-			title: "Rovo Ops",
-		},
-		{
-			description: "Answer Rovo setup and usage questions with concise guidance and helpful links.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-3.svg",
-			layoutClassName: "lg:col-start-4 lg:row-start-2",
-			prompt: "Build a Rovo agent named Rovo Expert that introduces Rovo features, answers setup and usage questions, and shares helpful Confluence links for unlocking organizational knowledge.",
-			title: "Rovo Expert",
-		},
-		{
-			description: "Help teammates document working style, communication norms, and collaboration preferences.",
-			iconSrc: "/avatar-agent/teamwork-agents/user-manual-writer.svg",
-			layoutClassName: "lg:col-start-5 lg:row-start-2",
-			prompt: "Build a Rovo agent named User Manual Writer that helps people Write user manual pages in Confluence covering working hours, preferred environments, communication norms, and collaboration tips.",
-			title: "User Manual Writer",
-		},
-		{
-			description: "Answer policy and process questions from trusted context.",
-			iconSrc: "/avatar-agent/teamwork-agents/workflow-builder.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Knowledge Base Guide that answers policy and process questions from trusted Confluence context, can Write KB article drafts, cites useful references, and flags missing information.",
-			title: "Knowledge Base Guide",
-		},
-		{
-			description: "Compile post-incident timelines, decisions, and follow-ups.",
-			iconSrc: "/avatar-agent/service-agents/rca-agent.svg",
-			layoutClassName: "",
-			prompt: "Build a Rovo agent named Incident Recap Writer that turns Slack channels and Jira Service Management timelines into a recap, running Analyze root cause to surface root causes, decisions, follow-ups, and owners.",
-			title: "Incident Recap Writer",
-		},
-	],
-	summarize: [
-		{
-			description: "Create and review PRDs with customer empathy, evidence, acceptance criteria, and direct feedback.",
-			hero: {
-				bannerClassName: "bg-[#BF63F3]",
-				skills: [
-					{ color: "default", label: "content-briefing" },
-					{ color: "product", label: "audience-fit" },
-					{ color: "strategy", label: "meeting-recap" },
-					{ color: "teamwork", label: "executive-summary" },
-					{ color: "software", label: "brand-review" },
-					{ color: "service", label: "translation-review" },
-					{ color: "platform", label: "clarity-pass" },
-					{ color: "2p3p", label: "prd-outline" },
-					{ color: "default", label: "action-extraction" },
-					{ color: "product", label: "changelog-writing" },
-				],
-				sources: [
-					{ id: "figma", label: "Figma", provider: "teams", name: "figma" },
-					{ id: "bitbucket", label: "Bitbucket", provider: "bitbucket" },
-					{ id: "github", label: "GitHub", provider: "teams", name: "github" },
-					{ id: "salesforce", label: "Salesforce", provider: "salesforce" },
-					{ id: "jira-product-discovery", label: "Jira Product Discovery", provider: "jira-product-discovery" },
-				],
-			},
-			iconSrc: "/avatar-agent/product-agents/wildcard-1.svg",
-			layoutClassName: "sm:col-span-2 sm:row-span-2 lg:col-start-1 lg:col-span-2 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Product Requirements Guide that runs Build PRD in Confluence with Jira Product Discovery and Figma context, reviewing drafts with direct language, customer empathy, supporting evidence, and actionable feedback.",
-			title: "Product Requirements Guide",
-		},
-		{
-			description: "Convert Jira work items into grouped release notes for customers and stakeholders.",
-			iconSrc: "/avatar-agent/dev-agents/deployment-summarizer.svg",
-			layoutClassName: "lg:col-start-3 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Release Notes Drafter that reviews recent Jira work, groups it into themes, and drafts clear release notes in Confluence for stakeholders.",
-			title: "Release Notes Drafter",
-		},
-		{
-			description: "Draft or review content against brand voice, tone guidance, and audience needs.",
-			iconSrc: "/avatar-agent/strategy-agents/wildcard-3.svg",
-			layoutClassName: "lg:col-start-4 lg:col-span-2 lg:row-start-1",
-			prompt: "Build a Rovo agent named Brand Voice Crafter that acts as a Brand voice editor over Confluence content, checking it against supplied brand voice and tone guidelines to help produce consistent communications.",
-			title: "Brand Voice Crafter",
-		},
-		{
-			description: "Draft social posts, improve engagement, and adapt messages by channel and audience.",
-			iconSrc: "/avatar-agent/service-agents/wildcard-4.svg",
-			layoutClassName: "lg:col-start-4 lg:row-start-2",
-			prompt: "Build a Rovo agent named Social Media Writer that runs Produce marketing materials with Canva to draft social media posts, suggests more engaging variants, and adapts messaging for channel, audience, and tone.",
-			title: "Social Media Writer",
-		},
-		{
-			description: "Translate writing while preserving meaning, tone, accessibility, and audience context.",
-			iconSrc: "/avatar-agent/teamwork-agents/global-translator.svg",
-			layoutClassName: "lg:col-start-5 lg:row-start-2",
-			prompt: "Build a Rovo agent named Global Translator that translates Confluence writing into most languages while preserving meaning, tone, and accessibility for speakers of other languages.",
-			title: "Global Translator",
-		},
-		{
-			description: "Condense dense context for leadership updates.",
-			iconSrc: "/avatar-agent/service-agents/wildcard-5.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Executive Briefing Writer that condenses dense Confluence context into key points, decisions, risks, recommendations, and next steps for leadership.",
-			title: "Executive Briefing Writer",
-		},
-		{
-			description: "Package progress into stakeholder-ready updates.",
-			iconSrc: "/avatar-agent/service-agents/ops-guide.svg",
-			layoutClassName: "",
-			prompt: "Build a Rovo agent named Stakeholder Update Builder that pulls Jira progress and posts to Slack, summarizing decisions, risks, blockers, and next steps in a concise update format.",
-			title: "Stakeholder Update Builder",
-		},
-	],
-	create: [
-		{
-			description: "Break large projects, epics, or workstreams into sequenced tasks, owners, and next steps.",
-			hero: {
-				bannerClassName: "bg-[#FFC716]",
-				skills: [
-					{ color: "teamwork", label: "dependency-map" },
-					{ color: "software", label: "workflow-design" },
-					{ color: "service", label: "blocker-scan" },
-					{ color: "platform", label: "acceptance-criteria" },
-					{ color: "2p3p", label: "prioritization" },
-				],
-				sources: [
-					{ id: "google-drive", label: "Google Drive", provider: "google-drive" },
-					{ id: "slack", label: "Slack", provider: "teams", name: "slack" },
-					{ id: "loom", label: "Loom", provider: "loom" },
-				],
-			},
-			iconSrc: "/avatar-agent/service-agents/wildcard-2.svg",
-			layoutClassName: "sm:col-span-2 sm:row-span-2 lg:col-start-4 lg:col-span-2 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Work Item Planner that breaks big projects and epics into smaller tasks in Jira, running Create work items to set owners, sequencing, and next steps.",
-			title: "Work Item Planner",
-		},
-		{
-			description: "Find, move, update, and organize Jira work items across sprints, epics, and stale queues.",
-			iconSrc: "/avatar-agent/teamwork-agents/work-organizer.svg",
-			layoutClassName: "lg:col-start-1 lg:row-start-1 lg:row-span-2",
-			prompt: "Build a Rovo agent named Work Item Organizer that uses the Bulk issue editor to find and update Jira work items, moves them into sprints, assigns epics, deletes stale items, and recommends cleanup actions.",
-			title: "Work Item Organizer",
-		},
-		{
-			description: "Write concise bug reports with reproduction steps, impact, expected behavior, and triage notes.",
-			iconSrc: "/avatar-agent/dev-agents/code-vulnerability-scanner-npm-yarn.svg",
-			layoutClassName: "lg:col-start-2 lg:col-span-2 lg:row-start-1",
-			prompt: "Build a Rovo agent named Bug Report Assistant that turns Jira and Sentry context into clear, concise bug reports with reproduction details, impact, expected behavior, and triage-ready notes.",
-			title: "Bug Report Assistant",
-		},
-		{
-			description: "Detect blocked work, explain the evidence, and recommend the clearest unblocking move.",
-			iconSrc: "/avatar-agent/strategy-agents/wildcard-4.svg",
-			layoutClassName: "lg:col-start-2 lg:row-start-2",
-			prompt: "Build a Rovo agent named Blocker Checker that runs the Dependency mapper over Jira work items to detect likely blockers, explains the evidence, and recommends how to update or unblock the work.",
-			title: "Blocker Checker",
-		},
-		{
-			description: "Review work items against a team's definition of ready and suggest missing details.",
-			iconSrc: "/avatar-agent/product-agents/feedback-analyzer.svg",
-			layoutClassName: "lg:col-start-3 lg:row-start-2",
-			prompt: "Build a Rovo agent named Readiness Checker that runs the Backlog groomer to review a Jira work item against a team's definition of ready and suggests fixes when required details are missing.",
-			title: "Readiness Checker",
-		},
-		{
-			description: "Summarize in-flight projects, priorities, owners, progress, and work that needs attention.",
-			iconSrc: "/avatar-agent/teamwork-agents/progress-tracker.svg",
-			layoutClassName: "sm:col-span-2",
-			prompt: "Build a Rovo agent named Progress Tracker that uses the Milestone tracker over Jira to give teams a real-time overview of in-flight projects, current priorities, owners, and what should be prioritized next.",
-			title: "Progress Tracker",
-		},
-		{
-			description: "Recommend balanced sprint scope using capacity, velocity, issue size, and delivery risk.",
-			iconSrc: "/avatar-agent/product-agents/wildcard-2.svg",
-			layoutClassName: "",
-			prompt: "Build a Rovo agent named Sprint Capacity Planner that runs the Sprint planner over Jira to recommend a balanced sprint scope based on team capacity, ticket sizes, prior velocity, and risk.",
-			title: "Sprint Capacity Planner",
-		},
-	],
-};
 
 function parseCssDurationMs(value: string): number | null {
 	const trimmedValue = value.trim();
@@ -881,512 +275,6 @@ function parseCssDurationMs(value: string): number | null {
 	return Number.isFinite(numericDuration) ? numericDuration : null;
 }
 
-function getHomeStarterCardGlowAccent(iconSrc: string): string {
-	const group = iconSrc.match(/\/avatar-agent\/([^/]+)\//)?.[1];
-	return (group && HOME_STARTER_AVATAR_GROUP_ACCENTS[group]) || HOME_STARTER_CARD_GLOW_FALLBACK_ACCENT;
-}
-
-function getHomeStarterCardStyle(accentColor: string): HomeStarterCardGlowCSSProperties {
-	return {
-		"--card-glow-tile-accent": accentColor,
-		containerType: "size",
-		willChange: "transform, opacity",
-	};
-}
-
-function resetHomeStarterCardPointer(tile: HTMLElement) {
-	tile.style.setProperty("--card-glow-pointer-x", "-10");
-	tile.style.setProperty("--card-glow-pointer-y", "-10");
-}
-
-function buildFallbackTemplatePrompt(agent: AgentTemplatesAgent): string {
-	const appList = agent.sources?.map((source) => source.label).join(", ");
-	const skillList = agent.skills?.map((skill) => skill.label).join(", ");
-	const featureList = agent.capabilities?.map((capability) => capability.label).join("; ");
-
-	return [
-		`Use the ${agent.name} template to create a Rovo agent.`,
-		agent.description,
-		appList ? `Connect it to ${appList}.` : null,
-		skillList ? `Include skills for ${skillList}.` : null,
-		featureList ? `It should support these features: ${featureList}.` : null,
-		"Keep the prompt concise and ready for me to review before sending.",
-	].filter(Boolean).join(" ");
-}
-
-function HomeStarterCardGlowLayers({ iconSrc }: Readonly<{ iconSrc: string }>) {
-	return (
-		<>
-			<span
-				aria-hidden
-				className="pointer-events-none absolute inset-0 z-0 grid place-items-center transform-gpu"
-				style={HOME_STARTER_CARD_GLOW_LAYER_STYLE}
-			>
-				<Image
-					alt=""
-					aria-hidden
-					className="size-12 object-contain opacity-[var(--card-glow-icon-opacity)]"
-					height={48}
-					src={iconSrc}
-					width={48}
-				/>
-			</span>
-			<span
-				aria-hidden
-				className="pointer-events-none absolute inset-0 z-[1] rounded-[inherit]"
-				data-home-starter-card-base-border
-				style={HOME_STARTER_CARD_BASE_BORDER_STYLE}
-			/>
-			<span
-				aria-hidden
-				className="pointer-events-none absolute inset-0 z-[2] overflow-hidden rounded-[inherit] border border-transparent"
-				data-home-starter-card-glow-border
-				style={HOME_STARTER_CARD_BORDER_GLOW_STYLE}
-			/>
-		</>
-	);
-}
-
-const HOME_STARTER_HERO_VARIANTS = {
-	exit: { opacity: 0, scale: 0.98, y: -4 },
-	hidden: { opacity: 0, scale: 0.98, y: 8 },
-	visible: { opacity: 1, scale: 1, y: 0 },
-} as const;
-
-function HomeStarterHeroTile({
-	accentColor,
-	onBlur,
-	onClick,
-	onFocus,
-	onMouseEnter,
-	onMouseLeave,
-	setTileRef,
-	shouldReduceMotion,
-	template,
-}: Readonly<{
-	accentColor: string;
-	onBlur: () => void;
-	onClick: () => void;
-	onFocus: () => void;
-	onMouseEnter: () => void;
-	onMouseLeave: () => void;
-	setTileRef: (node: HTMLButtonElement | null) => void;
-	shouldReduceMotion: boolean | null;
-	template: HomeStarterTemplate & { hero: HomeStarterHeroDecoration };
-}>) {
-	const { hero } = template;
-
-	return (
-		<motion.button
-			aria-label={`Use prompt starter: ${template.title}`}
-			className={cn(
-				"group group/home-starter-card relative isolate flex min-h-0 flex-col items-start gap-3 overflow-hidden rounded-lg bg-background p-4 text-left outline-none transition-[background-color,box-shadow] duration-fast ease-out hover:bg-bg-neutral-subtle focus-visible:ring-3 focus-visible:ring-ring/50",
-				BENTO_CAROUSEL_TILE_CLASS,
-				template.layoutClassName,
-			)}
-			onBlur={onBlur}
-			onClick={onClick}
-			onFocus={onFocus}
-			onMouseEnter={onMouseEnter}
-			onMouseLeave={onMouseLeave}
-			ref={setTileRef}
-			style={getHomeStarterCardStyle(accentColor)}
-			transition={{ duration: 0.2, ease: [0, 0.4, 0, 1] }}
-			type="button"
-			variants={HOME_STARTER_HERO_VARIANTS}
-			whileHover={
-				shouldReduceMotion
-					? undefined
-					: { transition: { damping: 22, stiffness: 400, type: "spring" }, y: -2 }
-			}
-			whileTap={shouldReduceMotion ? undefined : { scale: 0.98, transition: { duration: 0.05 } }}
-		>
-			<HomeStarterCardGlowLayers iconSrc={template.iconSrc} />
-			<span className="relative z-[3] inline-flex size-8 shrink-0 items-center justify-center">
-				<Avatar shape="hexagon" size="default">
-					<AvatarImage src={template.iconSrc} alt="" className="object-contain" />
-					<AvatarFallback>{template.title.slice(0, 2).toUpperCase()}</AvatarFallback>
-				</Avatar>
-			</span>
-			<div className="relative z-[3] flex min-h-0 flex-1 flex-col gap-4">
-				<div className="flex flex-col gap-1">
-					<span className="block w-full min-w-0 text-sm font-semibold leading-5 text-text">
-						{template.title}
-					</span>
-					<span className="block w-full min-w-0 text-sm leading-5 text-text max-lg:line-clamp-2 max-lg:overflow-hidden">
-						{template.description}
-					</span>
-				</div>
-				{hero.sources.length > 0 || hero.skills.length > 0 ? (
-					<div className="flex flex-col gap-4 max-lg:hidden">
-						{hero.sources.length > 0 ? (
-							<div className="flex flex-col gap-1">
-								<span className="block text-xs font-semibold leading-4 text-text-subtle">
-									Works with
-								</span>
-								<TWGAppstack
-									animated={false}
-									className="justify-start"
-									iconSize="md"
-									maxVisible={hero.sources.length}
-									sources={hero.sources}
-								/>
-							</div>
-						) : null}
-						{hero.skills.length > 0 ? (
-							<div className="flex flex-col gap-1">
-								<span className="block text-xs font-semibold leading-4 text-text-subtle">
-									Skills
-								</span>
-								<SkillTagGroup maxRows={2}>
-									{hero.skills.map((skill) => (
-										<SkillTag color={skill.color ?? "default"} icon={skill.icon ?? getSkillIcon(skill.label)} key={skill.label}>
-											{skill.label}
-										</SkillTag>
-									))}
-								</SkillTagGroup>
-							</div>
-						) : null}
-					</div>
-				) : null}
-			</div>
-		</motion.button>
-	);
-}
-
-const HOME_STARTER_CYCLE_DURATION_MS = 6000;
-
-// Bottom "more below" tease. Applied as an alpha mask on the grid wrapper (the
-// stable AnimatePresence host) rather than as a semi-transparent gradient
-// overlay: an overlay only hides content that is fully opaque, so during a tab
-// swap the exiting/entering tiles — whose own opacity is mid-animation — show
-// *through* the scrim. A mask clips the content layer's alpha at the source, so
-// transitioning tiles can never leak past the fade. Height matches the prior
-// `h-24` (96px) overlay. The "Browse all" pill stays a separate, unmasked
-// sibling so it keeps reading as a crisp affordance over the faded edge.
-
-function HomeStarterBento({
-	onBrowseTemplates,
-	onDismiss,
-	onPreviewEnd,
-	onPreviewStart,
-	onSelect,
-	templatesDialogOpen,
-}: Readonly<{
-	onBrowseTemplates: (category: HomeStarterCategory) => void;
-	onDismiss: () => void;
-	onPreviewEnd: () => void;
-	onPreviewStart: (prompt: string) => void;
-	onSelect: (prompt: string, template?: StudioCreationTemplateContext) => void;
-	templatesDialogOpen: boolean;
-}>) {
-	const [activeCategory, setActiveCategory] = useState<HomeStarterCategory>(HOME_STARTER_DEFAULT_CATEGORY);
-	const [bentoInteracting, setBentoInteracting] = useState(false);
-	const [browseAllHovered, setBrowseAllHovered] = useState(false);
-	const shouldReduceMotion = useReducedMotion();
-	const focusedTemplatePromptRef = useRef<string | null>(null);
-	const hoveredTemplatePromptRef = useRef<string | null>(null);
-	const bentoInteractingRef = useRef(false);
-	const tileRefs = useRef<Array<HTMLButtonElement | null>>([]);
-	const registerDescBox = useBentoDescriptionClamp();
-	const { ref: bentoCarouselRef, canScrollLeft, canScrollRight, scrollByDir } = useHasHorizontalOverflow<HTMLDivElement>({ reduceMotion: shouldReduceMotion ?? false });
-	const templates = HOME_STARTER_VIEWS[activeCategory];
-	const visibleTemplates = templates.slice(0, 5);
-	const canShowMore = templates.length > visibleTemplates.length;
-	const cycleRunning = !shouldReduceMotion && !templatesDialogOpen;
-	const cycleProgress = useMotionValue(0);
-	const cycleControlsRef = useRef<AnimationPlaybackControls | null>(null);
-	const updateBentoInteracting = useCallback((interacting: boolean) => {
-		bentoInteractingRef.current = interacting;
-		setBentoInteracting(interacting);
-	}, []);
-
-	useEffect(() => {
-		if (!cycleRunning) {
-			cycleProgress.set(0);
-			return;
-		}
-
-		cycleProgress.set(0);
-		const controls = animate(cycleProgress, 1, {
-			duration: HOME_STARTER_CYCLE_DURATION_MS / 1000,
-			ease: "linear",
-			onComplete: () => {
-				cycleProgress.set(0);
-				setActiveCategory((prev) => {
-					const currentIndex = HOME_STARTER_CATEGORIES.findIndex((entry) => entry.id === prev);
-					const nextIndex = (currentIndex + 1) % HOME_STARTER_CATEGORIES.length;
-					return HOME_STARTER_CATEGORIES[nextIndex].id;
-				});
-			},
-		});
-		if (bentoInteractingRef.current) {
-			controls.pause();
-		}
-		cycleControlsRef.current = controls;
-
-		return () => {
-			controls.stop();
-			cycleControlsRef.current = null;
-		};
-	}, [activeCategory, cycleRunning, cycleProgress]);
-
-	useEffect(() => {
-		const controls = cycleControlsRef.current;
-		if (!controls) {
-			return;
-		}
-		if (bentoInteracting) {
-			controls.pause();
-		} else {
-			controls.play();
-		}
-	}, [bentoInteracting]);
-	const handleTemplateMouseEnter = useCallback((prompt: string) => {
-		hoveredTemplatePromptRef.current = prompt;
-		onPreviewStart(prompt);
-	}, [onPreviewStart]);
-	const handleTemplateMouseLeave = useCallback(() => {
-		hoveredTemplatePromptRef.current = null;
-
-		if (focusedTemplatePromptRef.current) {
-			onPreviewStart(focusedTemplatePromptRef.current);
-		} else {
-			onPreviewEnd();
-		}
-	}, [onPreviewEnd, onPreviewStart]);
-	const handleTemplateFocus = useCallback((prompt: string) => {
-		focusedTemplatePromptRef.current = prompt;
-		onPreviewStart(prompt);
-	}, [onPreviewStart]);
-	const handleTemplateBlur = useCallback(() => {
-		focusedTemplatePromptRef.current = null;
-
-		if (hoveredTemplatePromptRef.current) {
-			onPreviewStart(hoveredTemplatePromptRef.current);
-		} else {
-			onPreviewEnd();
-		}
-	}, [onPreviewEnd, onPreviewStart]);
-	const handleBentoPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-		for (const tile of tileRefs.current) {
-			if (!tile) {
-				continue;
-			}
-
-			const rect = tile.getBoundingClientRect();
-			const centerX = rect.left + rect.width / 2;
-			const centerY = rect.top + rect.height / 2;
-			const relativeX = event.clientX - centerX;
-			const relativeY = event.clientY - centerY;
-			const normalizedX = relativeX / (rect.width / 2);
-			const normalizedY = relativeY / (rect.height / 2);
-
-			tile.style.setProperty("--card-glow-pointer-x", normalizedX.toFixed(3));
-			tile.style.setProperty("--card-glow-pointer-y", normalizedY.toFixed(3));
-		}
-	}, []);
-	const resetBentoPointer = useCallback(() => {
-		for (const tile of tileRefs.current) {
-			if (tile) {
-				resetHomeStarterCardPointer(tile);
-			}
-		}
-	}, []);
-	return (
-		<div
-			className="w-full"
-			onFocus={() => updateBentoInteracting(true)}
-			onBlur={(event) => {
-				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-					updateBentoInteracting(false);
-				}
-			}}
-			onMouseEnter={() => updateBentoInteracting(true)}
-			onMouseLeave={() => updateBentoInteracting(false)}
-			onPointerLeave={resetBentoPointer}
-			onPointerMove={handleBentoPointerMove}
-		>
-			<div className="@container/bento relative" style={HOME_STARTER_CARD_GLOW_EFFECT_STYLE}>
-				{/*
-					`-mt-2 pt-2` gives the masked content top headroom that nets to zero
-					visual shift: the bottom-fade mask clips its children to the box, so
-					tiles flush with the top edge would have their hover lift (`y: -2`) and
-					focus ring sliced off. The padding keeps that motion inside the opaque
-					region; the negative margin pulls the box back so spacing is unchanged.
-				*/}
-				<div
-					className={cn("relative -mt-2 pt-2", canShowMore && "lg:bento-fade-bottom")}
-				>
-					<AnimatePresence mode="wait" initial={false}>
-						<motion.div
-							key={activeCategory}
-							ref={bentoCarouselRef}
-							style={getBentoEdgeMaskStyle(canScrollLeft, canScrollRight)}
-							className={cn(BENTO_CAROUSEL_CONTAINER_CLASS, ROVO_APP_STUDIO_CONTENT_MAX_WIDTH_CLASS)}
-							initial={shouldReduceMotion ? false : "hidden"}
-							animate="visible"
-							exit={shouldReduceMotion ? undefined : "exit"}
-							variants={{
-								hidden: {},
-								visible: {
-									transition: { staggerChildren: 0.04, delayChildren: 0.02 },
-								},
-								exit: {
-									transition: { staggerChildren: 0.02, staggerDirection: -1 },
-								},
-							}}
-						>
-							{visibleTemplates.map((template, index) => {
-								const accentColor = getHomeStarterCardGlowAccent(template.iconSrc);
-
-								if (template.hero) {
-									return (
-										<HomeStarterHeroTile
-											accentColor={accentColor}
-											key={template.title}
-											onBlur={handleTemplateBlur}
-											onClick={() => onSelect(template.prompt, buildCreationTemplateContextFromStarter(template))}
-											onFocus={() => handleTemplateFocus(template.prompt)}
-											onMouseEnter={() => handleTemplateMouseEnter(template.prompt)}
-											onMouseLeave={handleTemplateMouseLeave}
-											setTileRef={(node) => {
-												tileRefs.current[index] = node;
-											}}
-											shouldReduceMotion={shouldReduceMotion}
-											template={template as HomeStarterTemplate & { hero: HomeStarterHeroDecoration }}
-										/>
-									);
-								}
-
-								return (
-									<motion.button
-										key={template.title}
-										type="button"
-										aria-label={`Use prompt starter: ${template.title}`}
-										onClick={() => onSelect(template.prompt)}
-										onMouseEnter={() => handleTemplateMouseEnter(template.prompt)}
-										onMouseLeave={handleTemplateMouseLeave}
-										onFocus={() => handleTemplateFocus(template.prompt)}
-										onBlur={handleTemplateBlur}
-										className={cn(
-											"group group/home-starter-card relative isolate flex min-h-0 flex-col items-start gap-3 overflow-hidden rounded-lg bg-background p-4 text-left outline-none transition-[background-color,box-shadow] duration-fast ease-out hover:bg-bg-neutral-subtle focus-visible:ring-3 focus-visible:ring-ring/50",
-											BENTO_CAROUSEL_TILE_CLASS,
-											template.layoutClassName,
-										)}
-										ref={(node) => {
-											tileRefs.current[index] = node;
-										}}
-										variants={{
-											hidden: { opacity: 0, y: 8, scale: 0.98 },
-											visible: { opacity: 1, y: 0, scale: 1 },
-											exit: { opacity: 0, y: -4, scale: 0.98 },
-										}}
-										transition={{ duration: 0.2, ease: [0, 0.4, 0, 1] }}
-										whileHover={
-											shouldReduceMotion
-												? undefined
-												: { y: -2, transition: { type: "spring", stiffness: 400, damping: 22 } }
-										}
-										whileTap={shouldReduceMotion ? undefined : { scale: 0.98, transition: { duration: 0.05 } }}
-										style={getHomeStarterCardStyle(accentColor)}
-									>
-										<HomeStarterCardGlowLayers iconSrc={template.iconSrc} />
-										<span className="relative z-[3] inline-flex size-8 shrink-0 items-center justify-center transition-opacity duration-fast ease-out group-hover:opacity-90">
-											<Avatar shape="hexagon" size="default">
-												<AvatarImage src={template.iconSrc} alt="" className="object-contain" />
-												<AvatarFallback>{template.title.slice(0, 2).toUpperCase()}</AvatarFallback>
-											</Avatar>
-										</span>
-										<span className="relative z-[3] flex w-full min-w-0 flex-1 flex-col gap-1">
-											<span className="block w-full min-w-0 text-sm font-semibold leading-5 text-text">
-												{template.title}
-											</span>
-											<span
-												ref={registerDescBox}
-												className="block w-full min-w-0 flex-1 min-h-0 overflow-hidden"
-											>
-												<span className="text-sm leading-5 text-text-subtle line-clamp-2">
-													{template.description}
-												</span>
-											</span>
-										</span>
-									</motion.button>
-								);
-							})}
-						</motion.div>
-					</AnimatePresence>
-					<AnimatePresence initial={false}>
-						{canScrollLeft ? (
-							<CarouselArrow direction="previous" key="previous" label="Show previous prompt starters" onClick={() => scrollByDir(-1)} />
-						) : null}
-						{canScrollRight ? (
-							<CarouselArrow direction="next" key="next" label="Show next prompt starters" onClick={() => scrollByDir(1)} />
-						) : null}
-					</AnimatePresence>
-				</div>
-				{canShowMore ? (
-					<div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center pb-2">
-						<div
-							className="group/browse-all pointer-events-auto relative flex items-center"
-							onMouseEnter={() => setBrowseAllHovered(true)}
-							onMouseLeave={() => setBrowseAllHovered(false)}
-							onFocus={() => setBrowseAllHovered(true)}
-							onBlur={(event) => {
-								if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-									setBrowseAllHovered(false);
-								}
-							}}
-						>
-							<Button
-								type="button"
-								aria-label="Browse all agents"
-								variant="ghost"
-								size="compact"
-								className="h-7 rounded-full border-0 bg-surface px-3 text-sm leading-5 font-normal text-text-subtle hover:bg-surface-hovered"
-								style={{ boxShadow: token("elevation.shadow.overlay") }}
-								onClick={() => onBrowseTemplates(activeCategory)}
-							>
-								Browse all
-							</Button>
-							{/* Absolutely positioned so "Browse all" stays centered at rest. */}
-							<AnimatePresence initial={false}>
-								{browseAllHovered ? (
-									<>
-										{/* Bridge the visual 8px gap so pointer movement from "Browse all" to
-										    "Dismiss" cannot fall through and hover a bento tile behind it. */}
-										<div aria-hidden className="pointer-events-auto absolute left-full top-0 h-7 w-2" />
-										<motion.div
-											key="dismiss"
-											className="absolute left-full top-0 ml-2"
-											initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8 }}
-											animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-											exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8 }}
-											transition={{ type: "spring", visualDuration: 0.25, bounce: 0.2 }}
-										>
-											<Button
-												type="button"
-												aria-label="Dismiss prompt starters"
-												variant="ghost"
-												size="compact"
-												className="h-7 rounded-full border-0 bg-surface px-3 text-sm leading-5 font-normal text-text-subtle hover:bg-surface-hovered"
-												style={{ boxShadow: token("elevation.shadow.overlay") }}
-												onClick={onDismiss}
-											>
-												Dismiss
-											</Button>
-										</motion.div>
-									</>
-								) : null}
-							</AnimatePresence>
-						</div>
-					</div>
-				) : null}
-			</div>
-		</div>
-	);
-}
-
 function getCssDurationTokenMs(tokenName: string, fallbackMs: number): number {
 	if (typeof window === "undefined") {
 		return fallbackMs;
@@ -1395,62 +283,6 @@ function getCssDurationTokenMs(tokenName: string, fallbackMs: number): number {
 	const tokenValue = window.getComputedStyle(document.documentElement).getPropertyValue(tokenName);
 
 	return parseCssDurationMs(tokenValue) ?? fallbackMs;
-}
-
-function mergeContextDescriptions(...parts: Array<string | null | undefined>): string | undefined {
-	const mergedParts = parts.map((part) => part?.trim()).filter((part): part is string => Boolean(part));
-
-	return mergedParts.length > 0 ? mergedParts.join("\n\n") : undefined;
-}
-
-function getNonEmptyString(value: unknown): string | null {
-	return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
-}
-
-function normalizeStudioAgentResult(agentResult: RovoDataParts["agent-result"]): RovoAgentProfile | null {
-	const id = getNonEmptyString(agentResult.agentId);
-	const name = getNonEmptyString(agentResult.name);
-	const summary = getNonEmptyString(agentResult.summary);
-	const description = getNonEmptyString(agentResult.description) ?? summary;
-	const conversationStarters = Array.isArray(agentResult.conversationStarters)
-		? agentResult.conversationStarters.map((starter) => starter.trim()).filter(Boolean).slice(0, STUDIO_AGENT_MAX_CONVERSATION_STARTERS)
-		: [];
-	const conversationStarterIcons = Array.isArray(agentResult.conversationStarterIcons)
-		? agentResult.conversationStarterIcons
-		: [];
-
-	if (!id || !name || !description || conversationStarters.length === 0) {
-		return null;
-	}
-
-	const contextDescription = [
-		"[Selected Studio-generated agent]",
-		`Agent: ${name}`,
-		"Source: /studio agent creation result",
-		`Description: ${description}`,
-		summary ? `Summary: ${summary}` : null,
-		conversationStarters.length > 0 ? `Conversation starters: ${conversationStarters.join(" | ")}` : null,
-		"Answer as this selected generated agent while using the existing Studio chat capabilities and available context.",
-		"[End selected Studio-generated agent]",
-	]
-		.filter((line): line is string => Boolean(line))
-		.join("\n");
-
-	return {
-		avatarSrc: getNonEmptyString(agentResult.avatarSrc) ?? getRandomAgentAvatarSrc(),
-		byline: "Custom agent by You",
-		contextDescription,
-		description,
-		id,
-		name,
-		starters: conversationStarters.map((starter, index) => ({
-			icon: getStarterIcon((conversationStarterIcons[index] as StarterIconKey | undefined) ?? DEFAULT_STARTER_ICON),
-			id: `${id}-starter-${index + 1}`,
-			label: starter,
-			prompt: starter,
-			type: "prompt",
-		})),
-	};
 }
 
 function getStudioAgentCreationThreadTitle(thread: { title: string } | null): string {
@@ -1462,16 +294,6 @@ function getStudioAgentCreationThreadTitle(thread: { title: string } | null): st
 
 	return "Agent creation";
 }
-
-type StudioAgentRegistrationResult =
-	| string
-	| {
-			id?: string | null;
-	  }
-	| RovoAgentProfile
-	| null
-	| undefined
-	| void;
 
 type StudioAgentRegistryContext = ReturnType<typeof useRovoSelectedAgent> & {
 	registerCreatedAgentFromResult?: (
@@ -1487,18 +309,6 @@ type StudioSubmitPromptPayload = Parameters<ReturnType<typeof useRovoApp>["submi
 	creationMode?: "agent";
 };
 
-function resolveRegisteredStudioAgentId(result: StudioAgentRegistrationResult, fallbackAgentId: string): string {
-	if (typeof result === "string" && result.trim().length > 0) {
-		return result.trim();
-	}
-
-	if (result && typeof result === "object" && typeof result.id === "string" && result.id.trim().length > 0) {
-		return result.id.trim();
-	}
-
-	return fallbackAgentId;
-}
-
 type RealtimeInjectContextPayload = {
 	type: string;
 	content?: string;
@@ -1507,20 +317,9 @@ type RealtimeInjectContextPayload = {
 	[key: string]: unknown;
 };
 
-type RealtimeMessageMutationResult =
-	| string
-	| {
-			id?: string | null;
-	  }
-	| void;
-
-type RovoAppRealtimeShellAdapter = ReturnType<typeof useRovoApp> & {
-	appendRealtimeMessage?: (role: "user" | "assistant", content: string, options?: Record<string, unknown>) => Promise<RealtimeMessageMutationResult> | RealtimeMessageMutationResult;
+type RovoAppRealtimeShellAdapter = RovoRealtimeShellAdapter<ReturnType<typeof useRovoApp>> & {
 	delegateToRovo?: (messageId: string, options?: Record<string, unknown>) => Promise<void>;
-	setRealtimeMessageContent?: (messageId: string, content: string) => Promise<void> | void;
 	submitRealtimeText?: (payload: { contextDescription?: string; hermesContext?: RovoAppHermesContext; files: FileUIPart[]; text: string }) => Promise<void>;
-	updateRealtimeMessage?: (messageId: string, contentDelta: string) => Promise<void> | void;
-	setVoiceMode?: (next: boolean) => void;
 };
 
 function waitForDeterministicTrace(ms: number): Promise<void> {
@@ -1605,96 +404,6 @@ type ScrollActiveTimelineSelection = {
 	messageId: string;
 	runtimeThreadId: string | null;
 };
-
-function resolveRealtimeMutationId(result: RealtimeMessageMutationResult): string | null {
-	if (typeof result === "string" && result.trim()) {
-		return result;
-	}
-
-	if (result && typeof result === "object" && typeof result.id === "string" && result.id.trim()) {
-		return result.id;
-	}
-
-	return null;
-}
-
-function buildRealtimeThreadSummary(messages: ReadonlyArray<ReturnType<typeof useRovoApp>["messages"][number]>): string {
-	const summary = messages
-		.filter((message) => message.role === "user" || message.role === "assistant")
-		.slice(-REALTIME_THREAD_SUMMARY_MAX_MESSAGES)
-		.map((message) => {
-			const text = getMessageText(message).trim();
-			const artifact = getMessageArtifactResult(message);
-			const fragments = [text || null, artifact ? `${artifact.action === "update" ? "Updated" : "Created"} artifact "${artifact.title}".` : null].filter((fragment): fragment is string =>
-				Boolean(fragment),
-			);
-
-			if (fragments.length === 0) {
-				return null;
-			}
-
-			return `${message.role}: ${fragments.join(" ")}`.trim();
-		})
-		.filter((line): line is string => Boolean(line))
-		.join("\n");
-
-	return summary.slice(0, 2_000);
-}
-
-function buildRealtimeArtifactContextSummary(input: {
-	annotationContext: string | null;
-	document: {
-		id: string;
-		kind: string;
-		title: string;
-	} | null;
-}): string | null {
-	if (!input.document) {
-		return null;
-	}
-
-	return [`Artifact open: ${input.document.title}`, `Document ID: ${input.document.id}`, `Kind: ${input.document.kind}`, input.annotationContext ? input.annotationContext : null]
-		.filter((part): part is string => Boolean(part))
-		.join("\n");
-}
-
-function resolveRealtimeStatusMessage(realtime: RealtimeVoiceShellResult): string | null {
-	const directStatus = typeof realtime.statusMessage === "string" && realtime.statusMessage.trim() ? realtime.statusMessage.trim() : null;
-	if (directStatus) {
-		return directStatus;
-	}
-
-	const connectionState =
-		typeof realtime.connectionState === "string" && realtime.connectionState.trim()
-			? realtime.connectionState.trim().toLowerCase()
-			: typeof realtime.connectionStatus === "string" && realtime.connectionStatus.trim()
-				? realtime.connectionStatus.trim().toLowerCase()
-				: null;
-
-	if (connectionState === "reconnecting" || realtime.isReconnecting) {
-		return "Reconnecting voice...";
-	}
-
-	if (connectionState === "disconnected") {
-		return "Voice disconnected";
-	}
-
-	return null;
-}
-
-function resolveRealtimeSessionIdentity(realtime: RealtimeVoiceShellResult, activeThreadId: string | null, runtimeThreadId: string): string | null {
-	const candidates = [realtime.sessionId, realtime.sessionKey, realtime.connectionState, realtime.connectionStatus];
-
-	const explicitIdentity = candidates.find((candidate) => {
-		return typeof candidate === "string" && candidate.trim().length > 0;
-	});
-
-	if (explicitIdentity) {
-		return explicitIdentity;
-	}
-
-	return realtime.voiceState !== "idle" ? `${activeThreadId ?? runtimeThreadId}:${realtime.voiceState}` : null;
-}
 
 function getViewportPointFromScreenAssistantTarget(
 	target: StudioScreenAssistantTarget | null | undefined,
@@ -2992,17 +1701,11 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		realtimeTypedResponseStartedRef.current = false;
 	}, []);
 
-	const setChatVoiceMode = useCallback((next: boolean) => {
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (typeof realtimeChat.setVoiceMode === "function") {
-			realtimeChat.setVoiceMode(next);
-			return;
-		}
-
-		if (realtimeChat.isVoiceMode !== next) {
-			realtimeChat.toggleVoiceMode();
-		}
-	}, []);
+	const {
+		appendRealtimeMessage,
+		setChatVoiceMode,
+		updateRealtimeMessage,
+	} = useRovoRealtimeShellBridge<RovoAppRealtimeShellAdapter>({ chatRef });
 
 	const injectRealtimeContext = useCallback((payload: RealtimeInjectContextPayload | null) => {
 		if (!payload) {
@@ -3010,32 +1713,6 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		}
 
 		realtimeInjectContextRef.current?.(payload);
-	}, []);
-
-	const appendRealtimeMessage = useCallback(async (role: "user" | "assistant", content: string, options?: Record<string, unknown>): Promise<string | null> => {
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (typeof realtimeChat.appendRealtimeMessage !== "function") {
-			return null;
-		}
-
-		const result = await realtimeChat.appendRealtimeMessage(role, content, options);
-		return resolveRealtimeMutationId(result);
-	}, []);
-
-	const updateRealtimeMessage = useCallback(async (messageId: string | null, content: string, options?: { replace?: boolean }) => {
-		if (!messageId || !content) {
-			return;
-		}
-
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (options?.replace && typeof realtimeChat.setRealtimeMessageContent === "function") {
-			await realtimeChat.setRealtimeMessageContent(messageId, content);
-			return;
-		}
-
-		if (typeof realtimeChat.updateRealtimeMessage === "function") {
-			await realtimeChat.updateRealtimeMessage(messageId, content);
-		}
 	}, []);
 
 	const resetRealtimeAssistantMessageState = useCallback(() => {
@@ -3583,9 +2260,9 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		injectContext: realtime.injectContext,
 	});
 
-	const realtimeStatusMessage = resolveRealtimeStatusMessage(realtime);
+	const realtimeStatusMessage = resolveStudioRealtimeStatusMessage(realtime);
 	const shouldChatVoiceModeBeEnabled = isRealtimeActive;
-	const realtimeSessionIdentity = resolveRealtimeSessionIdentity(realtime, chat.activeThreadId, chat.runtimeThreadId);
+	const realtimeSessionIdentity = resolveStudioRealtimeSessionIdentity(realtime, chat.activeThreadId, chat.runtimeThreadId);
 	const wasRealtimeStreamingRef = useRef(false);
 	const dictationState = resolveComposerDictationState({
 		active: isDictationActive,
@@ -3607,12 +2284,9 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		if (wasRealtimeStreamingRef.current && !chat.isStreaming && isRealtimeActive) {
 			const lastAssistantMessage = [...chat.messages].reverse().find((m) => m.role === "assistant");
 			if (lastAssistantMessage) {
-				const text = getMessageText(lastAssistantMessage);
-				const artifact = getMessageArtifactResult(lastAssistantMessage);
-				const summary = artifact ? `Studio ${artifact.action === "update" ? "updated" : "created"} artifact "${artifact.title}". ${text || ""}` : text || "Studio completed the task.";
 				injectRealtimeContext({
 					type: "thread_message",
-					content: summary.slice(0, REALTIME_RESULT_SUMMARY_MAX_CHARS),
+					content: buildStudioRealtimeResultSummary(lastAssistantMessage),
 				});
 			}
 		}
@@ -3630,7 +2304,7 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 			return;
 		}
 
-		const summary = buildRealtimeThreadSummary(chat.messages);
+		const summary = buildStudioRealtimeThreadSummary(chat.messages);
 		if (summary) {
 			injectRealtimeContext({
 				type: "thread_context",
@@ -4116,78 +2790,17 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 			return message.role === "user" || message.role === "assistant";
 		});
 	}, [displayMessages]);
-	useEffect(() => {
-		if (studioAgentCreationThreadKeysRef.current.has(chat.runtimeThreadId) && chat.activeThreadId) {
-			markStudioAgentCreationThread(chat.activeThreadId);
-		}
-		}, [chat.activeThreadId, chat.runtimeThreadId, markStudioAgentCreationThread, studioAgentCreationThreadKeysRef]);
-	useEffect(() => {
-		for (const message of chat.messages.toReversed()) {
-			const agentResult = getMessageAgentResult(message);
-			if (!isGeneratedAgentResult(agentResult) || !hasTurnCompleteSignal(message)) {
-				continue;
-			}
-
-			const agentResultKey = `${chat.runtimeThreadId}:${message.id}:${agentResult.agentId}:${agentResult.action}`;
-			if (handledAgentResultKeysRef.current.has(agentResultKey)) {
-				continue;
-			}
-
-			if (handleStudioAgentResultSelect(agentResult, { sourceMessageId: message.id })) {
-				handledAgentResultKeysRef.current.add(agentResultKey);
-				unmarkStudioAgentCreationThread(chat.runtimeThreadId);
-				unmarkStudioAgentCreationThread(chat.activeThreadId);
-				break;
-			}
-		}
-		}, [chat.activeThreadId, chat.messages, chat.runtimeThreadId, handledAgentResultKeysRef, handleStudioAgentResultSelect, unmarkStudioAgentCreationThread]);
-	useEffect(() => {
-		if (typeof studioAgentRegistry.registerCreatedAgentFromResult !== "function") {
-			return;
-		}
-
-		for (const message of chat.messages.toReversed()) {
-			if (!hasTurnCompleteSignal(message)) {
-				continue;
-			}
-
-			const artifactListAgentResults = getStudioAutomationArtifactListAgents(message);
-			if (artifactListAgentResults.length === 0) {
-				continue;
-			}
-
-			let didRegisterAgent = false;
-			for (const agentResult of artifactListAgentResults) {
-				if (!isGeneratedAgentResult(agentResult)) {
-					continue;
-				}
-
-				const agentResultKey = `${chat.runtimeThreadId}:${message.id}:${agentResult.agentId}:${agentResult.action}:artifact-list`;
-				if (handledAgentResultKeysRef.current.has(agentResultKey)) {
-					continue;
-				}
-
-				const sourceKey = `studio-agent-result:${chat.activeThreadId ?? chat.runtimeThreadId}:${message.id}:${agentResult.agentId}`;
-				const registered = studioAgentRegistry.registerCreatedAgentFromResult(agentResult, {
-					preserveCurrentThread: true,
-					select: false,
-					sourceKey,
-				});
-				if (!registered) {
-					continue;
-				}
-
-				handledAgentResultKeysRef.current.add(agentResultKey);
-				didRegisterAgent = true;
-			}
-
-			if (didRegisterAgent) {
-				unmarkStudioAgentCreationThread(chat.runtimeThreadId);
-				unmarkStudioAgentCreationThread(chat.activeThreadId);
-				break;
-			}
-		}
-	}, [chat.activeThreadId, chat.messages, chat.runtimeThreadId, handledAgentResultKeysRef, studioAgentRegistry, unmarkStudioAgentCreationThread]);
+	useStudioAgentResultRegistration({
+		activeThreadId: chat.activeThreadId,
+		handledAgentResultKeysRef,
+		markStudioAgentCreationThread,
+		messages: chat.messages,
+		onAgentResultSelect: handleStudioAgentResultSelect,
+		runtimeThreadId: chat.runtimeThreadId,
+		studioAgentCreationThreadKeysRef,
+		studioAgentRegistry,
+		unmarkStudioAgentCreationThread,
+	});
 	const timelineItems = useMemo(() => {
 		return deriveRovoAppTimelineItems(displayMessages);
 	}, [displayMessages]);
@@ -4409,10 +3022,6 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 	const studioLandingMotionTransition = shouldReduceStudioLandingMotion
 		? STUDIO_LANDING_REDUCED_TRANSITION
 		: STUDIO_LANDING_ENTER_TRANSITION;
-	const homeStarterBentoPresence = {
-		instant: isDefaultHomeSubmitTransition,
-		reduceMotion: shouldReduceStudioLandingMotion,
-	};
 	screenAssistantComposerRef.current = {
 		hasPrefill: Boolean(voiceTranscript ?? prefillText),
 		placeholder: composerPreviewState.placeholder,
@@ -4763,7 +3372,7 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 			return;
 		}
 
-		const artifactContext = buildRealtimeArtifactContextSummary({
+		const artifactContext = buildStudioRealtimeArtifactContextSummary({
 			annotationContext: annotationContextRef.current,
 			document: workspaceDocument
 				? {
@@ -5108,29 +3717,17 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 
 			{shouldShowAgentConfigPane && showHomeState ? <div aria-hidden className="flex-1 shrink" /> : null}
 
-			<AnimatePresence custom={homeStarterBentoPresence} initial={false}>
-				{shouldShowHomeStarterBento ? (
-					<motion.div
-						key="home-starter-bento"
-						className="z-10 mx-auto mb-3 w-[90%]"
-						animate="visible"
-						custom={homeStarterBentoPresence}
-						exit="exit"
-						initial={shouldReduceStudioLandingMotion ? false : "hidden"}
-						style={{ willChange: "transform, opacity, height" }}
-						variants={STUDIO_HOME_BENTO_VARIANTS}
-					>
-						<HomeStarterBento
-							onBrowseTemplates={handleBrowseAgentsDirectory}
-							onDismiss={() => setBentoDismissed(true)}
-							onSelect={handleGallerySelect}
-							onPreviewStart={handleGalleryPreviewStart}
-							onPreviewEnd={handleGalleryPreviewEnd}
-							templatesDialogOpen={agentTemplatesDialogOpen || isSidebarAgentBrowserOpen}
-						/>
-					</motion.div>
-				) : null}
-			</AnimatePresence>
+			<RovoAppHomeStarterBento
+				instantExit={isDefaultHomeSubmitTransition}
+				isVisible={shouldShowHomeStarterBento}
+				onBrowseTemplates={handleBrowseAgentsDirectory}
+				onDismiss={() => setBentoDismissed(true)}
+				onPreviewEnd={handleGalleryPreviewEnd}
+				onPreviewStart={handleGalleryPreviewStart}
+				onSelect={handleGallerySelect}
+				reduceMotion={shouldReduceStudioLandingMotion}
+				templatesDialogOpen={agentTemplatesDialogOpen || isSidebarAgentBrowserOpen}
+			/>
 
 			{shouldShowComposerDock ? (
 				<div
@@ -5555,7 +4152,6 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 					}}
 				>
 					<RovoAppShellPaneLayout
-						agentConfigPane={agentConfigPane}
 						artifactOrigin={artifactOrigin}
 						artifactPane={artifactPane}
 						artifactPanelId={ROVO_APP_SPLIT_ARTIFACT_PANEL_ID}
@@ -5564,7 +4160,7 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 						minArtifactPaneWidth={ROVO_APP_MIN_ARTIFACT_PANE_WIDTH}
 						minChatPaneWidth={ROVO_APP_MIN_CHAT_PANE_WIDTH}
 						onArtifactSplitLayoutChanged={handleArtifactSplitLayoutChanged}
-						shouldShowAgentConfigPane={shouldShowAgentConfigPane}
+						priorityPane={shouldShowAgentConfigPane ? agentConfigPane : undefined}
 						shouldSplitArtifactPane={shouldSplitArtifactPane}
 						shellSize={shellSize}
 						splitArtifactPaneDefaultSize={splitArtifactPaneDefaultSize}

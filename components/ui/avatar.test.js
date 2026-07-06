@@ -2,20 +2,16 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const AVATAR_SOURCE = fs.readFileSync(path.join(__dirname, "avatar.tsx"), "utf8");
 const AVATAR_DEMO_SOURCE = fs.readFileSync(
 	path.join(__dirname, "..", "website", "demos", "ui", "avatar-demo.tsx"),
 	"utf8",
 );
-const AVATAR_DETAILS_SOURCE = fs.readFileSync(
-	path.join(__dirname, "..", "..", "app", "data", "details", "ui.ts"),
-	"utf8",
-);
-const REGISTRY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "..", "website", "registry.ts"),
-	"utf8",
-);
+const AVATAR_DETAILS_SOURCE = readDetailCategorySource("ui");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const PRIMARY_AVATAR_PATH = path.join(
 	__dirname,
 	"..",

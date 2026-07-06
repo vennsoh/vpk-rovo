@@ -2,6 +2,62 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+const vpkIconRestrictedImportNames = [
+	"Activity",
+	"AlertCircle",
+	"ArrowLeft",
+	"ArrowRight",
+	"Blocks",
+	"Code",
+	"Calendar",
+	"Check",
+	"ChevronDown",
+	"ChevronRight",
+	"ChevronsUpDown",
+	"ExternalLink",
+	"FileText",
+	"Footprints",
+	"Forward",
+	"GalleryVerticalEnd",
+	"Keyboard",
+	"LineChart",
+	"Link",
+	"Maximize2",
+	"Menu",
+	"MessageCircleQuestion",
+	"Mic",
+	"MicOff",
+	"MoreHorizontal",
+	"MousePointerClick",
+	"Pause",
+	"Play",
+	"RotateCw",
+	"Search",
+	"Settings",
+	"Square",
+	"Settings2",
+	"Trash2",
+	"TreePine",
+	"TrendingDown",
+	"TrendingUp",
+	"VolumeX",
+	"Waves",
+];
+
+const appComponentRestrictedImportPaths = [
+	{
+		name: "lucide-react",
+		message:
+			'Use "@/components/ui/vpk-icons" or direct "@atlaskit/icon" imports instead of "lucide-react".',
+	},
+	{
+		name: "@/components/ui/vpk-icons",
+		importNames: vpkIconRestrictedImportNames,
+		message:
+			'Use the stable "*Icon" exports from "@/components/ui/vpk-icons" instead of the Lucide-compat aliases.',
+	},
+];
+
 const eslintConfig = defineConfig([
 	...nextVitals,
 	...nextTs,
@@ -30,57 +86,81 @@ const eslintConfig = defineConfig([
 			"no-restricted-imports": [
 				"error",
 				{
-					paths: [
+					paths: appComponentRestrictedImportPaths,
+				},
+			],
+		},
+	},
+	{
+		files: ["components/projects/rovo/**/*.{js,jsx,ts,tsx}"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: appComponentRestrictedImportPaths,
+					patterns: [
 						{
-							name: "lucide-react",
+							group: ["@/components/projects/studio/**"],
 							message:
-								'Use "@/components/ui/vpk-icons" or direct "@atlaskit/icon" imports instead of "lucide-react".',
+								"Rovo project code must not import Studio internals. Move shared behavior to rovo-core or pass it through a route adapter.",
 						},
+					],
+				},
+			],
+		},
+	},
+	{
+		files: ["components/projects/studio/**/*.{js,jsx,ts,tsx}"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: appComponentRestrictedImportPaths,
+					patterns: [
 						{
-							name: "@/components/ui/vpk-icons",
-							importNames: [
-								"Activity",
-								"AlertCircle",
-								"ArrowLeft",
-								"ArrowRight",
-								"Blocks",
-								"Code",
-								"Calendar",
-								"Check",
-								"ChevronDown",
-								"ChevronRight",
-								"ChevronsUpDown",
-								"ExternalLink",
-								"FileText",
-								"Footprints",
-								"Forward",
-								"GalleryVerticalEnd",
-								"Keyboard",
-								"LineChart",
-								"Link",
-								"Maximize2",
-								"Menu",
-								"MessageCircleQuestion",
-								"Mic",
-								"MicOff",
-								"MoreHorizontal",
-								"MousePointerClick",
-								"Pause",
-								"Play",
-								"RotateCw",
-								"Search",
-								"Settings",
-								"Square",
-								"Settings2",
-								"Trash2",
-								"TreePine",
-								"TrendingDown",
-								"TrendingUp",
-								"VolumeX",
-								"Waves",
-							],
+							group: ["@/components/projects/rovo/**"],
 							message:
-								'Use the stable "*Icon" exports from "@/components/ui/vpk-icons" instead of the Lucide-compat aliases.',
+								"Studio project code must not import Rovo route internals. Move shared behavior to rovo-core or pass it through a route adapter.",
+						},
+					],
+				},
+			],
+		},
+	},
+	{
+		files: [
+			"app/contexts/**/*.{js,jsx,ts,tsx}",
+			"components/projects/shared/**/*.{js,jsx,ts,tsx}",
+			"components/projects/sidebar-chat/**/*.{js,jsx,ts,tsx}",
+		],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: appComponentRestrictedImportPaths,
+					patterns: [
+						{
+							group: ["@/components/projects/rovo/**", "@/components/projects/studio/**"],
+							message:
+								"Shared app context and shared project code must not depend on route internals. Use rovo-core or a route-owned adapter.",
+						},
+					],
+				},
+			],
+		},
+	},
+	{
+		files: ["components/ui/**/*.{js,jsx,ts,tsx}"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: appComponentRestrictedImportPaths,
+					patterns: [
+						{
+							group: ["@/app/**", "@/components/projects/**"],
+							message:
+								"Shared UI primitives must stay generic and must not import app routes or project-specific surfaces.",
 						},
 					],
 				},

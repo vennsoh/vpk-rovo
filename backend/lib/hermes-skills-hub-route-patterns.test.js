@@ -4,36 +4,36 @@ const path = require("node:path");
 const test = require("node:test");
 const express = require("express");
 
-const serverPath = path.join(__dirname, "..", "server.js");
-const serverSource = fs.readFileSync(serverPath, "utf8");
+const routePath = path.join(__dirname, "..", "routes", "skills.js");
+const routeSource = fs.readFileSync(routePath, "utf8");
 
 function extractRoutePath(method, prefix) {
-	const routeStart = serverSource.indexOf(`app.${method}("${prefix}`);
+	const routeStart = routeSource.indexOf(`router.${method}("${prefix}`);
 	assert.notEqual(routeStart, -1, `Expected to find ${method.toUpperCase()} route starting with ${prefix}`);
 
-	const pathStart = routeStart + `app.${method}("`.length;
-	const pathEnd = serverSource.indexOf('"', pathStart);
+	const pathStart = routeStart + `router.${method}("`.length;
+	const pathEnd = routeSource.indexOf('"', pathStart);
 	assert.notEqual(pathEnd, -1, `Expected to find route terminator for ${prefix}`);
 
-	return serverSource.slice(pathStart, pathEnd);
+	return routeSource.slice(pathStart, pathEnd);
 }
 
 function extractRouteHandler(method, routePath) {
-	const marker = `app.${method}("${routePath}"`;
-	const start = serverSource.indexOf(marker);
+	const marker = `router.${method}("${routePath}"`;
+	const start = routeSource.indexOf(marker);
 	assert.notEqual(start, -1, `Expected to find route handler for ${routePath}`);
 
-	const arrowStart = serverSource.indexOf("=>", start + marker.length);
+	const arrowStart = routeSource.indexOf("=>", start + marker.length);
 	assert.notEqual(arrowStart, -1, `Expected to find route arrow function for ${routePath}`);
-	const braceStart = serverSource.indexOf("{", arrowStart);
+	const braceStart = routeSource.indexOf("{", arrowStart);
 	let depth = 0;
-	for (let index = braceStart; index < serverSource.length; index += 1) {
-		const char = serverSource[index];
+	for (let index = braceStart; index < routeSource.length; index += 1) {
+		const char = routeSource[index];
 		if (char === "{") depth += 1;
 		if (char === "}") {
 			depth -= 1;
 			if (depth === 0) {
-				return serverSource.slice(start, index + 1);
+				return routeSource.slice(start, index + 1);
 			}
 		}
 	}
@@ -42,22 +42,22 @@ function extractRouteHandler(method, routePath) {
 }
 
 test("skills hub wildcard routes register under Express 5", () => {
-	const inspectRoute = extractRoutePath("get", "/api/skills/hub/inspect/");
-	const uninstallRoute = extractRoutePath("delete", "/api/skills/hub/uninstall/");
-	const tapsRoute = extractRoutePath("delete", "/api/skills/hub/taps/");
+	const inspectRoute = extractRoutePath("get", "/hub/inspect/");
+	const uninstallRoute = extractRoutePath("delete", "/hub/uninstall/");
+	const tapsRoute = extractRoutePath("delete", "/hub/taps/");
 
 	const app = express();
 	assert.doesNotThrow(() => {
-		app.get(inspectRoute, (_req, res) => res.status(204).end());
-		app.delete(uninstallRoute, (_req, res) => res.status(204).end());
-		app.delete(tapsRoute, (_req, res) => res.status(204).end());
+		app.get(`/api/skills${inspectRoute}`, (_req, res) => res.status(204).end());
+		app.delete(`/api/skills${uninstallRoute}`, (_req, res) => res.status(204).end());
+		app.delete(`/api/skills${tapsRoute}`, (_req, res) => res.status(204).end());
 	});
 });
 
 test("skills hub wildcard handlers use named params instead of legacy positional params", () => {
-	const inspectRoute = extractRoutePath("get", "/api/skills/hub/inspect/");
-	const uninstallRoute = extractRoutePath("delete", "/api/skills/hub/uninstall/");
-	const tapsRoute = extractRoutePath("delete", "/api/skills/hub/taps/");
+	const inspectRoute = extractRoutePath("get", "/hub/inspect/");
+	const uninstallRoute = extractRoutePath("delete", "/hub/uninstall/");
+	const tapsRoute = extractRoutePath("delete", "/hub/taps/");
 
 	const inspectHandler = extractRouteHandler("get", inspectRoute);
 	const uninstallHandler = extractRouteHandler("delete", uninstallRoute);

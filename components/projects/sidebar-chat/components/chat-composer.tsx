@@ -27,8 +27,8 @@ import { Queue, QueueItem, QueueItemActions, QueueItemContent, QueueItemIndicato
 import { Button } from "@/components/ui/button";
 import DeleteIcon from "@atlaskit/icon/core/delete";
 import { Footer } from "@/components/ui-custom/footer";
-import ChatContextBar from "./chat-context-bar";
-import type { ChatContextBarDescriptor } from "../lib/chat-context-bar";
+import ChatContextBar from "@/components/projects/shared/components/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import AddIcon from "@atlaskit/icon/core/add";
 import { PendingAttachments } from "@/components/projects/shared/components/pending-attachments";
 import { RovoAppComposerAddMenu } from "@/components/projects/shared/components/rovo-app-composer-add-menu";

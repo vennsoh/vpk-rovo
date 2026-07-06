@@ -1,7 +1,7 @@
 import { getAllDataParts, type RovoUIMessage } from "@/lib/rovo-ui-messages";
+import { STUDIO_AUTOMATION_ARTIFACT_LIST_TYPE } from "@/components/projects/studio/lib/studio-automation-artifact-list";
 
 const STUDIO_AUTOMATION_CREATE_AGENT_DRAFTS_TOOL_NAME = "studio.create_agent_drafts";
-const STUDIO_AUTOMATION_ARTIFACT_LIST_TYPE = "studio-automation-artifact-list";
 
 export interface StudioAutomationGeneratingAgent {
 	avatarSrc: string;

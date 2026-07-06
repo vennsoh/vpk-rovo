@@ -6,12 +6,14 @@
 
 // Chat contexts
 export {
-	getStudioSessionAgentDisplayName,
-	getStudioSessionAgentResultDisplayName,
 	RovoChatProvider,
 	useRovoChat,
 	useRovoSelectedAgent,
 } from "./context-rovo-chat";
+export {
+	getStudioSessionAgentDisplayName,
+	getStudioSessionAgentResultDisplayName,
+} from "@/components/projects/rovo-core/lib/agent-records/session-agent-entry";
 export type {
 	QueuedPromptItem,
 	RovoThreadSnapshot,

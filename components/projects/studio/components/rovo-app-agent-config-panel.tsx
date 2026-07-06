@@ -79,7 +79,7 @@ import FloatingRovoButton, {
 } from "@/components/projects/shared/components/floating-rovo-button";
 import RovoFloatingChat from "@/components/projects/rovo-floating-chat/components/rovo-floating-chat";
 import type { ChatPanelGreetingProps, ChatSubmitInterceptOutcome } from "@/components/projects/sidebar-chat/page";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import { getStudioSessionAgentDisplayName, useRovoChat } from "@/app/contexts";
 import type { SendPromptOptions } from "@/app/contexts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -101,7 +101,7 @@ import type {
 } from "@/app/contexts/context-rovo-chat";
 import type { RovoDataParts } from "@/lib/rovo-ui-messages";
 import { cn } from "@/lib/utils";
-import { getStudioAgentChangeSummary, type StudioAgentChangeSection, type StudioAgentChangeSummary } from "@/components/projects/studio/lib/studio-agent-versioning";
+import { getStudioAgentChangeSummary, type StudioAgentChangeSection, type StudioAgentChangeSummary } from "@/components/projects/rovo-core/lib/agent-records/agent-versioning";
 
 type AgentResult = RovoDataParts["agent-result"];
 export type AgentConfigView = "configure" | "insights" | "test";

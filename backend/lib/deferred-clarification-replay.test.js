@@ -1,596 +1,331 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
-const vm = require("node:vm");
 
 const { adaptClarificationAnswers } = require("./ask-user-questions-adapter");
 const {
-	buildQuestionCardPayloadFromRequestUserInput,
-} = require("./question-card-payload");
-const { MAX_LABEL_LENGTH: CLARIFICATION_MAX_LABEL_LENGTH } = require("./question-card-extractor");
+	buildClarificationResumeDecision,
+	buildClarificationResumeDenyMessage,
+} = require("./deferred-clarification");
+const {
+	handleReplayDeferredToolRequest,
+} = require("./replay-deferred-tool");
 const { getNonEmptyString } = require("./shared-utils");
-
-const SERVER_FILE = path.resolve(__dirname, "..", "server.js");
-const SERVER_SOURCE = fs.readFileSync(SERVER_FILE, "utf8");
-
-const SAFE_JSON_PARSE_SOURCE = extractSourceBetweenMarkers(
-	"function safeJsonParse(rawValue) {",
-	"function extractClassifierJsonCandidate(rawText) {",
-);
-const NORMALIZE_REQUEST_USER_INPUT_QUESTION_META_SOURCE = extractSourceBetweenMarkers(
-	"function normalizeRequestUserInputQuestionMeta(questionMeta) {",
-	"function buildRequestUserInputQuestionFingerprintFromMeta(questionMeta) {",
-);
-const BUILD_REQUEST_USER_INPUT_QUESTION_FINGERPRINT_FROM_META_SOURCE =
-	extractSourceBetweenMarkers(
-		"function buildRequestUserInputQuestionFingerprintFromMeta(questionMeta) {",
-		"function buildRequestUserInputQuestionFingerprintFromInput(questionInput) {",
-	);
-const BUILD_REQUEST_USER_INPUT_QUESTION_FINGERPRINT_FROM_INPUT_SOURCE =
-	extractSourceBetweenMarkers(
-		"function buildRequestUserInputQuestionFingerprintFromInput(questionInput) {",
-		"function getClarificationSubmissionQuestionFingerprint(clarificationSubmission) {",
-	);
-const GET_CLARIFICATION_SUBMISSION_QUESTION_FINGERPRINT_SOURCE =
-	extractSourceBetweenMarkers(
-		"function getClarificationSubmissionQuestionFingerprint(clarificationSubmission) {",
-		"function createClarificationFallbackSubmission({",
-	);
-const CREATE_CLARIFICATION_FALLBACK_SUBMISSION_SOURCE = extractSourceBetweenMarkers(
-	"function createClarificationFallbackSubmission({",
-	"function parseRovoResponseBody(rawValue) {",
-);
-const PARSE_ROVO_RESPONSE_BODY_SOURCE = extractSourceBetweenMarkers(
-	"function parseRovoResponseBody(rawValue) {",
-	"function isDeferredToolResponseAccepted(responseBody) {",
-);
-const IS_DEFERRED_TOOL_RESPONSE_ACCEPTED_SOURCE = extractSourceBetweenMarkers(
-	"function isDeferredToolResponseAccepted(responseBody) {",
-	"function buildClarificationResumeDenyMessage(clarificationSubmission) {",
-);
-const BUILD_CLARIFICATION_RESUME_DENY_MESSAGE_SOURCE = extractSourceBetweenMarkers(
-	"function buildClarificationResumeDenyMessage(clarificationSubmission) {",
-	"function buildApprovalResumeDecision(approvalSubmission) {",
-);
-const BUILD_PAUSED_TOOL_CONTINUATION_MESSAGE_INPUT_SOURCE =
-	extractSourceBetweenMarkers(
-		"function buildPausedToolContinuationMessageInput({",
-		"function getLatestAssistantWidgetPayload(messages) {",
-	);
-const HANDLE_PAUSED_CONTINUATION_SOURCE = extractArrowFunctionExpression(
-	"const handlePausedContinuation = async ({ rawEvent, control }) => {",
-	"// Synthesise a DeferredToolResponse from clarification answers",
-	"handlePausedContinuation",
-);
-const PATH_A_FALLBACK_SNIPPET_SOURCE = extractSourceBetweenMarkers(
-	"const fallbackClarificationSubmission =",
-	"} else {",
-);
-
-function extractSourceBetweenMarkers(startMarker, endMarker) {
-	const startIndex = SERVER_SOURCE.indexOf(startMarker);
-	assert.notEqual(
-		startIndex,
-		-1,
-		`Expected to find start marker in server.js: ${startMarker}`,
-	);
-
-	const endIndex = SERVER_SOURCE.indexOf(endMarker, startIndex);
-	assert.notEqual(
-		endIndex,
-		-1,
-		`Expected to find end marker in server.js: ${endMarker}`,
-	);
-
-	return SERVER_SOURCE.slice(startIndex, endIndex).trim();
-}
-
-function extractArrowFunctionExpression(startMarker, endMarker, constName) {
-	const blockSource = extractSourceBetweenMarkers(startMarker, endMarker);
-	const prefix = `const ${constName} = `;
-	assert.equal(
-		blockSource.startsWith(prefix),
-		true,
-		`Expected arrow function assignment for ${constName}`,
-	);
-
-	const expressionSource = blockSource.slice(prefix.length).trim();
-	return expressionSource.endsWith(";")
-		? expressionSource.slice(0, -1)
-		: expressionSource;
-}
-
-function evaluateFunctionSource(functionSource, context) {
-	return vm.runInNewContext(`(${functionSource})`, context, {
-		filename: SERVER_FILE,
-	});
-}
-
-function createConsoleStub() {
-	return {
-		info() {},
-		log() {},
-		warn() {},
-		error() {},
-	};
-}
 
 function toPlainValue(value) {
 	return JSON.parse(JSON.stringify(value));
 }
 
-function createServerHelperContext({
-	questionMetaStore = new Map(),
-	adaptAnswersForToolContract,
-} = {}) {
-	const context = {
-		console: createConsoleStub(),
-		getNonEmptyString,
-		buildQuestionCardPayloadFromRequestUserInput,
-		CLARIFICATION_WIDGET_TYPE: "question-card",
-		CLARIFICATION_MAX_PRESET_OPTIONS: 8,
-		CLARIFICATION_CUSTOM_OPTION_PLACEHOLDER: "Tell Rovo what to do...",
-		CLARIFICATION_MAX_LABEL_LENGTH,
-		createClarificationSessionId: () => "clarification-test-session",
-		_requestUserInputQuestionMetaStore: questionMetaStore,
-	};
+function createQuestionMetaStore() {
+	return new Map([
+		[
+			"request-user-input-tool-call-123",
+			[
+				{
+					id: "q-1",
+					label: "What kind of app?",
+					options: [
+						{ id: "dashboard", label: "Dashboard" },
+						{ id: "docs", label: "Documentation" },
+					],
+				},
+			],
+		],
+	]);
+}
 
-	context.safeJsonParse = evaluateFunctionSource(SAFE_JSON_PARSE_SOURCE, context);
-	context.normalizeRequestUserInputQuestionMeta = evaluateFunctionSource(
-		NORMALIZE_REQUEST_USER_INPUT_QUESTION_META_SOURCE,
-		context,
-	);
-	context.buildRequestUserInputQuestionFingerprintFromMeta =
-		evaluateFunctionSource(
-			BUILD_REQUEST_USER_INPUT_QUESTION_FINGERPRINT_FROM_META_SOURCE,
-			context,
-		);
-	context.buildRequestUserInputQuestionFingerprintFromInput =
-		evaluateFunctionSource(
-			BUILD_REQUEST_USER_INPUT_QUESTION_FINGERPRINT_FROM_INPUT_SOURCE,
-			context,
-		);
-	context.getClarificationSubmissionQuestionFingerprint =
-		evaluateFunctionSource(
-			GET_CLARIFICATION_SUBMISSION_QUESTION_FINGERPRINT_SOURCE,
-			context,
-		);
-	context.createClarificationFallbackSubmission = evaluateFunctionSource(
-		CREATE_CLARIFICATION_FALLBACK_SUBMISSION_SOURCE,
-		context,
-	);
-	context.parseRovoResponseBody = evaluateFunctionSource(
-		PARSE_ROVO_RESPONSE_BODY_SOURCE,
-		context,
-	);
-	context.isDeferredToolResponseAccepted = evaluateFunctionSource(
-		IS_DEFERRED_TOOL_RESPONSE_ACCEPTED_SOURCE,
-		context,
-	);
-	context.adaptClarificationAnswersForToolContract =
-		typeof adaptAnswersForToolContract === "function"
-			? adaptAnswersForToolContract
-			: (sessionId, answers) =>
+function createClarificationDenyMessageBuilder(questionMetaStore) {
+	return (clarificationSubmission) =>
+		buildClarificationResumeDenyMessage(
+			clarificationSubmission,
+			(sessionId, answers) =>
 				adaptClarificationAnswers(
 					sessionId,
 					answers,
 					questionMetaStore.get(sessionId) || null,
-				);
-	context.buildClarificationResumeDenyMessage = evaluateFunctionSource(
-		BUILD_CLARIFICATION_RESUME_DENY_MESSAGE_SOURCE,
-		context,
-	);
-	context.buildPausedToolContinuationMessageInput = evaluateFunctionSource(
-		BUILD_PAUSED_TOOL_CONTINUATION_MESSAGE_INPUT_SOURCE,
-		context,
-	);
-
-	return context;
+				),
+		);
 }
 
-function createReplayHarness({
+function isRequestUserInputTool(toolName) {
+	const normalizedToolName = getNonEmptyString(toolName)?.toLowerCase();
+	return normalizedToolName === "ask_user_questions";
+}
+
+function isExitPlanModeTool(toolName) {
+	const normalizedToolName = getNonEmptyString(toolName)?.toLowerCase();
+	return normalizedToolName === "exit_plan_mode";
+}
+
+function createPausedReplayHarness({
 	pausedToolCallRecord,
 	clarificationSubmission,
-	questionMetaStore,
+	questionMetaStore = new Map(),
+	threadId = "thread-123",
+	rovoSessionId = "rovo-session-123",
+	sessionMode = "persistent",
 }) {
-	const context = createServerHelperContext({ questionMetaStore });
 	const emitRequestUserInputQuestionCardCalls = [];
 	const registerPausedRovoToolCallCalls = [];
-	const updatePlanSessionCalls = [];
-	const appendPlanCardIdCalls = [];
+	const syncThreadSessionCalls = [];
 	const resumeCalls = [];
+	const replayViaRovoCalls = [];
+	const rovoResumeToolCallsCalls = [];
+	let hasObservedDeferredToolRequest = false;
+	let pausedToolCallHandled = false;
 
-	Object.assign(context, {
-		pausedToolCallRecord,
-		clarificationSubmission,
-		threadId: "thread-123",
-		rovoSessionId: "rovo-session-123",
-		sessionMode: "plan",
-		hasObservedDeferredToolRequest: false,
-		pausedToolCallHandled: false,
-		hasEmittedPlanWidget: false,
-		isRequestUserInputTool: (toolName) => {
-			const normalizedToolName = getNonEmptyString(toolName)?.toLowerCase();
-			return normalizedToolName === "ask_user_questions";
-		},
-		isExitPlanModeTool: () => false,
-		getDeferredToolPartInput: (part) => part?.input ?? null,
-		extractDeferredPlanWidgetPayload: () => null,
-		emitPlanWidgetData: () => {},
-		emitRequestUserInputQuestionCard: (payload) => {
-			emitRequestUserInputQuestionCardCalls.push(payload);
-		},
-		registerPausedRovoToolCall: (payload) => {
-			registerPausedRovoToolCallCalls.push(payload);
-		},
-		updatePlanSession: (threadId, payload) => {
-			updatePlanSessionCalls.push({ threadId, payload });
-		},
-		appendPlanCardId: (threadId, planId) => {
-			appendPlanCardIdCalls.push({ threadId, planId });
-		},
-	});
+	const onPausedToolCalls = async ({ rawEvent, control }) => {
+		const pausedParts = Array.isArray(rawEvent?.parts) ? rawEvent.parts : [];
+		const interactivePart = pausedParts.find((part) => {
+			const toolName = getNonEmptyString(part?.tool_name);
+			return isRequestUserInputTool(toolName) || isExitPlanModeTool(toolName);
+		});
 
-	const handlePausedContinuation = evaluateFunctionSource(
-		HANDLE_PAUSED_CONTINUATION_SOURCE,
-		context,
-	);
+		if (!interactivePart) {
+			const decisions = pausedParts
+				.map((part) => {
+					const toolCallId = getNonEmptyString(part?.tool_call_id);
+					return toolCallId
+						? { tool_call_id: toolCallId, deny_message: null }
+						: null;
+				})
+				.filter(Boolean);
+			if (decisions.length > 0) {
+				await control.resume({ decisions });
+			}
+			return { disconnect: false };
+		}
+
+		const replayDeferredToolResult = await handleReplayDeferredToolRequest({
+			rawEvent,
+			control,
+			threadId,
+			sessionId: rovoSessionId,
+			sessionMode,
+			isRequestUserInputTool,
+			isExitPlanModeTool,
+			syncThreadSessionFromPort: async (...args) => {
+				syncThreadSessionCalls.push(args);
+				return {
+					sessionId: rovoSessionId,
+					sessionMode,
+				};
+			},
+			emitRequestUserInputQuestionCard: (payload) => {
+				emitRequestUserInputQuestionCardCalls.push(payload);
+			},
+			emitExitPlanWidget: () => {},
+			registerPausedToolCall: (payload) => {
+				registerPausedRovoToolCallCalls.push(payload);
+			},
+		});
+
+		if (replayDeferredToolResult.handled) {
+			if (replayDeferredToolResult.hasObservedDeferredToolRequest) {
+				hasObservedDeferredToolRequest = true;
+			}
+			if (replayDeferredToolResult.pausedToolCallHandled) {
+				pausedToolCallHandled = true;
+			}
+			return { disconnect: replayDeferredToolResult.disconnect === true };
+		}
+
+		const decisions = pausedParts
+			.map((part) => {
+				const toolCallId = getNonEmptyString(part?.tool_call_id);
+				return toolCallId
+					? { tool_call_id: toolCallId, deny_message: null }
+					: null;
+			})
+			.filter(Boolean);
+		if (decisions.length > 0) {
+			await control.resume({ decisions });
+		}
+		return { disconnect: false };
+	};
+
+	const rovoResumeToolCalls = async (...args) => {
+		rovoResumeToolCallsCalls.push(args);
+		return { resumed: true };
+	};
+	const replayViaRovo = async (args) => {
+		replayViaRovoCalls.push(args);
+	};
 
 	return {
-		context,
+		get hasObservedDeferredToolRequest() {
+			return hasObservedDeferredToolRequest;
+		},
+		get pausedToolCallHandled() {
+			return pausedToolCallHandled;
+		},
 		emitRequestUserInputQuestionCardCalls,
 		registerPausedRovoToolCallCalls,
-		updatePlanSessionCalls,
-		appendPlanCardIdCalls,
+		syncThreadSessionCalls,
 		resumeCalls,
-		handlePausedContinuation: (rawEvent) =>
-			handlePausedContinuation({
-				rawEvent,
-				control: {
-					port: pausedToolCallRecord.port,
-					resume: async (payload) => {
-						resumeCalls.push(payload);
-						return { resumed: true };
-					},
-					disconnect: () => {},
-					reservePort: () => pausedToolCallRecord.handle || null,
-				},
-			}),
-	};
-}
+		replayViaRovoCalls,
+		rovoResumeToolCallsCalls,
+		onPausedToolCalls,
+		resumePausedClarification: async () => {
+			const resumeDecisions = [
+				buildClarificationResumeDecision({
+					clarificationSubmission,
+					clarificationToolCallId: pausedToolCallRecord.toolCallId,
+					setChatAccepted: false,
+					buildDenyMessageFn:
+						createClarificationDenyMessageBuilder(questionMetaStore),
+				}),
+			].filter(Boolean);
 
-async function runPathAFallbackSnippet(contextOverrides = {}) {
-	const context = createServerHelperContext(contextOverrides);
-	const rovoResumeToolCallsCalls = [];
-	const rovoRequestCalls = [];
-	const replayViaRovoCalls = [];
-	const requestError = contextOverrides.requestError || null;
-	const requestResponse =
-		contextOverrides.requestResponse ??
-		{
-			status: 200,
-			data: JSON.stringify({ response: "Deferred tools set" }),
-		};
-
-	Object.assign(context, {
-		pausedToolCallRecord:
-			contextOverrides.pausedToolCallRecord || {
-				toolCallId: "tool-call-123",
-				port: 8001,
-			},
-		enrichedContextDescription:
-			contextOverrides.enrichedContextDescription ??
-			"[ask_user_questions Result]\nUse the clarified answers to continue.",
-		clarificationSubmission:
-			contextOverrides.clarificationSubmission || null,
-		deferredToolResponse:
-			contextOverrides.deferredToolResponse || {
-				tool_call_id: "tool-call-123",
-				result: {
-					"What kind of app?": ["Dashboard"],
-				},
-			},
-		rovoRequest: async (...args) => {
-			rovoRequestCalls.push(args);
-			if (requestError) {
-				throw requestError;
+			if (resumeDecisions.length === 0) {
+				throw new Error(
+					`Paused tool continuation ${pausedToolCallRecord.toolCallId} is missing a resume decision.`,
+				);
 			}
-			return requestResponse;
-		},
-		rovoResumeToolCalls: async (...args) => {
-			rovoResumeToolCallsCalls.push(args);
-			return { resumed: true };
-		},
-		streamCommonOptions:
-			contextOverrides.streamCommonOptions || {
+
+			await rovoResumeToolCalls(pausedToolCallRecord.port, {
+				decisions: resumeDecisions,
+			});
+			await replayViaRovo({
+				port: pausedToolCallRecord.port,
+				portHandle: pausedToolCallRecord.handle,
 				onTextDelta: () => {},
-			},
-		handlePausedContinuation:
-			contextOverrides.handlePausedContinuation || (async () => ({ disconnect: false })),
-		replayViaRovo: async (args) => {
-			replayViaRovoCalls.push(args);
+				skipReplayUntilToolCallId: pausedToolCallRecord.toolCallId,
+				onPausedToolCalls,
+			});
 		},
-	});
-
-	const result = await vm.runInNewContext(
-		`(async () => {
-			${PATH_A_FALLBACK_SNIPPET_SOURCE}
-			return {
-				fallbackClarificationSubmission,
-				fallbackDenyMessage,
-				setChatAccepted,
-				setChatFailure,
-				shouldUseDenyMessageFallback,
-				resumeResponse,
-			};
-		})()`,
-		context,
-		{ filename: SERVER_FILE },
-	);
-
-	return {
-		result,
-		rovoRequestCalls,
-		rovoResumeToolCallsCalls,
-		replayViaRovoCalls,
+		createControl: (handle = pausedToolCallRecord.handle || null) => ({
+			port: pausedToolCallRecord.port,
+			resume: async (payload) => {
+				resumeCalls.push(payload);
+				return { resumed: true };
+			},
+			disconnect: () => {},
+			reservePort: () => handle,
+		}),
 	};
 }
 
-test("Path A resumes paused clarification via deny_message without queueing DeferredToolResponse", async () => {
-	const {
-		result,
-		rovoRequestCalls,
-		rovoResumeToolCallsCalls,
-		replayViaRovoCalls,
-	} =
-		await runPathAFallbackSnippet();
-
-	assert.equal(rovoRequestCalls.length, 0);
-	assert.equal(result.setChatAccepted, false);
-	assert.equal(result.shouldUseDenyMessageFallback, true);
-	assert.equal(rovoResumeToolCallsCalls.length, 1);
-	assert.equal(replayViaRovoCalls.length, 1);
-	assert.equal(replayViaRovoCalls[0].port, 8001);
-	assert.equal(replayViaRovoCalls[0].portHandle, undefined);
-	assert.equal(
-		replayViaRovoCalls[0].skipReplayUntilToolCallId,
-		"tool-call-123",
-	);
-	assert.equal(typeof replayViaRovoCalls[0].onTextDelta, "function");
-	assert.equal(typeof replayViaRovoCalls[0].onPausedToolCalls, "function");
-	assert.deepEqual(toPlainValue(rovoResumeToolCallsCalls[0]), [
-		8001,
-		{
-			decisions: [
-				{
-					tool_call_id: "tool-call-123",
-					deny_message: [
-						"The user answered the clarification questions.",
-						"Use these answers instead of calling the clarification tool again:",
-						"- What kind of app?: Dashboard",
-					].join("\n"),
-				},
-			],
-		},
-	]);
-});
-
-test("Path A no longer depends on set_chat_message success for clarification replay", async () => {
-	const { result, rovoResumeToolCallsCalls, replayViaRovoCalls } = await runPathAFallbackSnippet({
-		requestResponse: {
-			status: 503,
-			data: JSON.stringify({ response: "Chat message set" }),
-		},
-	});
-
-	assert.equal(result.setChatAccepted, false);
-	assert.equal(result.shouldUseDenyMessageFallback, true);
-	assert.equal(replayViaRovoCalls.length, 1);
-	assert.deepEqual(toPlainValue(result.fallbackClarificationSubmission), {
-		sessionId: "request-user-input-tool-call-123",
-		answers: {
-			"What kind of app?": ["Dashboard"],
-		},
-	});
-	assert.equal(rovoResumeToolCallsCalls.length, 1);
-	assert.match(
-		rovoResumeToolCallsCalls[0][1].decisions[0].deny_message,
-		/- What kind of app\?: Dashboard/u,
-	);
-});
-
-test("Path A ignores set_chat_message transport errors for paused clarification replay", async () => {
-	const { result, rovoResumeToolCallsCalls, replayViaRovoCalls } = await runPathAFallbackSnippet({
-		requestError: new Error("network down"),
-	});
-
-	assert.equal(result.setChatAccepted, false);
-	assert.equal(result.shouldUseDenyMessageFallback, true);
-	assert.equal(result.setChatFailure ?? null, null);
-	assert.equal(replayViaRovoCalls.length, 1);
-	assert.equal(rovoResumeToolCallsCalls.length, 1);
-	assert.match(
-		rovoResumeToolCallsCalls[0][1].decisions[0].deny_message,
-		/The user answered the clarification questions\./u,
-	);
-});
-
-test("replay duplicate suppression resumes replayed ask_user_questions with deny_message", async () => {
+test("paused clarification resume decision uses adapted answers in deny_message", () => {
+	const questionMetaStore = createQuestionMetaStore();
 	const clarificationSubmission = {
 		sessionId: "request-user-input-tool-call-123",
 		answers: {
 			"q-1": "dashboard",
 		},
 	};
-	const questionMetaStore = new Map([
-		[
-			clarificationSubmission.sessionId,
-			[
-				{
-					id: "q-1",
-					label: "What kind of app?",
-					options: [
-						{ id: "dashboard", label: "Dashboard" },
-						{ id: "docs", label: "Documentation" },
-					],
-				},
-			],
-		],
-	]);
-	const harness = createReplayHarness({
-		pausedToolCallRecord: {
-			kind: "clarification",
-			toolCallId: "tool-call-123",
-			port: 8123,
-			handle: null,
-		},
+
+	const decision = buildClarificationResumeDecision({
 		clarificationSubmission,
-		questionMetaStore,
+		clarificationToolCallId: "tool-call-123",
+		setChatAccepted: false,
+		buildDenyMessageFn: createClarificationDenyMessageBuilder(questionMetaStore),
 	});
 
-	const result = await harness.handlePausedContinuation({
-		parts: [
-			{
-				tool_name: "ask_user_questions",
-				tool_call_id: "tool-call-456",
-				input: {
-					result: {
-						questions: [
-							{
-								id: "q-1",
-								question: "What kind of app?",
-								options: [
-									{ id: "dashboard", label: "Dashboard" },
-									{ id: "docs", label: "Documentation" },
-								],
-							},
-						],
-					},
-				},
-			},
-		],
+	assert.deepEqual(toPlainValue(decision), {
+		tool_call_id: "tool-call-123",
+		deny_message: [
+			"The user answered the clarification questions.",
+			"Use these answers instead of calling the clarification tool again:",
+			"- What kind of app?: Dashboard",
+		].join("\n"),
 	});
-
-	assert.equal(result.disconnect, false);
-	assert.equal(harness.resumeCalls.length, 1);
-	assert.deepEqual(toPlainValue(harness.resumeCalls[0]), {
-		decisions: [
-			{
-				tool_call_id: "tool-call-456",
-				deny_message: [
-					"The user answered the clarification questions.",
-					"Use these answers instead of calling the clarification tool again:",
-					"- What kind of app?: Dashboard",
-				].join("\n"),
-			},
-		],
-	});
-	assert.equal(harness.emitRequestUserInputQuestionCardCalls.length, 0);
-	assert.equal(harness.registerPausedRovoToolCallCalls.length, 0);
-	assert.equal(harness.updatePlanSessionCalls.length, 0);
-	assert.equal(harness.context.hasObservedDeferredToolRequest, false);
-	assert.equal(harness.context.pausedToolCallHandled, false);
 });
 
-test("replay duplicate suppression ignores the original resumed tool call boundary", async () => {
-	const harness = createReplayHarness({
+test("paused clarification replay resumes with deny_message before replaying the port", async () => {
+	const questionMetaStore = createQuestionMetaStore();
+	const harness = createPausedReplayHarness({
 		pausedToolCallRecord: {
 			kind: "clarification",
 			toolCallId: "tool-call-123",
-			port: 8123,
+			port: 8001,
 			handle: null,
 		},
 		clarificationSubmission: {
 			sessionId: "request-user-input-tool-call-123",
-			answers: { "q-1": "dashboard" },
+			answers: {
+				"q-1": "dashboard",
+			},
 		},
-		questionMetaStore: new Map(),
+		questionMetaStore,
 	});
 
-	const result = await harness.handlePausedContinuation({
-		parts: [
+	await harness.resumePausedClarification();
+
+	assert.deepEqual(toPlainValue(harness.rovoResumeToolCallsCalls), [
+		[
+			8001,
 			{
-				tool_name: "ask_user_questions",
-				tool_call_id: "tool-call-123",
-				input: {
-					questions: [
-						{
-							id: "q-1",
-							question: "What kind of app?",
-							options: [{ id: "dashboard", label: "Dashboard" }],
-						},
-					],
-				},
+				decisions: [
+					{
+						tool_call_id: "tool-call-123",
+						deny_message: [
+							"The user answered the clarification questions.",
+							"Use these answers instead of calling the clarification tool again:",
+							"- What kind of app?: Dashboard",
+						].join("\n"),
+					},
+				],
 			},
 		],
-	});
-
-	assert.equal(result.disconnect, false);
-	assert.equal(harness.resumeCalls.length, 0);
-	assert.equal(harness.emitRequestUserInputQuestionCardCalls.length, 0);
-	assert.equal(harness.registerPausedRovoToolCallCalls.length, 0);
-	assert.equal(harness.updatePlanSessionCalls.length, 0);
+	]);
+	assert.equal(harness.replayViaRovoCalls.length, 1);
+	assert.equal(harness.replayViaRovoCalls[0].port, 8001);
+	assert.equal(harness.replayViaRovoCalls[0].portHandle, null);
+	assert.equal(
+		harness.replayViaRovoCalls[0].skipReplayUntilToolCallId,
+		"tool-call-123",
+	);
+	assert.equal(typeof harness.replayViaRovoCalls[0].onTextDelta, "function");
+	assert.equal(
+		typeof harness.replayViaRovoCalls[0].onPausedToolCalls,
+		"function",
+	);
 });
 
-test("replay continuation emits a new clarification card for changed follow-up questions", async () => {
-	const clarificationSubmission = {
-		sessionId: "request-user-input-tool-call-123",
-		answers: {
-			"q-1": "dashboard",
-		},
-	};
-	const questionMetaStore = new Map([
-		[
-			clarificationSubmission.sessionId,
-			[
-				{
-					id: "q-1",
-					label: "What kind of app?",
-					options: [
-						{ id: "dashboard", label: "Dashboard" },
-						{ id: "docs", label: "Documentation" },
-					],
-				},
-			],
-		],
-	]);
+test("replay continuation emits changed follow-up questions as a new paused clarification", async () => {
 	const handle = { release() {} };
-	const followUpHarness = createReplayHarness({
+	const harness = createPausedReplayHarness({
 		pausedToolCallRecord: {
 			kind: "clarification",
 			toolCallId: "tool-call-123",
 			port: 8123,
 			handle,
 		},
-		clarificationSubmission,
-		questionMetaStore,
-	});
-
-	const result = await followUpHarness.handlePausedContinuation({
-		parts: [
-			{
-				tool_name: "ask_user_questions",
-				tool_call_id: "tool-call-789",
-				input: {
-					questions: [
-						{
-							id: "q-2",
-							question: "Which deployment target should we use?",
-							options: [
-								{ id: "cloud", label: "Cloud" },
-								{ id: "dc", label: "Data Center" },
-							],
-						},
-					],
-				},
+		clarificationSubmission: {
+			sessionId: "request-user-input-tool-call-123",
+			answers: {
+				"q-1": "dashboard",
 			},
-		],
+		},
+		questionMetaStore: createQuestionMetaStore(),
 	});
 
-	assert.equal(result.disconnect, true);
-	assert.equal(followUpHarness.resumeCalls.length, 0);
-	assert.deepEqual(toPlainValue(followUpHarness.emitRequestUserInputQuestionCardCalls), [
+	const result = await harness.onPausedToolCalls({
+		rawEvent: {
+			parts: [
+				{
+					tool_name: "ask_user_questions",
+					tool_call_id: "tool-call-789",
+					input: {
+						questions: [
+							{
+								id: "q-2",
+								question: "Which deployment target should we use?",
+								options: [
+									{ id: "cloud", label: "Cloud" },
+									{ id: "dc", label: "Data Center" },
+								],
+							},
+						],
+					},
+				},
+			],
+		},
+		control: harness.createControl(handle),
+	});
+
+	assert.deepEqual(result, { disconnect: true });
+	assert.deepEqual(toPlainValue(harness.emitRequestUserInputQuestionCardCalls), [
 		{
 			toolName: "ask_user_questions",
 			toolCallId: "tool-call-789",
@@ -609,39 +344,71 @@ test("replay continuation emits a new clarification card for changed follow-up q
 			source: "deferred_tool_request",
 		},
 	]);
-	assert.equal(followUpHarness.registerPausedRovoToolCallCalls.length, 1);
-	assert.equal(
-		followUpHarness.registerPausedRovoToolCallCalls[0].toolCallId,
-		"tool-call-789",
-	);
-	assert.equal(followUpHarness.registerPausedRovoToolCallCalls[0].port, 8123);
-	assert.equal(followUpHarness.registerPausedRovoToolCallCalls[0].handle, handle);
-	assert.equal(
-		followUpHarness.registerPausedRovoToolCallCalls[0].threadId,
-		"thread-123",
-	);
-	assert.equal(
-		followUpHarness.registerPausedRovoToolCallCalls[0].sessionId,
-		"rovo-session-123",
-	);
-	assert.equal(
-		followUpHarness.registerPausedRovoToolCallCalls[0].sessionMode,
-		"plan",
-	);
-	assert.equal(
-		followUpHarness.registerPausedRovoToolCallCalls[0].kind,
-		"clarification",
-	);
-	assert.deepEqual(toPlainValue(followUpHarness.updatePlanSessionCalls), [
+	assert.deepEqual(harness.syncThreadSessionCalls, [
+		[
+			"thread-123",
+			8123,
+			{ sessionMode: "persistent" },
+		],
+	]);
+	assert.deepEqual(harness.registerPausedRovoToolCallCalls, [
 		{
+			toolCallId: "tool-call-789",
+			port: 8123,
+			handle,
 			threadId: "thread-123",
-			payload: {
-				isActive: true,
-				phase: "qa",
-				deferredToolCallId: "tool-call-789",
-			},
+			sessionId: "rovo-session-123",
+			sessionMode: "persistent",
+			kind: "clarification",
 		},
 	]);
-	assert.equal(followUpHarness.context.hasObservedDeferredToolRequest, true);
-	assert.equal(followUpHarness.context.pausedToolCallHandled, true);
+	assert.equal(harness.hasObservedDeferredToolRequest, true);
+	assert.equal(harness.pausedToolCallHandled, true);
+	assert.equal(harness.resumeCalls.length, 0);
+});
+
+test("replay continuation auto-resumes non-interactive paused parts", async () => {
+	const harness = createPausedReplayHarness({
+		pausedToolCallRecord: {
+			kind: "clarification",
+			toolCallId: "tool-call-123",
+			port: 8123,
+			handle: null,
+		},
+		clarificationSubmission: {
+			sessionId: "request-user-input-tool-call-123",
+			answers: {
+				"q-1": "dashboard",
+			},
+		},
+		questionMetaStore: createQuestionMetaStore(),
+	});
+
+	const result = await harness.onPausedToolCalls({
+		rawEvent: {
+			parts: [
+				{
+					tool_name: "read_file",
+					tool_call_id: "tool-call-read",
+				},
+			],
+		},
+		control: harness.createControl(),
+	});
+
+	assert.deepEqual(result, { disconnect: false });
+	assert.deepEqual(harness.resumeCalls, [
+		{
+			decisions: [
+				{
+					tool_call_id: "tool-call-read",
+					deny_message: null,
+				},
+			],
+		},
+	]);
+	assert.equal(harness.emitRequestUserInputQuestionCardCalls.length, 0);
+	assert.equal(harness.registerPausedRovoToolCallCalls.length, 0);
+	assert.equal(harness.hasObservedDeferredToolRequest, false);
+	assert.equal(harness.pausedToolCallHandled, false);
 });

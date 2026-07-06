@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = join(__dirname, "..", "..");
 const SOURCE = readFileSync(join(__dirname, "breadcrumb.tsx"), "utf8");
@@ -9,14 +11,8 @@ const DEMO_SOURCE = readFileSync(
 	join(ROOT, "components", "website", "demos", "ui", "breadcrumb-demo.tsx"),
 	"utf8",
 );
-const REGISTRY_SOURCE = readFileSync(
-	join(ROOT, "components", "website", "registry.ts"),
-	"utf8",
-);
-const DETAILS_SOURCE = readFileSync(
-	join(ROOT, "app", "data", "details", "ui.ts"),
-	"utf8",
-);
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
+const DETAILS_SOURCE = readDetailCategorySource("ui");
 
 test("Breadcrumb exposes ADS medium and small sizes through root context", () => {
 	assert.match(SOURCE, /type BreadcrumbSize = "medium" \| "small"/);

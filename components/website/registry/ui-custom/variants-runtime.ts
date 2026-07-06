@@ -1,0 +1,376 @@
+import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
+
+export const UI_CUSTOM_RUNTIME_VARIANT_DEMOS: Record<string, ComponentType> = {
+	"schema-display-demo-with-params": dynamic(
+		() =>
+			import("../../demos/ui-custom/schema-display-demo").then((mod) => ({
+				default: mod.SchemaDisplayDemoWithParams,
+			})),
+		{ ssr: false },
+	),
+	"schema-display-demo-with-body": dynamic(
+		() =>
+			import("../../demos/ui-custom/schema-display-demo").then((mod) => ({
+				default: mod.SchemaDisplayDemoWithBody,
+			})),
+		{ ssr: false },
+	),
+	"schema-display-demo-nested": dynamic(
+		() =>
+			import("../../demos/ui-custom/schema-display-demo").then((mod) => ({
+				default: mod.SchemaDisplayDemoNested,
+			})),
+		{ ssr: false },
+	),
+	"schema-display-demo-methods": dynamic(
+		() =>
+			import("../../demos/ui-custom/schema-display-demo").then((mod) => ({
+				default: mod.SchemaDisplayDemoMethods,
+			})),
+		{ ssr: false },
+	),
+	"schema-display-demo-custom-composition": dynamic(
+		() =>
+			import("../../demos/ui-custom/schema-display-demo").then((mod) => ({
+				default: mod.SchemaDisplayDemoCustomComposition,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-custom-duration": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoCustomDuration,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-custom-spread": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoCustomSpread,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWave,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave-colors": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWaveColors,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave-geometry": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWaveGeometry,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave-depth": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWaveDepth,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave-timing-spread": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWaveTimingSpread,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-wave-full-config": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoWaveFullConfig,
+			})),
+		{ ssr: false },
+	),
+	"shimmer-demo-heading": dynamic(
+		() =>
+			import("../../demos/ui-custom/shimmer-demo").then((mod) => ({
+				default: mod.ShimmerDemoHeading,
+			})),
+		{ ssr: false },
+	),
+	"snippet-demo-plain": dynamic(
+		() =>
+			import("../../demos/ui-custom/snippet-demo").then((mod) => ({
+				default: mod.SnippetDemoPlain,
+			})),
+		{ ssr: false },
+	),
+	"snippet-demo-multiple": dynamic(
+		() =>
+			import("../../demos/ui-custom/snippet-demo").then((mod) => ({
+				default: mod.SnippetDemoMultiple,
+			})),
+		{ ssr: false },
+	),
+	"snippet-demo-callbacks": dynamic(
+		() =>
+			import("../../demos/ui-custom/snippet-demo").then((mod) => ({
+				default: mod.SnippetDemoCallbacks,
+			})),
+		{ ssr: false },
+	),
+	"sources-demo-custom-rendering": dynamic(
+		() =>
+			import("../../demos/ui-custom/sources-demo").then((mod) => ({
+				default: mod.SourcesDemoCustomRendering,
+			})),
+		{ ssr: false },
+	),
+	"speech-input-demo-with-transcript": dynamic(
+		() =>
+			import("../../demos/ui-custom/speech-input-demo").then((mod) => ({
+				default: mod.SpeechInputDemoWithTranscript,
+			})),
+		{ ssr: false },
+	),
+	"speech-input-demo-sizes": dynamic(
+		() =>
+			import("../../demos/ui-custom/speech-input-demo").then((mod) => ({
+				default: mod.SpeechInputDemoSizes,
+			})),
+		{ ssr: false },
+	),
+	"speech-input-demo-disabled": dynamic(
+		() =>
+			import("../../demos/ui-custom/speech-input-demo").then((mod) => ({
+				default: mod.SpeechInputDemoDisabled,
+			})),
+		{ ssr: false },
+	),
+	"terminal-demo-streaming": dynamic(
+		() =>
+			import("../../demos/ui-custom/terminal-demo").then((mod) => ({
+				default: mod.TerminalDemoStreaming,
+			})),
+		{ ssr: false },
+	),
+	"terminal-demo-clearable": dynamic(
+		() =>
+			import("../../demos/ui-custom/terminal-demo").then((mod) => ({
+				default: mod.TerminalDemoClearable,
+			})),
+		{ ssr: false },
+	),
+	"terminal-demo-composed": dynamic(
+		() =>
+			import("../../demos/ui-custom/terminal-demo").then((mod) => ({
+				default: mod.TerminalDemoComposed,
+			})),
+		{ ssr: false },
+	),
+	"terminal-demo-ansi": dynamic(
+		() =>
+			import("../../demos/ui-custom/terminal-demo").then((mod) => ({
+				default: mod.TerminalDemoAnsi,
+			})),
+		{ ssr: false },
+	),
+	"test-results-demo-with-progress": dynamic(
+		() =>
+			import("../../demos/ui-custom/test-results-demo").then((mod) => ({
+				default: mod.TestResultsDemoWithProgress,
+			})),
+		{ ssr: false },
+	),
+	"test-results-demo-with-errors": dynamic(
+		() =>
+			import("../../demos/ui-custom/test-results-demo").then((mod) => ({
+				default: mod.TestResultsDemoWithErrors,
+			})),
+		{ ssr: false },
+	),
+	"test-results-demo-running": dynamic(
+		() =>
+			import("../../demos/ui-custom/test-results-demo").then((mod) => ({
+				default: mod.TestResultsDemoRunning,
+			})),
+		{ ssr: false },
+	),
+	"stack-trace-demo-open": dynamic(
+		() =>
+			import("../../demos/ui-custom/stack-trace-demo").then((mod) => ({
+				default: mod.StackTraceDemoOpen,
+			})),
+		{ ssr: false },
+	),
+	"stack-trace-demo-filter-internals": dynamic(
+		() =>
+			import("../../demos/ui-custom/stack-trace-demo").then((mod) => ({
+				default: mod.StackTraceDemoFilterInternals,
+			})),
+		{ ssr: false },
+	),
+	"stack-trace-demo-clickable": dynamic(
+		() =>
+			import("../../demos/ui-custom/stack-trace-demo").then((mod) => ({
+				default: mod.StackTraceDemoClickable,
+			})),
+		{ ssr: false },
+	),
+	"suggestion-demo-vertical": dynamic(
+		() =>
+			import("../../demos/ui-custom/suggestion-demo").then((mod) => ({
+				default: mod.SuggestionDemoVertical,
+			})),
+		{ ssr: false },
+	),
+	"suggestion-demo-with-icons": dynamic(
+		() =>
+			import("../../demos/ui-custom/suggestion-demo").then((mod) => ({
+				default: mod.SuggestionDemoWithIcons,
+			})),
+		{ ssr: false },
+	),
+	"tool-demo-running": dynamic(
+		() =>
+			import("../../demos/ui-custom/tool-demo").then((mod) => ({
+				default: mod.ToolDemoRunning,
+			})),
+		{ ssr: false },
+	),
+	"tool-demo-error": dynamic(
+		() =>
+			import("../../demos/ui-custom/tool-demo").then((mod) => ({
+				default: mod.ToolDemoError,
+			})),
+		{ ssr: false },
+	),
+	"tool-demo-collapsed": dynamic(
+		() =>
+			import("../../demos/ui-custom/tool-demo").then((mod) => ({
+				default: mod.ToolDemoCollapsed,
+			})),
+		{ ssr: false },
+	),
+	"tool-demo-pending": dynamic(
+		() =>
+			import("../../demos/ui-custom/tool-demo").then((mod) => ({
+				default: mod.ToolDemoPending,
+			})),
+		{ ssr: false },
+	),
+	"tool-demo-approval": dynamic(
+		() =>
+			import("../../demos/ui-custom/tool-demo").then((mod) => ({
+				default: mod.ToolDemoApproval,
+			})),
+		{ ssr: false },
+	),
+	"twg-tool-demo-single-source": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-tool-demo").then((mod) => ({
+				default: mod.TwgToolDemoSingleSource,
+			})),
+		{ ssr: false },
+	),
+	"twg-tool-demo-multiple-sources": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-tool-demo").then((mod) => ({
+				default: mod.TwgToolDemoMultipleSources,
+			})),
+		{ ssr: false },
+	),
+	"twg-tool-demo-completed": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-tool-demo").then((mod) => ({
+				default: mod.TwgToolDemoCompleted,
+			})),
+		{ ssr: false },
+	),
+	"twg-appstack-demo-static": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-appstack-demo").then((mod) => ({
+				default: mod.TWGAppstackDemoStatic,
+			})),
+		{ ssr: false },
+	),
+	"twg-appstack-demo-overflow": dynamic(
+		() =>
+			import("../../demos/ui-custom/twg-appstack-demo").then((mod) => ({
+				default: mod.TWGAppstackDemoOverflow,
+			})),
+		{ ssr: false },
+	),
+	"transcription-demo-static": dynamic(
+		() =>
+			import("../../demos/ui-custom/transcription-demo").then((mod) => ({
+				default: mod.TranscriptionDemoStatic,
+			})),
+		{ ssr: false },
+	),
+	"transcription-demo-with-seek": dynamic(
+		() =>
+			import("../../demos/ui-custom/transcription-demo").then((mod) => ({
+				default: mod.TranscriptionDemoWithSeek,
+			})),
+		{ ssr: false },
+	),
+	"voice-selector-demo-with-attributes": dynamic(
+		() =>
+			import("../../demos/ui-custom/voice-selector-demo").then((mod) => ({
+				default: mod.VoiceSelectorDemoWithAttributes,
+			})),
+		{ ssr: false },
+	),
+	"voice-selector-demo-multi-provider": dynamic(
+		() =>
+			import("../../demos/ui-custom/voice-selector-demo").then((mod) => ({
+				default: mod.VoiceSelectorDemoMultiProvider,
+			})),
+		{ ssr: false },
+	),
+	"voice-selector-demo-with-preview": dynamic(
+		() =>
+			import("../../demos/ui-custom/voice-selector-demo").then((mod) => ({
+				default: mod.VoiceSelectorDemoWithPreview,
+			})),
+		{ ssr: false },
+	),
+	"web-preview-demo-basic": dynamic(
+		() =>
+			import("../../demos/ui-custom/web-preview-demo").then((mod) => ({
+				default: mod.WebPreviewDemoBasic,
+			})),
+		{ ssr: false },
+	),
+	"web-preview-demo-with-console": dynamic(
+		() =>
+			import("../../demos/ui-custom/web-preview-demo").then((mod) => ({
+				default: mod.WebPreviewDemoWithConsole,
+			})),
+		{ ssr: false },
+	),
+	"web-preview-demo-fullscreen": dynamic(
+		() =>
+			import("../../demos/ui-custom/web-preview-demo").then((mod) => ({
+				default: mod.WebPreviewDemoFullscreen,
+			})),
+		{ ssr: false },
+	),
+	"web-preview-demo-url-change": dynamic(
+		() =>
+			import("../../demos/ui-custom/web-preview-demo").then((mod) => ({
+				default: mod.WebPreviewDemoUrlChange,
+			})),
+		{ ssr: false },
+	),
+	"web-preview-demo-external": dynamic(
+		() =>
+			import("../../demos/ui-custom/web-preview-demo").then((mod) => ({
+				default: mod.WebPreviewDemoExternal,
+			})),
+		{ ssr: false },
+	),
+};

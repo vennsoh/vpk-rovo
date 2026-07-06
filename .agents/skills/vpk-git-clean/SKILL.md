@@ -1,6 +1,15 @@
 ---
 name: vpk-git-clean
 description: "Use for VPK-rovo git housekeeping: removing landed worktrees, deleting merged PR source branches, pruning stale tracking refs, and closing explicitly abandoned PRs. This is the deferred cleanup step that `vpk-git-ship` intentionally does NOT run during a ship, because an agent cannot remove the worktree it is standing in — so cleanup is a separate, later sweep run from the main checkout. Use whenever the user says \"vpk-git-clean\", \"clean up worktrees\", \"clean up branches\", \"remove merged worktrees\", \"delete the branch after merge\", \"prune stale refs\", \"tidy worktrees\", \"sweep landed worktrees\", \"my worktrees are piling up\", \"remove this worktree\", \"free worktree ports\", \"kill the dev server for a worktree\", or after a `vpk-git-ship` ship reported a worktree was left active for follow-up removal. Run it from the main checkout, not from inside a worktree you want removed."
+purpose: Clean landed VPK worktrees, merged branches, tracking refs, and explicitly abandoned PR heads only after evidence proves they are safe to remove.
+owner: VPK
+category: git-workflow
+inputs: Main checkout state, worktree list, branch list, PR merge evidence, live process checks, and user-approved cleanup scope.
+outputs: Removed proven-landed worktrees/branches, pruned refs, cleanup report, and preserved ambiguous or dirty targets.
+required_tools: shell, git, gh, ps, pgrep
+validation_command: git status --short
+generated_artifacts: none
+common_failure_modes: Running inside the target worktree, deleting unmerged work, touching dirty worktrees, or treating ambiguous untracked files as cleanup residue.
 ---
 
 # VPK Git Clean

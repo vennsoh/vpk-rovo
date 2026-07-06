@@ -35,7 +35,7 @@ function loadFixture() {
 }
 
 // Allowed mode value sets, mirrored from
-// components/blocks/agent/components/agent.tsx (REASONING_MODE_SECTIONS,
+// components/blocks/agent-2/components/agent-2.tsx (REASONING_MODE_SECTIONS,
 // KNOWLEDGE_MODE_OPTIONS, MEMORY_MODE_OPTIONS).
 const REASONING_MODES = new Set([
 	"quick-auto",

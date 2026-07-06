@@ -15,10 +15,10 @@ import type {
 import ChatPanel from "@/components/projects/sidebar-chat/page";
 import type { ChatPanelCustomAgentTabs, ChatPanelGreetingProps } from "@/components/projects/sidebar-chat/page";
 import RovoFloatingChat from "@/components/projects/rovo-floating-chat/components/rovo-floating-chat";
-import type { ChatContextBarDescriptor } from "@/components/projects/sidebar-chat/lib/chat-context-bar";
+import type { ChatContextBarDescriptor } from "@/components/projects/shared/lib/chat-context-bar";
 import type { ChatSurfaceSwitchHandler } from "@/components/projects/shared/components/chat-surface-switcher";
 import { SidebarResizeHandle } from "@/components/ui/sidebar";
-import { useSidebarResize } from "@/components/projects/rovo/hooks/use-sidebar-resize";
+import { useSidebarResize } from "@/components/projects/rovo-core/hooks/use-sidebar-resize";
 import { useRovoChat } from "@/app/contexts";
 
 type Product = "admin" | "agents" | "home" | "jira" | "confluence" | "rovo" | "search" | "studio";

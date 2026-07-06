@@ -17,7 +17,7 @@ import {
 import { textareaCSS } from "@/components/projects/shared/components/rovo-composer-styles";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import ChatContextBar from "@/components/projects/sidebar-chat/components/chat-context-bar";
+import ChatContextBar from "@/components/projects/shared/components/chat-context-bar";
 import type { RovoAppPlanExecutionTrackerViewModel } from "@/components/projects/shared/lib/rovo-app-plan-execution-tracker";
 import type { RovoAppQueuedAction } from "@/lib/rovo-app-types";
 import ArrowUpIcon from "@atlaskit/icon/core/arrow-up";

@@ -3,155 +3,93 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const HOOK_SOURCE = fs.readFileSync(path.join(__dirname, "use-rovo-app.ts"), "utf8");
-const ROVO_HOOK_SOURCE = fs.readFileSync(
-	path.join(process.cwd(), "components/projects/rovo/hooks/use-rovo-app.ts"),
-	"utf8",
-);
-const THREAD_LIST_SOURCE = fs.readFileSync(
-	path.join(__dirname, "use-rovo-app-thread-list.ts"),
-	"utf8",
-);
-const ROVO_THREAD_LIST_SOURCE = fs.readFileSync(
-	path.join(process.cwd(), "components/projects/rovo/hooks/use-rovo-app-thread-list.ts"),
-	"utf8",
-);
-const TYPES_SOURCE = fs.readFileSync(
-	path.join(process.cwd(), "lib/rovo-app-types.ts"),
-	"utf8",
-);
+function readSource(relativePath) {
+	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
+}
 
-test("passive Rovo app thread refresh is quiet and not a 3-second poll", () => {
-	for (const source of [HOOK_SOURCE, ROVO_HOOK_SOURCE]) {
-		assert.match(source, /const ROVO_APP_PASSIVE_THREAD_REFRESH_INTERVAL_MS = 15_000;/u);
-		assert.match(source, /reportBackendUnavailable\?: boolean;/u);
-		assert.match(source, /const reportBackendUnavailable = options\.reportBackendUnavailable \?\? true;/u);
-		assert.match(source, /void refreshThreads\(\{ reportBackendUnavailable: false \}\);/u);
-		assert.match(source, /if \(reportBackendUnavailable\) \{\s*setInputError\(getRovoAppBackendUnavailableUserMessage\(\)\);/u);
-		assert.doesNotMatch(source, /void refreshThreads\(\{ reportBackendUnavailable: false \}\);[\s\S]{0,160}\}, 3000\);/u);
+const STUDIO_ROUTE_HOOK_SOURCE = readSource("components/projects/studio/hooks/use-rovo-app.ts");
+const ROVO_ROUTE_HOOK_SOURCE = readSource("components/projects/rovo/hooks/use-rovo-app.ts");
+const CORE_HOOK_SOURCE = readSource("components/projects/rovo-core/hooks/use-rovo-app-core.ts");
+const STUDIO_APP_ADAPTER_SOURCE = readSource("components/projects/studio/studio-app-adapter.ts");
+const ROVO_APP_ADAPTER_SOURCE = readSource("components/projects/rovo/rovo-app-adapter.ts");
+const CHAT_TRANSPORT_SOURCE = readSource("components/projects/rovo-core/hooks/use-rovo-app-chat-transport.ts");
+const CHAT_REQUEST_BODY_SOURCE = readSource("components/projects/rovo-core/lib/rovo-app-chat-request-body.ts");
+
+function assertIncludesAll(source, snippets) {
+	for (const snippet of snippets) {
+		assert.match(source, snippet);
 	}
+}
 
-	assert.doesNotMatch(THREAD_LIST_SOURCE, /setInterval\(/u);
-	assert.match(THREAD_LIST_SOURCE, /document\.addEventListener\("visibilitychange", handleVisibilityChange\);/u);
-	assert.match(ROVO_THREAD_LIST_SOURCE, /const ROVO_APP_PASSIVE_THREAD_REFRESH_INTERVAL_MS = 15_000;/u);
-	assert.doesNotMatch(ROVO_THREAD_LIST_SOURCE, /setInterval\([\s\S]*,\s*3000\);/u);
+test("Studio useRovoApp remains a thin route adapter over shared Rovo core", () => {
+	assertIncludesAll(STUDIO_ROUTE_HOOK_SOURCE, [
+		/import \{ useRovoAppQueue \} from "@\/app\/studio\/rovo-queue-provider";/u,
+		/import \{ usePersistentState \} from "@\/components\/projects\/control-plane\/lib\/use-persistent-state";/u,
+		/import \{ studioAppAdapter \} from "@\/components\/projects\/studio\/studio-app-adapter";/u,
+		/import \{[\s\S]*useRovoAppCore,[\s\S]*type RovoAppHookOptions,[\s\S]*type RovoAppHookResult,[\s\S]*\} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-core";/u,
+		/const STUDIO_CLARIFICATION_BEHAVIOR = \{[\s\S]*dismissUsesPlanMode: true,[\s\S]*includeDeferredToolPlanMode: false,[\s\S]*rollbackFailedSend: true,[\s\S]*\} as const;/u,
+		/usePersistentState<RovoAppSendMode>\("rovo-app-send-mode", "queue"\)/u,
+		/return useRovoAppCore\(\{[\s\S]*clarificationBehavior: STUDIO_CLARIFICATION_BEHAVIOR,[\s\S]*queue,[\s\S]*routeAdapter: studioAppAdapter,[\s\S]*sendMode,[\s\S]*setSendMode,[\s\S]*\}\);/u,
+	]);
+
+	assert.doesNotMatch(STUDIO_ROUTE_HOOK_SOURCE, /DefaultChatTransport|useChat\(|fetchRovoApp|submitRovoApp|setInterval\(/u);
 });
 
-test("Studio thread list keeps its serialized refresh cache aligned with optimistic deletes", () => {
-	assert.match(
-		THREAD_LIST_SOURCE,
-		/function serializeRovoAppThreads\(threads: ReadonlyArray<RovoAppThread>\): string \{\s*return JSON\.stringify\(threads\);\s*\}/u,
-	);
-	assert.match(
-		THREAD_LIST_SOURCE,
-		/const nextSerialized = serializeRovoAppThreads\(result\);/u,
-	);
-	assert.match(
-		THREAD_LIST_SOURCE,
-		/setThreads\(\(prev\) => \{\s*const nextThreads = prev\.filter\(\(t\) => t\.id !== threadId\);\s*lastSerializedRef\.current = serializeRovoAppThreads\(nextThreads\);\s*return nextThreads;\s*\}\);/u,
-	);
+test("Rovo useRovoApp remains a thin route adapter over shared Rovo core", () => {
+	assertIncludesAll(ROVO_ROUTE_HOOK_SOURCE, [
+		/import \{ useRovoAppQueue \} from "@\/app\/rovo\/rovo-queue-provider";/u,
+		/import \{ rovoAppAdapter \} from "@\/components\/projects\/rovo\/rovo-app-adapter";/u,
+		/import \{[\s\S]*useRovoAppCore,[\s\S]*type RovoAppHookOptions,[\s\S]*type RovoAppHookResult,[\s\S]*\} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-core";/u,
+		/const ROVO_CLARIFICATION_BEHAVIOR = \{[\s\S]*dismissUsesPlanMode: false,[\s\S]*includeDeferredToolPlanMode: true,[\s\S]*rollbackFailedSend: false,[\s\S]*\} as const;/u,
+		/const setSendMode = useCallback<RovoAppSendModeSetter>\(\(\) => \{\}, \[\]\);/u,
+		/return useRovoAppCore\(\{[\s\S]*clarificationBehavior: ROVO_CLARIFICATION_BEHAVIOR,[\s\S]*queue,[\s\S]*routeAdapter: rovoAppAdapter,[\s\S]*sendMode: "queue",[\s\S]*setSendMode,[\s\S]*\}\);/u,
+	]);
+
+	assert.doesNotMatch(ROVO_ROUTE_HOOK_SOURCE, /usePersistentState|DefaultChatTransport|useChat\(|fetchRovoApp|submitRovoApp|setInterval\(/u);
 });
 
-test("Studio queued prompt actions preserve explicit creation mode", () => {
-	assert.match(
-		TYPES_SOURCE,
-		/export type RovoAppCreationMode = "agent" \| "skill";/u,
-	);
-	assert.match(
-		TYPES_SOURCE,
-		/export interface RovoAppQueuedPromptAction[\s\S]*creationMode\?: RovoAppCreationMode;[\s\S]*mode: RovoAppPromptMode;/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/type RovoAppCreationMode,/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/const enqueuePromptAction = useCallback\([\s\S]*creationMode\?: RovoAppCreationMode;[\s\S]*const queuedAction: RovoAppQueuedPromptAction = \{[\s\S]*creationMode,[\s\S]*mode,/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/await dispatchPromptNow\(\{[\s\S]*creationMode: action\.creationMode,[\s\S]*mode: action\.mode,/u,
-	);
+test("Studio adapter opts into creation-mode chat body metadata without leaking into Rovo", () => {
+	assertIncludesAll(STUDIO_APP_ADAPTER_SOURCE, [
+		/createRovoAppRouteAdapter\(\{[\s\S]*rootPath: "\/studio",[\s\S]*chatRequestBodyOptions: \{[\s\S]*chatSdkSource: "studio",[\s\S]*includeCreationMode: true,[\s\S]*\},[\s\S]*\}\)/u,
+		/export const ROVO_APP_ROOT_PATH = studioAppAdapter\.rootPath;/u,
+	]);
+
+	assertIncludesAll(ROVO_APP_ADAPTER_SOURCE, [
+		/createRovoAppRouteAdapter\(\{[\s\S]*rootPath: "\/rovo",[\s\S]*\}\)/u,
+		/export const ROVO_APP_ROOT_PATH = rovoAppAdapter\.rootPath;/u,
+	]);
+	assert.doesNotMatch(ROVO_APP_ADAPTER_SOURCE, /chatSdkSource|includeCreationMode/u);
+
+	assertIncludesAll(CHAT_TRANSPORT_SOURCE, [
+		/routeAdapter: RovoAppRouteAdapter;/u,
+		/\.\.\.routeAdapter\.chatRequestBodyOptions,/u,
+	]);
+	assertIncludesAll(CHAT_REQUEST_BODY_SOURCE, [
+		/chatSdkSource\?: "studio";/u,
+		/includeCreationMode\?: boolean;/u,
+		/const requestedCreationMode = getRovoAppRequestedCreationMode\(body, includeCreationMode\);/u,
+		/\.\.\.\(chatSdkSource \? \{ chatSdkSource \} : \{\}\),/u,
+		/\.\.\.\(requestedCreationMode \? \{ creationMode: requestedCreationMode \} : \{\}\),/u,
+	]);
 });
 
-test("Studio prompt dispatch only sends creation mode when callers pass it", () => {
-	assert.match(
-		HOOK_SOURCE,
-		/submitPrompt: \(payload: \{[\s\S]*creationMode\?: RovoAppCreationMode;/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/function buildPromptModeMetadata\([\s\S]*creationMode\?: RovoAppCreationMode,[\s\S]*\.\.\.\(creationMode \? \{ creationMode \} : \{\}\),[\s\S]*submittedMode: mode,/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/const submitPrompt = useCallback\([\s\S]*creationMode,[\s\S]*\}: \{[\s\S]*creationMode\?: RovoAppCreationMode;/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/const promptMessageMetadata = buildPromptModeMetadata\([\s\S]*undefined,[\s\S]*promptMode,[\s\S]*creationMode,/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/metadata: buildPromptModeMetadata\(messageMetadata, mode, creationMode\)/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/await dispatchPromptNow\(\{[\s\S]*creationMode,[\s\S]*mode: promptMode,/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/body: \{[\s\S]*contextDescription,[\s\S]*\.\.\.\(creationMode \? \{ creationMode \} : \{\}\),[\s\S]*hermesContext,/u,
-	);
-	assert.doesNotMatch(
-		HOOK_SOURCE,
-		/creationMode:\s*(?:mode|promptMode|isPlanMode|requestedPlanMode)/u,
-	);
-});
+test("shared Rovo core owns orchestration through focused route-agnostic hooks", () => {
+	assertIncludesAll(CORE_HOOK_SOURCE, [
+		/import \{ useRovoAppPromptActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-prompt-actions";/u,
+		/import \{ useRovoAppClarificationPlanActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-clarification-plan-actions";/u,
+		/import \{ useRovoAppDelegationQueueActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-delegation-queue-actions";/u,
+		/import \{ useRovoAppActiveTurnActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-active-turn-actions";/u,
+		/import \{ useRovoAppThreadMutationActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-thread-mutation-actions";/u,
+		/import \{ useRovoAppMessageEditActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-message-edit-actions";/u,
+		/import \{ useRovoAppDataPartActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-data-part-actions";/u,
+		/import \{ useRovoAppRunSideEffectActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-run-side-effect-actions";/u,
+		/import \{ useRovoAppThreadLifecycleActions \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-thread-lifecycle-actions";/u,
+		/import \{ useRovoAppBackgroundRefresh \} from "@\/components\/projects\/rovo-core\/hooks\/use-rovo-app-background-refresh";/u,
+		/routeAdapter: RovoAppRouteAdapter;/u,
+		/const \{[\s\S]*rootPath: ROVO_APP_ROOT_PATH,[\s\S]*\} = routeAdapter;/u,
+		/useRovoAppChatTransport\(\{[\s\S]*routeAdapter,[\s\S]*\}\);/u,
+	]);
 
-test("Studio transport preserves creation mode in prepared request bodies", () => {
-	assert.match(
-		HOOK_SOURCE,
-		/const requestedCreationMode =[\s\S]*body\?\.creationMode === "agent" \|\| body\?\.creationMode === "skill"[\s\S]*\? body\.creationMode[\s\S]*: undefined;/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/body: \{[\s\S]*\.\.\.\(body \?\? \{\}\),[\s\S]*\.\.\.\(requestedCreationMode[\s\S]*\? \{ creationMode: requestedCreationMode \}[\s\S]*: \{\}\),/u,
-	);
-});
-
-test("Studio clarification continuations can preserve agent creation mode", () => {
-	assert.match(
-		HOOK_SOURCE,
-		/interface RovoAppClarificationSubmitOptions \{[\s\S]*contextDescription\?: string;[\s\S]*creationMode\?: RovoAppCreationMode;[\s\S]*onSubmitted\?: \(\) => void;[\s\S]*\}/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/const AGENT_CREATION_POST_CLARIFICATION_CONTEXT = \[[\s\S]*POST-CLARIFICATION — Studio Agent Creation[\s\S]*structured agent result/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/const submitClarification = useCallback\([\s\S]*options\?: RovoAppClarificationSubmitOptions[\s\S]*const creationMode = options\?\.creationMode;[\s\S]*const wasPlanModeActive = !creationMode && isPlanModeRef\.current;/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/body: Record<string, unknown> = \{[\s\S]*contextDescription,[\s\S]*\.\.\.\(creationMode \? \{ creationMode \} : \{\}\),[\s\S]*clarification:/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/buildClarificationMessageMetadata\(questionCard, \{[\s\S]*answers,[\s\S]*creationMode,[\s\S]*status: "answered"/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/markLocalThreadRunPending\(threadId\);\s*options\?\.onSubmitted\?\.\(\);/u,
-	);
-	assert.match(
-		HOOK_SOURCE,
-		/catch \(sendError\) \{[\s\S]*setRovoMessages\(\(prev\) => prev\.filter\(\(m\) => m\.id !== messageId\)\);[\s\S]*setLocalThreadActiveRun\(threadId, null\);[\s\S]*setAttachedRunStatus\(null\);[\s\S]*setInputError\(toRovoAppUserErrorMessage\(sendError\)\);[\s\S]*throw sendError;/u,
-	);
-	assert.doesNotMatch(
-		HOOK_SOURCE,
-		/isPlanModeRef\.current \|\| Boolean\(questionCard\.deferredToolCallId\)/u,
-	);
+	assert.doesNotMatch(CORE_HOOK_SOURCE, /@\/components\/projects\/studio\//u);
+	assert.doesNotMatch(CORE_HOOK_SOURCE, /@\/components\/projects\/rovo\//u);
 });

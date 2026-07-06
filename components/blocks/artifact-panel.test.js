@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ARTIFACT_SOURCE = fs.readFileSync(path.join(__dirname, "artifact.tsx"), "utf8");
 
@@ -19,11 +21,11 @@ test("Artifact is registered as a website block in all four registries", () => {
 		/blockComponent\("artifact"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ ArtifactCard \} from "@\/components\/blocks\/artifact";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/artifact: dynamic\(\(\) => import\("\.\/demos\/blocks\/artifact-demo"\)/u,
 	);
 });

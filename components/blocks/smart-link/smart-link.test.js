@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const DIR = __dirname;
 const COMPONENT_SOURCE = fs.readFileSync(path.join(DIR, "components", "smart-link.tsx"), "utf8");
@@ -11,8 +13,8 @@ const INDEX_SOURCE = fs.readFileSync(path.join(DIR, "index.ts"), "utf8");
 const COMPONENTS_SOURCE = fs.readFileSync(path.join(process.cwd(), "app", "data", "components.ts"), "utf8");
 const COMPONENT_MANIFEST_SOURCE = fs.readFileSync(path.join(process.cwd(), "app", "data", "component-manifest.ts"), "utf8");
 const NAV_ADS_SOURCE = fs.readFileSync(path.join(process.cwd(), "app", "data", "nav-ads.ts"), "utf8");
-const BLOCK_DETAILS_SOURCE = fs.readFileSync(path.join(process.cwd(), "app", "data", "details", "blocks.ts"), "utf8");
-const REGISTRY_SOURCE = fs.readFileSync(path.join(process.cwd(), "components", "website", "registry.ts"), "utf8");
+const BLOCK_DETAILS_SOURCE = readDetailCategorySource("blocks");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 test("SmartLink is powered by the shared HoverCard primitive", () => {
 	assert.match(COMPONENT_SOURCE, /HoverCard, HoverCardContent, HoverCardTrigger/u);

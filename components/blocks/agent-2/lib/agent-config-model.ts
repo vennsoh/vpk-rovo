@@ -1,5 +1,11 @@
-import type { AgentAutomationRule } from "@/components/blocks/triggers/page";
 import { slugifySkillName } from "@/app/data/directory/skills";
+import {
+	createAgentAutomationRule,
+	createAgentTriggerValue,
+	getAgentAutomationRuleLabel,
+	inferAutomationRules,
+	type AgentAutomationRule,
+} from "@/components/blocks/triggers/data/trigger-catalog";
 
 export type AgentConfigTextFieldName =
 	| "name"
@@ -93,6 +99,54 @@ export function getSkillConfigItems(items: readonly string[] | undefined): reado
 	return getNonEmptyConfigItems(items)
 		.map(getSkillConfigLabel)
 		.filter(Boolean);
+}
+
+export function getAgentAutomationRules(config: AgentConfigFormValue): readonly AgentAutomationRule[] {
+	if (Array.isArray(config.automationRules)) {
+		return config.automationRules;
+	}
+	const triggers = getNonEmptyConfigItems(config.triggers);
+	if (triggers.length > 0) {
+		return inferAutomationRules(triggers) ?? [];
+	}
+
+	const trigger = config.trigger?.trim();
+	return trigger ? inferAutomationRules([trigger]) ?? [] : [];
+}
+
+export function getAgentAutomationItems(config: AgentConfigFormValue): readonly string[] {
+	return serializeAgentAutomationRuleLabels(getAgentAutomationRules(config));
+}
+
+export function serializeAgentAutomationRuleLabels(rules: readonly AgentAutomationRule[] | undefined): string[] {
+	return (rules ?? [])
+		.map((rule, index) => getAgentAutomationRuleLabel(rule, index).trim())
+		.filter(Boolean);
+}
+
+export function getNextAutomationRuleIndex(rules: readonly AgentAutomationRule[] | undefined): number {
+	const usedIndexes = (rules ?? [])
+		.map((rule) => /^automation-(\d+)$/u.exec(rule.id)?.[1])
+		.map((value) => Number(value))
+		.filter((value) => Number.isFinite(value));
+	return usedIndexes.length > 0 ? Math.max(...usedIndexes) + 1 : (rules?.length ?? 0) + 1;
+}
+
+export function createAutomationRuleFromEvent(
+	providerId: Parameters<typeof createAgentTriggerValue>[0],
+	eventId: string,
+	existingRules: readonly AgentAutomationRule[] | undefined,
+): AgentAutomationRule | null {
+	const nextIndex = getNextAutomationRuleIndex(existingRules);
+	const nextTrigger = createAgentTriggerValue(providerId, eventId, 1);
+	return nextTrigger
+		? createAgentAutomationRule({
+				id: `automation-${nextIndex}`,
+				name: "",
+				prompt: "",
+				triggers: [nextTrigger],
+			})
+		: null;
 }
 
 // Disabled-item lookups are label-keyed so they survive reordering and removal

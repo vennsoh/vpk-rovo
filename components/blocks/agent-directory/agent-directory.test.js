@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Agent Directory is exposed as a website block and used by Studio", () => {
 		/blockComponent\("agent-directory", "Agent Directory"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ AgentsDirectoryDialog \} from "@\/components\/blocks\/agent-directory";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"agent-directory": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/agent-directory-demo"\)/u,
 	);
 	assert.match(
@@ -68,7 +70,7 @@ test("Agent Directory close button sits in the dialog header", () => {
 test("Agent Directory renders a New agent header action", () => {
 	const source = readProjectFile("components/blocks/agent-browser/components/agent-browser.tsx");
 	const agentsDirectorySource = readProjectFile("components/blocks/agent-directory/components/agent-directory.tsx");
-	const detailsSource = readProjectFile("app/data/details/blocks.ts");
+	const detailsSource = readDetailCategorySource("blocks");
 
 	assert.match(source, /primaryActionLabel\?: string;/u);
 	assert.match(source, /onPrimaryAction\?: \(\) => void;/u);
@@ -85,8 +87,8 @@ test("Agent Directory exposes an opt-in experimental variation", () => {
 	const source = readProjectFile("components/blocks/agent-browser/components/agent-browser.tsx");
 	const agentsDirectorySource = readProjectFile("components/blocks/agent-directory/components/agent-directory.tsx");
 	const indexSource = readProjectFile("components/blocks/agent-directory/index.ts");
-	const detailsSource = readProjectFile("app/data/details/blocks.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const detailsSource = readDetailCategorySource("blocks");
+	const registrySource = readWebsiteRegistrySource();
 	const demoSource = readProjectFile("components/website/demos/blocks/agent-directory-demo.tsx");
 	const pageSource = readProjectFile("components/blocks/agent-directory/page.tsx");
 
@@ -630,7 +632,7 @@ test("Agent Card expanded template uses the shared template detail body without 
 	const cardParts = readProjectFile("components/blocks/agent-card/components/agent-card-parts.tsx");
 	const demo = readProjectFile("components/website/demos/blocks/agent-card-demo.tsx");
 	const page = readProjectFile("components/blocks/agent-card/page.tsx");
-	const details = readProjectFile("app/data/details/blocks.ts");
+	const details = readDetailCategorySource("blocks");
 	const theme = readProjectFile("app/tailwind-theme.css");
 
 	assert.match(card, /const expandedStats = stats\.slice\(0, 2\);/u);

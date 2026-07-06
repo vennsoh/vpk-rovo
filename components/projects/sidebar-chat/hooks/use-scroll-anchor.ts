@@ -11,7 +11,7 @@ import {
 	getLatestUserMessageId,
 } from "@/lib/rovo-ui-messages";
 import type { RovoUIMessage } from "@/lib/rovo-ui-messages";
-import { resolveRovoAppScrollAnchorLayout } from "@/components/projects/rovo/lib/rovo-app-scroll-anchor";
+import { resolveRovoAppScrollAnchorLayout } from "@/components/projects/rovo-core/lib/rovo-app-scroll-anchor";
 
 const LATEST_TURN_SELECTOR = "[data-chat-latest-turn='true']";
 const FAST_TURN_SCROLL_ANIMATION = {

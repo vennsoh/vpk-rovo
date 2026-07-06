@@ -1,6 +1,15 @@
 ---
 name: vpk-design
 description: Translate Figma URLs, screenshots, mockups, and pixel-perfect design specs into VPK code. Use ADS MCP only for token/icon/a11y mapping inside Figma tasks. Use vpk-component for ADS or shadcn component harvesting.
+purpose: Convert Figma, screenshot, or bespoke visual specs into VPK code using extraction, implementation, and validation roles.
+owner: VPK
+category: design-implementation
+inputs: Figma URL, screenshot, mockup, design notes, existing VPK tokens, and affected route/component context.
+outputs: Implemented VPK UI, token/icon mapping notes, screenshots, a11y findings, and validation evidence.
+required_tools: shell, rg, pnpm, browser verification tools, ADS/Figma tools when available
+validation_command: pnpm run lint && pnpm run typecheck
+generated_artifacts: none by default; approved design work may add UI, demo, asset, screenshot, or test files.
+common_failure_modes: Guessing specs without extraction, using raw tokens before semantic classes, missing dark mode, or skipping visual proof.
 ---
 
 # VPK Design

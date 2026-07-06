@@ -31,7 +31,7 @@ test("chat surface switcher opens the active compact thread in fullscreen when a
 	);
 	assert.match(
 		source,
-		/router\.push\(activeThreadId \? buildRovoAppThreadPath\(activeThreadId\) : ROVO_APP_ROOT_PATH\);/u,
+		/router\.push\(activeThreadId \? buildRovoAppThreadPath\(ROVO_APP_ROOT_PATH, activeThreadId\) : ROVO_APP_ROOT_PATH\);/u,
 	);
 	assert.match(
 		source,
@@ -51,8 +51,8 @@ test("compact chat Rovo labels do not mount a dropdown menu", () => {
 			headerSource,
 			/<DropdownMenuContent align="start" sideOffset=\{4\} positionerClassName="z-\[600\]">[\s\S]*?<ChatSurfaceSwitcherItems/u,
 		);
-		assert.match(headerSource, /src="\/1p\/rovo\.svg"/u);
-		assert.match(headerSource, /<span className="text-sm font-semibold text-text">Rovo<\/span>/u);
+		assert.match(headerSource, /import \{ RovoAppBrand \} from "@\/components\/projects\/rovo-core\/components\/rovo-app-brand";/u);
+		assert.match(headerSource, /<RovoAppBrand \/>/u);
 		assert.match(
 			headerSource,
 			/<DropdownMenuContent align="end" sideOffset=\{4\} positionerClassName="z-\[600\]">[\s\S]*?<ChatSurfaceSwitcherItems/u,

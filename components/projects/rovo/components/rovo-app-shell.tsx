@@ -18,35 +18,36 @@ import { useRouter } from "next/navigation";
 import { ArtifactPanel } from "@/components/blocks/artifact";
 import { ChatTimelineNavigator } from "@/components/blocks/chat-timeline/chat-timeline-navigator";
 import { CreateButton } from "@/components/blocks/top-navigation/components/create-button";
-import { RovoAppHeader } from "@/components/projects/rovo/components/rovo-app-header";
-import { RovoAppBrowserArtifact } from "@/components/projects/rovo/components/rovo-app-browser-artifact";
+import { RovoAppHeaderCore as RovoAppHeader } from "@/components/projects/rovo-core/components/rovo-app-header";
+import { RovoAppBrowserArtifact } from "@/components/projects/rovo-core/components/rovo-app-browser-artifact";
 import { RovoAppComposer } from "@/components/projects/rovo/components/rovo-app-composer";
 import { RovoAppMessages } from "@/components/projects/rovo/components/rovo-app-messages";
-import { RovoAppHermesSkillDraftBar } from "@/components/projects/rovo/components/rovo-app-hermes-skill-draft-bar";
-import { RovoAppShellPaneLayout } from "@/components/projects/rovo/components/rovo-app-shell-pane-layout";
+import { RovoAppHermesSkillDraftBar } from "@/components/projects/rovo-core/components/rovo-app-hermes-skill-draft-bar";
+import { RovoAppShellPaneLayoutCore as RovoAppShellPaneLayout } from "@/components/projects/rovo-core/components/rovo-app-shell-pane-layout";
 import { RovoAppSidebar } from "@/components/projects/rovo/components/rovo-app-sidebar";
 import { useArtifactAnnotations } from "@/components/ui-custom/hooks/use-artifact-annotations";
 import { formatAnnotationsForVoiceContext } from "@/components/ui-custom/lib/artifact-annotations";
 import type { ArtifactAnnotation } from "@/components/ui-custom/lib/artifact-annotations";
 import { useRovoApp } from "@/components/projects/rovo/hooks/use-rovo-app";
-import { useHmrReloadSuppression } from "@/components/projects/rovo/hooks/use-hmr-reload-suppression";
-import { getRovoAppArtifactKindLabel, getRovoAppArtifactTypeLabel, sortRovoAppArtifacts } from "@/components/projects/rovo/lib/rovo-app-artifacts";
+import { useHmrReloadSuppression } from "@/components/projects/rovo-core/hooks/use-hmr-reload-suppression";
+import { getRovoAppArtifactKindLabel, getRovoAppArtifactTypeLabel, sortRovoAppArtifacts } from "@/components/projects/rovo-core/lib/rovo-app-artifacts";
 import { useLazyRef } from "@/lib/use-lazy-ref";
 import {
 	buildRovoAppBrowserArtifactKey,
 	shouldAutoOpenRovoAppBrowserArtifact,
 	shouldShowReopenRovoAppBrowserArtifactControl,
-} from "@/components/projects/rovo/lib/rovo-app-browser-preview";
+} from "@/components/projects/rovo-core/lib/rovo-app-browser-preview";
 import { resolveRovoAppComposerPlaceholder } from "@/components/projects/shared/lib/rovo-app-composer-placeholder";
 import { appendDictationTranscript, resolveComposerDictationState } from "@/lib/composer-dictation";
-import { ROVO_APP_MAX_CHAT_PANE_WIDTH, ROVO_APP_MIN_ARTIFACT_PANE_WIDTH, ROVO_APP_MIN_CHAT_PANE_WIDTH, getRovoAppShellLayout } from "@/components/projects/rovo/lib/rovo-app-shell-layout";
-import { getRovoAppSmartGenerationLayoutContext } from "@/components/projects/rovo/lib/rovo-app-smart-generation-layout";
-import { deriveRovoAppTimelineItems } from "@/components/projects/rovo/lib/rovo-app-timeline";
-import { buildComposerHermesContext, shouldResetComposerHermesSkillSelection } from "@/components/projects/rovo/lib/rovo-app-hermes-skill-selection";
+import { ROVO_APP_MAX_CHAT_PANE_WIDTH, ROVO_APP_MIN_ARTIFACT_PANE_WIDTH, ROVO_APP_MIN_CHAT_PANE_WIDTH, getRovoAppShellLayout } from "@/components/projects/rovo-core/lib/rovo-app-shell-layout";
+import { getRovoAppSmartGenerationLayoutContext } from "@/components/projects/rovo-core/lib/rovo-app-smart-generation-layout";
+import { deriveRovoAppTimelineItems } from "@/components/projects/rovo-core/lib/rovo-app-timeline";
+import { buildComposerHermesContext, shouldResetComposerHermesSkillSelection } from "@/components/projects/rovo-core/lib/rovo-app-hermes-skill-selection";
 import { useHermesEmbedEnabled } from "@/lib/hermes-feature-flags";
 import { buildRovoAppThreadPath } from "@/components/projects/rovo/lib/rovo-app-thread-route-sync";
-import { createRovoAppUserMessage } from "@/components/projects/rovo/lib/rovo-app-user-message";
+import { createRovoAppUserMessage } from "@/components/projects/rovo-core/lib/rovo-app-user-message";
 import { type DelegationRequest, useRealtimeVoice } from "@/components/projects/rovo/hooks/use-realtime-voice";
+import { type RovoRealtimeShellAdapter, useRovoRealtimeShellBridge } from "@/components/projects/rovo-core/hooks/use-rovo-realtime-shell-bridge";
 import type { ConversationFollowMode } from "@/components/ui-custom/conversation";
 import { RichTextMentionVisualMark, type ComposerDirectoryAutocompleteController } from "@/components/ui-custom/rich-text-editor";
 import { useSidebar as useGlobalSidebar } from "@/app/contexts/context-sidebar";
@@ -70,9 +71,9 @@ import { Kbd } from "@/components/ui/kbd";
 import SearchIcon from "@atlaskit/icon/core/search";
 import { SidebarProvider, SidebarResizeHandle } from "@/components/ui/sidebar";
 import { Footer } from "@/components/ui-custom/footer";
-import { useClicky } from "@/components/projects/rovo/hooks/use-clicky";
+import { useClicky } from "@/components/projects/rovo-core/hooks/use-clicky";
 import { useClickyVoice } from "@/components/projects/rovo/hooks/use-clicky-voice";
-import { ClickyOverlay } from "@/components/projects/rovo/components/clicky/clicky-overlay";
+import { ClickyOverlay } from "@/components/projects/rovo-core/components/clicky/clicky-overlay";
 import { ScreenAssistantRegionOverlay } from "@/components/screen-assistant/screen-assistant-region-overlay";
 import {
 	activateStudioScreenAssistantTarget,
@@ -81,8 +82,8 @@ import {
 	groundStudioScreenAssistantTarget,
 	type StudioScreenAssistantRegion,
 	type StudioScreenAssistantTarget,
-} from "@/components/projects/studio/lib/studio-screen-assistant";
-import { useSidebarResize } from "@/components/projects/rovo/hooks/use-sidebar-resize";
+} from "@/components/projects/rovo-core/lib/screen-assistant";
+import { useSidebarResize } from "@/components/projects/rovo-core/hooks/use-sidebar-resize";
 import { clamp, cn, createId } from "@/lib/utils";
 import { token } from "@/lib/tokens";
 import { getLatestDataPart, getLatestUserMessageId, getMessageArtifactResult, getMessageText } from "@/lib/rovo-ui-messages";
@@ -165,20 +166,9 @@ type RealtimeInjectContextPayload = {
 	[key: string]: unknown;
 };
 
-type RealtimeMessageMutationResult =
-	| string
-	| {
-			id?: string | null;
-	  }
-	| void;
-
-type RovoAppRealtimeShellAdapter = ReturnType<typeof useRovoApp> & {
-	appendRealtimeMessage?: (role: "user" | "assistant", content: string, options?: Record<string, unknown>) => Promise<RealtimeMessageMutationResult> | RealtimeMessageMutationResult;
+type RovoAppRealtimeShellAdapter = RovoRealtimeShellAdapter<ReturnType<typeof useRovoApp>> & {
 	delegateToRovo?: (messageId: string, options?: Record<string, unknown>) => Promise<void>;
-	setRealtimeMessageContent?: (messageId: string, content: string) => Promise<void> | void;
 	submitRealtimeText?: (payload: { contextDescription?: string; hermesContext?: RovoAppHermesContext; files: FileUIPart[]; text: string }) => Promise<void>;
-	updateRealtimeMessage?: (messageId: string, contentDelta: string) => Promise<void> | void;
-	setVoiceMode?: (next: boolean) => void;
 };
 
 type ExtendedDelegationRequest = DelegationRequest & {
@@ -249,18 +239,6 @@ type ScrollActiveTimelineSelection = {
 	messageId: string;
 	runtimeThreadId: string | null;
 };
-
-function resolveRealtimeMutationId(result: RealtimeMessageMutationResult): string | null {
-	if (typeof result === "string" && result.trim()) {
-		return result;
-	}
-
-	if (result && typeof result === "object" && typeof result.id === "string" && result.id.trim()) {
-		return result.id;
-	}
-
-	return null;
-}
 
 function buildRealtimeThreadSummary(messages: ReadonlyArray<ReturnType<typeof useRovoApp>["messages"][number]>): string {
 	const summary = messages
@@ -915,17 +893,11 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		realtimeTypedResponseStartedRef.current = false;
 	}, []);
 
-	const setChatVoiceMode = useCallback((next: boolean) => {
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (typeof realtimeChat.setVoiceMode === "function") {
-			realtimeChat.setVoiceMode(next);
-			return;
-		}
-
-		if (realtimeChat.isVoiceMode !== next) {
-			realtimeChat.toggleVoiceMode();
-		}
-	}, []);
+	const {
+		appendRealtimeMessage,
+		setChatVoiceMode,
+		updateRealtimeMessage,
+	} = useRovoRealtimeShellBridge<RovoAppRealtimeShellAdapter>({ chatRef });
 
 	const injectRealtimeContext = useCallback((payload: RealtimeInjectContextPayload | null) => {
 		if (!payload) {
@@ -933,32 +905,6 @@ export function RovoAppShell({ embedded = false, initialThreadId = null }: Reado
 		}
 
 		realtimeInjectContextRef.current?.(payload);
-	}, []);
-
-	const appendRealtimeMessage = useCallback(async (role: "user" | "assistant", content: string, options?: Record<string, unknown>): Promise<string | null> => {
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (typeof realtimeChat.appendRealtimeMessage !== "function") {
-			return null;
-		}
-
-		const result = await realtimeChat.appendRealtimeMessage(role, content, options);
-		return resolveRealtimeMutationId(result);
-	}, []);
-
-	const updateRealtimeMessage = useCallback(async (messageId: string | null, content: string, options?: { replace?: boolean }) => {
-		if (!messageId || !content) {
-			return;
-		}
-
-		const realtimeChat = chatRef.current as RovoAppRealtimeShellAdapter;
-		if (options?.replace && typeof realtimeChat.setRealtimeMessageContent === "function") {
-			await realtimeChat.setRealtimeMessageContent(messageId, content);
-			return;
-		}
-
-		if (typeof realtimeChat.updateRealtimeMessage === "function") {
-			await realtimeChat.updateRealtimeMessage(messageId, content);
-		}
 	}, []);
 
 	const resetRealtimeAssistantMessageState = useCallback(() => {

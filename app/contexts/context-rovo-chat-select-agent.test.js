@@ -7,6 +7,20 @@ const CONTEXT_SOURCE = fs.readFileSync(
 	path.join(__dirname, "context-rovo-chat.tsx"),
 	"utf8",
 );
+const AGENT_RECORD_TYPES_SOURCE = fs.readFileSync(
+	path.join(
+		process.cwd(),
+		"components/projects/rovo-core/lib/agent-records/types.ts",
+	),
+	"utf8",
+);
+const SESSION_AGENT_REGISTRY_SOURCE = fs.readFileSync(
+	path.join(
+		process.cwd(),
+		"components/projects/rovo-core/lib/agent-records/session-agent-registry.ts",
+	),
+	"utf8",
+);
 const RECENT_AGENTS_SOURCE = fs.readFileSync(
 	path.join(
 		process.cwd(),
@@ -52,43 +66,52 @@ test("selecting an agent does not bump lastTouchedAt (no pin-to-top on click)", 
 	assert.match(selectAgentBody, /setSelectedAgentIdState\(nextAgent\.id\)/u);
 });
 
-test("touchSessionAgent still exists for intentional bumps (create/edit/test/publish)", () => {
+test("session-agent registry still owns intentional bumps (create/edit/test/publish)", () => {
 	// Sanity check: the previous test passes for the right reason. The helper is
-	// still defined and still bumps lastTouchedAt — it just isn't called on select.
-	assert.match(CONTEXT_SOURCE, /const touchSessionAgent = useCallback\(/u);
-	assert.match(CONTEXT_SOURCE, /lastTouchedAt: Date\.now\(\)/u);
+	// still defined and still bumps lastTouchedAt - it just isn't called on select.
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /export function touchSessionAgentEntry\(/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /lastTouchedAt = Date\.now\(\)/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /touchSessionAgentEntry\(entries, existingEntry\.profile\.id, lastTouchedAt\)/u);
+	assert.doesNotMatch(CONTEXT_SOURCE, /const touchSessionAgent = useCallback\(/u);
+	assert.match(CONTEXT_SOURCE, /registerSessionAgentFromResult/u);
+	assert.match(CONTEXT_SOURCE, /updateSessionAgentDraftEntry/u);
+	assert.match(CONTEXT_SOURCE, /publishSessionAgentEntry/u);
 });
 
 test("session-agent publishing increments metadata and records version history", () => {
-	assert.match(CONTEXT_SOURCE, /export interface StudioAgentVersionRecord/u);
-	assert.match(CONTEXT_SOURCE, /version: number;/u);
-	assert.match(CONTEXT_SOURCE, /publishedVersion: number;/u);
-	assert.match(CONTEXT_SOURCE, /lastPublishedAt: number \| null;/u);
-	assert.match(CONTEXT_SOURCE, /versionHistory: readonly StudioAgentVersionRecord\[\];/u);
-	assert.match(CONTEXT_SOURCE, /const versionKind: StudioAgentVersionRecord\["kind"\] = existing\.publishedResult \? "update" : "publish";/u);
-	assert.match(CONTEXT_SOURCE, /const nextPublishedVersion = existing\.publishedResult[\s\S]*\? Math\.max\(existing\.publishedVersion, 1\) \+ 1[\s\S]*: 1;/u);
-	assert.match(CONTEXT_SOURCE, /version: nextPublishedVersion/u);
-	assert.match(CONTEXT_SOURCE, /publishedVersion: nextPublishedVersion/u);
-	assert.match(CONTEXT_SOURCE, /versionHistory: \[versionRecord, \.\.\.existing\.versionHistory\]/u);
+	assert.match(AGENT_RECORD_TYPES_SOURCE, /export interface StudioAgentVersionRecord/u);
+	assert.match(AGENT_RECORD_TYPES_SOURCE, /version: number;/u);
+	assert.match(AGENT_RECORD_TYPES_SOURCE, /publishedVersion: number;/u);
+	assert.match(AGENT_RECORD_TYPES_SOURCE, /lastPublishedAt: number \| null;/u);
+	assert.match(AGENT_RECORD_TYPES_SOURCE, /versionHistory: readonly StudioAgentVersionRecord\[\];/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /const versionKind: StudioAgentVersionRecord\["kind"\] = existing\.publishedResult \? "update" : "publish";/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /const nextPublishedVersion = existing\.publishedResult[\s\S]*\? Math\.max\(existing\.publishedVersion, 1\) \+ 1[\s\S]*: 1;/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /version: nextPublishedVersion/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /publishedVersion: nextPublishedVersion/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /versionHistory: \[versionRecord, \.\.\.existing\.versionHistory\]/u);
+	assert.match(CONTEXT_SOURCE, /publishSessionAgentEntry\(\{[\s\S]*entries: sessionAgentEntriesRef\.current,[\s\S]*profileId,[\s\S]*\}\)/u);
 });
 
 test("session-agent rollback restores a historical snapshot into the draft only", () => {
 	assert.match(CONTEXT_SOURCE, /restoreSessionAgentVersion: \(profileId: string, versionId: string\) => StudioSessionAgentEntry \| null;/u);
 	assert.match(CONTEXT_SOURCE, /const restoreSessionAgentVersion = useCallback/u);
-	assert.match(CONTEXT_SOURCE, /const restoredDraft = normalizeSessionAgentResult\(version\.snapshot\);/u);
-	assert.match(CONTEXT_SOURCE, /draftResult: restoredDraft/u);
-	assert.match(CONTEXT_SOURCE, /versionHistory: \[rollbackRecord, \.\.\.existing\.versionHistory\]/u);
+	assert.match(CONTEXT_SOURCE, /restoreSessionAgentVersionEntry\(\{[\s\S]*entries: sessionAgentEntriesRef\.current,[\s\S]*profileId,[\s\S]*versionId,[\s\S]*\}\)/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /export function restoreSessionAgentVersionEntry/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /const restoredDraft = normalizeSessionAgentResult\(version\.snapshot\);/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /draftResult: restoredDraft/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /versionHistory: \[rollbackRecord, \.\.\.existing\.versionHistory\]/u);
 	assert.doesNotMatch(
-		CONTEXT_SOURCE.slice(
-			CONTEXT_SOURCE.indexOf("const restoreSessionAgentVersion = useCallback"),
-			CONTEXT_SOURCE.indexOf("const resetAgentToRovo = useCallback"),
+		SESSION_AGENT_REGISTRY_SOURCE.slice(
+			SESSION_AGENT_REGISTRY_SOURCE.indexOf("export function restoreSessionAgentVersionEntry"),
+			SESSION_AGENT_REGISTRY_SOURCE.indexOf("export function removeSessionAgentEntry"),
 		),
 		/publishedResult: restoredDraft/u,
 	);
 });
 
 test("session-agent autosave is debounced instead of writing on every draft change", () => {
-	assert.match(CONTEXT_SOURCE, /const STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS = 900;/u);
+	assert.match(SESSION_AGENT_REGISTRY_SOURCE, /export const STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS = 900;/u);
+	assert.match(CONTEXT_SOURCE, /STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS,[\s\S]*\} from "@\/components\/projects\/rovo-core\/lib\/agent-records\/session-agent-registry";/u);
 	assert.match(CONTEXT_SOURCE, /const sessionAgentSaveTimerRef = useRef<ReturnType<typeof setTimeout> \| null>\(null\);/u);
 	assert.match(CONTEXT_SOURCE, /clearTimeout\(sessionAgentSaveTimerRef\.current\);/u);
 	assert.match(CONTEXT_SOURCE, /const saveTimer = setTimeout\(\(\) => \{[\s\S]*persistSessionAgentEntries\(sessionAgentEntriesRef\.current\.map\(normalizeSessionAgentEntry\)\)[\s\S]*\}, STUDIO_SESSION_AGENT_SAVE_DEBOUNCE_MS\);/u);

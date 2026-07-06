@@ -213,7 +213,7 @@ export type RovoDataParts = {
 		// generation-set modes survive panel close/reopen, agent switching, and
 		// publish (carried by the same key-preserving reducer as skills/knowledge).
 		// Typed as `string` on the wire; the valid value sets are owned by the
-		// option lists in components/blocks/agent/components/agent.tsx
+		// option lists in components/blocks/agent-2/components/agent-2.tsx
 		// (MEMORY_MODE_OPTIONS, REASONING_MODE_SECTIONS, KNOWLEDGE_MODE_OPTIONS).
 		memoryMode?: string;
 		reasoningMode?: string;

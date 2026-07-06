@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const GRAPH_SOURCE = fs.readFileSync(path.join(__dirname, "graph.tsx"), "utf8");
 const DEMO_SOURCE = fs.readFileSync(path.join(__dirname, "graph-demo.tsx"), "utf8");
@@ -37,20 +39,16 @@ const MANIFEST_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../../../../app/data/component-manifest.ts"),
 	"utf8",
 );
-const DETAILS_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../../../app/data/details/visual.ts"),
-	"utf8",
-);
-const REGISTRY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../registry.ts"),
-	"utf8",
-);
+const DETAILS_SOURCE = readDetailCategorySource("visual");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 function getGraphDetailsSource() {
-	const start = DETAILS_SOURCE.indexOf('"graph": {');
-	const end = DETAILS_SOURCE.indexOf('\n\t"squircle": {', start);
-	assert.notEqual(start, -1);
-	assert.notEqual(end, -1);
+	const startMatch = DETAILS_SOURCE.match(/\n(?:"graph"|graph): \{/u);
+	assert.ok(startMatch?.index !== undefined);
+	const start = startMatch.index + 1;
+	const endMatch = DETAILS_SOURCE.slice(start).match(/\n(?:"squircle"|squircle): \{/u);
+	assert.ok(endMatch?.index !== undefined);
+	const end = start + endMatch.index;
 	return DETAILS_SOURCE.slice(start, end);
 }
 
@@ -64,7 +62,7 @@ test("Graph is registered as a visual component", () => {
 		/visualComponent\("graph", "Graph", "@\/components\/website\/demos\/visual\/graph"\)/,
 	);
 	assert.match(REGISTRY_SOURCE, /graph: dynamic\(\(\) => import\("\.\/demos\/visual\/graph-demo"\)/);
-	assert.match(DETAILS_SOURCE, /"graph": \{/);
+	assert.match(DETAILS_SOURCE, /(?:"graph"|graph): \{/u);
 });
 
 test("Graph demo renders the reusable Graph visual", () => {

@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const SHADER_SOURCE = fs.readFileSync(path.join(__dirname, "shaders/ascii.tsx"), "utf8");
 const CORE_SOURCE = fs.readFileSync(path.join(__dirname, "shaders/ascii-core.ts"), "utf8");
@@ -15,18 +17,12 @@ const MANIFEST_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../../../../app/data/component-manifest.ts"),
 	"utf8",
 );
-const DETAILS_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../../../app/data/details/visual.ts"),
-	"utf8",
-);
+const DETAILS_SOURCE = readDetailCategorySource("visual");
 const NAV_UTILS_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../../../../app/data/nav-utils.ts"),
 	"utf8",
 );
-const REGISTRY_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../registry.ts"),
-	"utf8",
-);
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 function escapeRegExp(value) {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -42,7 +38,7 @@ test("ASCII is registered as a visual shader component", () => {
 		/visualComponent\("ascii", "ASCII", "@\/components\/website\/demos\/visual\/shaders\/ascii"\)/,
 	);
 	assert.match(REGISTRY_SOURCE, /ascii: dynamic\(\(\) => import\("\.\/demos\/visual\/ascii-demo"\)/);
-	assert.match(DETAILS_SOURCE, /"ascii": \{/);
+	assert.match(DETAILS_SOURCE, /(?:"ascii"|ascii): \{/);
 	assert.match(NAV_UTILS_SOURCE, /shaders: \[[^\]]*"ascii"/);
 });
 

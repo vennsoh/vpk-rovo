@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const DIR = __dirname;
 
@@ -19,8 +21,8 @@ const AGENT_CARD_INDEX_SOURCE = readProjectFile("components/blocks/agent-card/in
 const TAILWIND_THEME_SOURCE = readProjectFile("app/tailwind-theme.css");
 const COMPONENTS_SOURCE = readProjectFile("app/data/components.ts");
 const COMPONENT_MANIFEST_SOURCE = readProjectFile("app/data/component-manifest.ts");
-const BLOCK_DETAILS_SOURCE = readProjectFile("app/data/details/blocks.ts");
-const REGISTRY_SOURCE = readProjectFile("components/website/registry.ts");
+const BLOCK_DETAILS_SOURCE = readDetailCategorySource("blocks");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 const DEMO_SOURCE = readProjectFile("components/website/demos/blocks/twg-agent-card-demo.tsx");
 const PREVIEW_SOURCE = readProjectFile("app/preview/blocks/twg-agent-card/page.tsx");
 

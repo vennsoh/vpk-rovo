@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const GLOBALS_CSS_FILE = path.join(__dirname, "globals.css");
 const GLOBALS_CSS_SOURCE = fs.readFileSync(GLOBALS_CSS_FILE, "utf8");
@@ -89,8 +91,8 @@ test("shared UI surfaces do not reintroduce the old translucent overlay contract
 		readRepoFile("components.json"),
 		GLOBALS_CSS_SOURCE,
 		readRepoFile(".agents", "rules", "token-priority.md"),
-		readRepoFile("app", "data", "details", "ui.ts"),
-		readRepoFile("components", "website", "registry.ts"),
+		readDetailCategorySource("ui"),
+		readWebsiteRegistrySource(),
 		readRepoFile("components", "website", "demos", "ui", "dropdown-menu-demo.tsx"),
 		...collectFiles(path.join(REPO_ROOT, "components", "ui"), new Set([".ts", ".tsx"])).map((file) => fs.readFileSync(file, "utf8")),
 		...collectFiles(path.join(REPO_ROOT, "components", "ui-custom"), new Set([".ts", ".tsx"])).map((file) => fs.readFileSync(file, "utf8")),

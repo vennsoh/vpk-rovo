@@ -55,7 +55,7 @@ import {
 import { SidebarNavItem, SidebarNavItemAction, SidebarNavItemCount } from "@/components/ui-custom/sidebar-nav-item";
 import { Spinner } from "@/components/ui/spinner";
 import { ChevronDownIcon } from "@/components/ui/vpk-icons";
-import { shouldShowRovoAppSidebarRunIndicator } from "@/components/projects/rovo/lib/rovo-app-sidebar-run-indicator";
+import { shouldShowRovoAppSidebarRunIndicator } from "@/components/projects/rovo-core/lib/rovo-app-sidebar-run-indicator";
 import type { RovoAppThread } from "@/lib/rovo-app-types";
 import { token } from "@/lib/tokens";
 import { cn } from "@/lib/utils";

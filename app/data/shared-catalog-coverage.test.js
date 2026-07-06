@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { existsSync, readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -12,10 +14,10 @@ function readProjectFile(...segments) {
 test("retired shared surfaces have explicit visible catalog demos", () => {
 	const manifestSource = readProjectFile("app/data/component-manifest.ts");
 	const componentSource = readProjectFile("app/data/components.ts");
-	const uiDetailsSource = readProjectFile("app/data/details/ui.ts");
+	const uiDetailsSource = readDetailCategorySource("ui");
 	const utilityDetailsSource = readProjectFile("app/data/details/utility.ts");
-	const blockDetailsSource = readProjectFile("app/data/details/blocks.ts");
-	const registrySource = readProjectFile("components/website/registry.ts");
+	const blockDetailsSource = readDetailCategorySource("blocks");
+	const registrySource = readWebsiteRegistrySource();
 	const navAdsSource = readProjectFile("app/data/nav-ads.ts");
 
 	assert.match(manifestSource, /uiComponent\("heading", "Heading"\)/u);

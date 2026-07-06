@@ -8,6 +8,30 @@ function readProjectFile(relativePath) {
 }
 
 const SKILL_CONFIG_SOURCE = readProjectFile("components/blocks/skill-config/components/skill-config.tsx");
+const SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE = readProjectFile("components/blocks/skill-config/components/agent-compact-header-nav.tsx");
+
+test("Skill Config delegates compact header navigation to a local component owner", () => {
+	assert.match(
+		SKILL_CONFIG_SOURCE,
+		/from "@\/components\/blocks\/skill-config\/components\/agent-compact-header-nav";/u,
+	);
+	assert.doesNotMatch(SKILL_CONFIG_SOURCE, /const AGENT_COMPACT_HEADER_NAV_ITEMS/u);
+	assert.doesNotMatch(SKILL_CONFIG_SOURCE, /function AgentCompactHeaderNavButton/u);
+	assert.doesNotMatch(SKILL_CONFIG_SOURCE, /export function AgentCompactHeaderNav/u);
+	assert.match(
+		SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE,
+		/const AGENT_COMPACT_HEADER_NAV_ITEMS = \[[\s\S]*<LayoutDashboardIcon size="small" \/>[\s\S]*label: "Details"[\s\S]*label: "Insights"/u,
+	);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /export type AgentCompactHeaderSection/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /export interface AgentCompactHeaderNavProps/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /export const AGENT_COMPACT_HEADER_DEFAULT_NAV_ITEMS/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /export const AGENT_COMPACT_HEADER_DETAILS_NAV_ITEM/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /function AgentCompactHeaderNavButton/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /export function AgentCompactHeaderNav/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /computeContextBarOverflow/u);
+	assert.match(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /aria-label="More agent sections"/u);
+	assert.doesNotMatch(SKILL_CONFIG_COMPACT_HEADER_NAV_SOURCE, /DEFAULT_COLLAPSED_SECTIONS/u);
+});
 
 test("Skill Config toolbar visibility is an explicit apps-only model", () => {
 	assert.match(

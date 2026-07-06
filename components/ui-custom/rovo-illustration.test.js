@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -16,8 +18,8 @@ const ASSETS_SOURCE = readRepoFile("components/ui-custom/rovo-illustration/asset
 const DEMO_SOURCE = readRepoFile("components/website/demos/ui-custom/rovo-illustration-demo.tsx");
 const COMPONENTS_SOURCE = readRepoFile("app/data/components.ts");
 const MANIFEST_SOURCE = readRepoFile("app/data/component-manifest.ts");
-const DETAILS_SOURCE = readRepoFile("app/data/details/ui-custom.ts");
-const REGISTRY_SOURCE = readRepoFile("components/website/registry.ts");
+const DETAILS_SOURCE = readDetailCategorySource("ui-custom");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 test("Rovo Illustration restores the embedded spot illustration API", () => {
 	assert.match(INDEX_SOURCE, /export const RovoIllustration = SpotIllustration;/u);

@@ -14,7 +14,7 @@ Next.js 16 (React 19, Tailwind CSS v4) + Express backend with AI SDK (Vercel), A
 - Local browser verification in parallel worktrees should use the worktree-aware tmux launcher: `pnpm run dev:tmux:start` for frontend + backend, or `pnpm run rovo:tmux:start --1` / `--6` only when Rovo behavior is in scope. `dev:tmux:start` runs the dev stack through vanilla `portless run`, giving each worktree a stable `.localhost` URL — prefer that URL (shown by `pnpm ports` as `🌐 https://…`) when navigating. Fall back to `.dev-frontend-port` / `.dev-backend-port` only when no portless route exists; never assume the default frontend port. Because the tmux session is detached, the server and its Portless URL **survive across turns** — for multi-turn work (fix → prompt → return to the same URL) re-navigate to that URL on later turns instead of restarting. Stop with `pnpm run dev:tmux:stop` (per-worktree isolated); see the browser-automation isolation gotcha below.
 - Production runtime uses one Express process serving static export plus `/api/*`.
 - Primary frontend edits are in `components/projects/`, `components/blocks/`, `components/arts/`, `components/ui-custom/`, `components/ui-audio/`, `components/visual/`, `components/website/` (component docs and demos), and `app/` route files.
-- Backend/API edits are in `backend/server.js`, `backend/lib/*.js`, and nested `app/api/**/route.ts` handlers (dev proxy and route-local adapters).
+- Backend/API edits are split by owner: `backend/app.js` composes the Express app; `backend/server.js` owns process startup, static serving, listen, and WebSocket wiring; `backend/routes/*.js` owns route groups; `backend/chat/*.js` owns chat orchestration and streaming helpers; `backend/services/*` and `backend/middleware/*` own shared runtime services; nested `app/api/**/route.ts` handlers own dev proxy and route-local adapters.
 - Validate every change with `pnpm run lint` and `pnpm run typecheck`.
 - For UI changes, also run visual + accessibility checks (see `.agents/docs/workflows-extended.md`).
 - Browser testing and verification: use `agent-browser` (`npx agent-browser`) by default for browser testing, local web-app verification, screenshots, UI probes, public pages, isolated sessions, visual debugging, responsive checks, and unauthenticated web verification. Load and follow the `agent-browser` skill before using it so command patterns match the installed version. Fall back to the Playwright CLI only when `agent-browser` is unavailable or blocked, and load the `playwright` skill before using that fallback. Put ad-hoc browser artifacts under ignored `output/agent-browser/`.
@@ -195,7 +195,7 @@ Use these commands when you need to verify the app build locally or prepare the
 static export used by deployment.
 
 - Verify the Next.js build locally: `pnpm run build`
-- Build the static export used in production deployment: `pnpm run build:export` (temporarily moves runtime-only App Router API and skills detail routes before invoking the export build)
+- Build the static export used in production deployment: `pnpm run build:export` (do not run `NEXT_OUTPUT=export pnpm run build` directly; the wrapper temporarily moves runtime-only App Router API and skills detail routes before invoking the export build)
 - Fast redeploy to Micros after `.deploy.local` exists: `pnpm run deploy:micros`
 
 ### Testing
@@ -210,12 +210,33 @@ static export used by deployment.
 - GitHub Actions runs `.github/workflows/ci.yml` on PRs and manual dispatch.
   The remote `CI / PR checks` status check verifies lockfile registry URLs with
   `scripts/verify-pnpm-lockfile.js`, installs with `pnpm install --frozen-lockfile`,
-  then runs `pnpm run ci:pr` (root-level screenshot artifact verification via
-  `pnpm run verify:root-artifacts`, lint, typecheck, and unit tests via
-  `pnpm run test:unit:js`); treat it as
-  PR confirmation, not a substitute for local validation. This check is
+  then runs `pnpm run ci:pr` (root-level screenshot artifact verification, route
+  manifest, API surface, repo-map, file-size, catalog, lazy-load, source
+  guardrails, documented script references, lint, typecheck, Rovo core tests,
+  and JS unit tests); treat
+  it as PR confirmation, not a substitute for local validation. This check is
   required by branch protection on `main` — `/vpk-git-ship` auto-merge will wait
   for it to pass.
+- Validation freshness:
+  <!-- validation-freshness:begin -->
+  Last validated: 2026-07-06
+  Commands: `pnpm run validate:preflight`, `pnpm run verify:route-manifest`,
+  `pnpm run verify:api-surfaces`, `pnpm run verify:repo-map`,
+  `pnpm run verify:file-size`, `pnpm run verify:catalog`,
+  `pnpm run verify:lazy-load`, `pnpm run verify:source-guardrails`,
+  `pnpm run verify:doc-scripts`, `pnpm run lint`, `pnpm run typecheck`.
+  Reference docs: `.agents/docs/architecture-overview.md`,
+  `.agents/docs/workflows-extended.md`, `.agents/rules/api-surfaces.md`,
+  `.agents/rules/token-priority.md`,
+  `.agents/rules/component-architecture.md`,
+  `.agents/rules/agent-operations.md`.
+  <!-- validation-freshness:end -->
+- For bundle-sensitive work, run `pnpm run perf:budget:warn` as the default
+  manual baseline check. Use strict `pnpm run perf:budget` deliberately before
+  shipping performance or bundle-budget changes. When route load timing is in
+  scope, run `pnpm run perf:baseline`, then pass this worktree's Portless URL
+  to `pnpm run perf:baseline:timing -- --base-url <URL>`. Do not commit
+  `output/perf-baseline.json`.
 - For UI changes, keep the observational checks too: `pnpm run lint`, `pnpm run
   typecheck`, visual checks using the browser testing guidance above, and
   accessibility checks via `ads_analyze_a11y` /
@@ -308,8 +329,8 @@ The following `.agents/rules/` files load automatically when editing matching fi
 | --- | --- | --- |
 | `token-priority.md` | `components/**/*.tsx`, `app/**/*.tsx`, `*.css` | Token selection, theming, motion tokens |
 | `component-architecture.md` | `components/**/*.tsx`, `app/contexts/**/*.tsx` | Context pattern, compound components, CVA |
-| `chat-architecture.md` | `context-rovo-chat.tsx`, `backend/server.js`, `rovo-*.js`, `rovo/**` | AI SDK, useChat, Rovo, data parts |
-| `api-surfaces.md` | `backend/server.js`, `app/api/**/*.ts`, `backend/lib/*.js` | All endpoint listings |
+| `chat-architecture.md` | `context-rovo-chat.tsx`, `backend/chat/**`, `backend/routes/chat-*.js`, `backend/routes/rovo-*.js`, `backend/lib/rovo-*.js`, `rovo/**` | AI SDK, useChat, Rovo, data parts |
+| `api-surfaces.md` | `backend/routes/**/*.js`, `backend/app.js`, `backend/server.js`, `app/api/**/*.ts`, `backend/lib/*.js` | All endpoint listings |
 | `gotchas-ui.md` | `components/**/*.tsx` | Base UI menus, Popover, Toggle, Sonner |
 | `gotchas-chat.md` | `context-rovo-chat.tsx`, `rovo-*.js` | Rovo mode, session, message deletion |
 | `gotchas-react.md` | `**/*.tsx` | State updates, derived state, CSS gap |

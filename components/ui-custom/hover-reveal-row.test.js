@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
 
 const SOURCE = fs.readFileSync(
 	path.join(__dirname, "hover-reveal-row.tsx"),
@@ -11,10 +12,7 @@ const DEMO_SOURCE = fs.readFileSync(
 	path.join(__dirname, "../website/demos/ui-custom/hover-reveal-row-demo.tsx"),
 	"utf8",
 );
-const DETAILS_SOURCE = fs.readFileSync(
-	path.join(__dirname, "../../app/data/details/ui-custom.ts"),
-	"utf8",
-);
+const DETAILS_SOURCE = readDetailCategorySource("ui-custom");
 
 test("hover-reveal-row exposes the container class + label + actions primitives", () => {
 	assert.match(SOURCE, /export const hoverRevealRowClassName = "group\/hover-reveal-row relative";/u);

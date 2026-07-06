@@ -1,1 +1,1 @@
-export * from "./components/agent";
+export * from "@/components/blocks/agent-2";

@@ -7,8 +7,12 @@ const DIALOG_SOURCE = readFileSync(
 	join(__dirname, "components", "manage-triggers-dialog.tsx"),
 	"utf8",
 );
-const AGENT_SOURCE = readFileSync(
-	join(__dirname, "..", "agent", "components", "agent.tsx"),
+const AGENT_FIELDS_SOURCE = readFileSync(
+	join(__dirname, "..", "agent-2", "components", "agent-2.tsx"),
+	"utf8",
+);
+const AUTOMATION_DIALOGS_HOOK_SOURCE = readFileSync(
+	join(__dirname, "..", "agent-2", "hooks", "use-agent-automation-dialogs.ts"),
 	"utf8",
 );
 const DEMO_SOURCE = readFileSync(
@@ -58,17 +62,19 @@ test("ManageTriggersDialog rows manage automation rules, not individual event tr
 });
 
 test('agent config fallback wires "Manage flows" to ManageTriggersDialog', () => {
-	assert.match(AGENT_SOURCE, /import \{ ManageTriggersDialog \}/u);
-	assert.match(AGENT_SOURCE, /const \[manageTriggersOpen, setManageTriggersOpen\] = useState\(false\)/u);
-	assert.match(AGENT_SOURCE, /setManageTriggersOpen\(true\)/u);
-	assert.match(AGENT_SOURCE, /const handleAddAutomationFromManage = useCallback\(/u);
-	assert.match(AGENT_SOURCE, /const handleReorderAutomations = useCallback\(/u);
-	assert.match(AGENT_SOURCE, /const handleToggleAutomation = useCallback\(/u);
-	assert.match(AGENT_SOURCE, /const handleDeleteAutomation = useCallback\(/u);
-	assert.match(AGENT_SOURCE, /handleEditTriggers\(automationRule\)/u);
-	assert.match(AGENT_SOURCE, /const currentAutomationRules = useMemo\([\s\S]*getAgentAutomationRules\(config\)/u);
-	assert.match(AGENT_SOURCE, /<ManageTriggersDialog/u);
-	assert.match(AGENT_SOURCE, /automationRules=\{currentAutomationRules\}/u);
+	assert.match(AGENT_FIELDS_SOURCE, /import \{ ManageTriggersDialog \}/u);
+	assert.match(AGENT_FIELDS_SOURCE, /from "@\/components\/blocks\/agent-2\/hooks\/use-agent-automation-dialogs";/u);
+	assert.match(AGENT_FIELDS_SOURCE, /<ManageTriggersDialog/u);
+	assert.match(AGENT_FIELDS_SOURCE, /automationRules=\{currentAutomationRules\}/u);
+	assert.match(AGENT_FIELDS_SOURCE, /onEditAutomation=\{handleEditAutomationFromManage\}/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const \[manageTriggersOpen, setManageTriggersOpen\] = useState\(false\)/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /setManageTriggersOpen\(true\)/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const handleAddAutomationFromManage = useCallback\(/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const handleReorderAutomations = useCallback\(/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const handleToggleAutomation = useCallback\(/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const handleDeleteAutomation = useCallback\(/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /handleEditTriggers\(automationRule, true\)/u);
+	assert.match(AUTOMATION_DIALOGS_HOOK_SOURCE, /const currentAutomationRules = useMemo\([\s\S]*getAgentAutomationRules\(config\)/u);
 });
 
 test("manage demo opens the restored dialog and keeps full automation editing available", () => {

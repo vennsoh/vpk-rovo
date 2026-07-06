@@ -67,7 +67,47 @@ function createRouteDecisionPart(options = {}, { transient = false } = {}) {
 	return part;
 }
 
+function formatRouteDecisionSSE(decision) {
+	return `data: ${JSON.stringify(createRouteDecisionPart(decision))}\n\n`;
+}
+
+function parseRouteDecisionFromSseChunk(chunk) {
+	if (typeof chunk !== "string" || chunk.trim().length === 0) {
+		return null;
+	}
+
+	const trimmedChunk = chunk.trim();
+	if (!trimmedChunk.startsWith("data:")) {
+		return null;
+	}
+
+	const payloadText = trimmedChunk.replace(/^data:\s*/, "");
+	if (!payloadText || payloadText === "[DONE]") {
+		return null;
+	}
+
+	try {
+		const parsed = JSON.parse(payloadText);
+		if (
+			parsed &&
+			typeof parsed === "object" &&
+			parsed.type === "data-route-decision" &&
+			parsed.data &&
+			typeof parsed.data === "object" &&
+			!Array.isArray(parsed.data)
+		) {
+			return parsed.data;
+		}
+	} catch {
+		return null;
+	}
+
+	return null;
+}
+
 module.exports = {
 	buildRouteDecision,
 	createRouteDecisionPart,
+	formatRouteDecisionSSE,
+	parseRouteDecisionFromSseChunk,
 };

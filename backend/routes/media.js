@@ -1,0 +1,294 @@
+"use strict";
+
+const express = require("express");
+
+const { createAbortControllerFromRequest } = require("../lib/http-request-abort");
+const {
+	ImageProxyResponseTooLargeError,
+	buildImageProxyRequestHeaders,
+	deriveAtlassianImageCandidatesFromUrl,
+	extractAtlassianImageCandidatesFromHtml,
+	parseImageProxyTarget,
+	readImageProxyResponsePayload,
+} = require("../lib/image-proxy");
+const { resolveSpeechPayloadFromAudioRequest } = require("../lib/audio-input-extractor");
+const { synthesizeSound } = require("../lib/sound-generation");
+const { transcribeAudio } = require("../lib/speech-transcription");
+const { getNonEmptyString } = require("../lib/shared-utils");
+
+const SOUND_GENERATION_INPUT_MAX_CHARS = 4096;
+const IMAGE_PROXY_TIMEOUT_MS = 15_000;
+
+function isAbortError(error) {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"name" in error &&
+		error.name === "AbortError"
+	);
+}
+
+function createMediaRouter({
+	abortControllerFromRequest = createAbortControllerFromRequest,
+	abortControllerConstructor = AbortController,
+	buildImageProxyHeaders = buildImageProxyRequestHeaders,
+	deriveAtlassianImageCandidates = deriveAtlassianImageCandidatesFromUrl,
+	extractAtlassianImageCandidates = extractAtlassianImageCandidatesFromHtml,
+	fetchFn = globalThis.fetch,
+	getString = getNonEmptyString,
+	imageProxyResponseTooLargeError = ImageProxyResponseTooLargeError,
+	imageProxyTimeoutMs = IMAGE_PROXY_TIMEOUT_MS,
+	now = Date.now,
+	parseImageProxyTargetFn = parseImageProxyTarget,
+	readImageProxyPayload = readImageProxyResponsePayload,
+	resolveSpeechPayload = resolveSpeechPayloadFromAudioRequest,
+	soundInputMaxChars = SOUND_GENERATION_INPUT_MAX_CHARS,
+	synthesizeSoundFn = synthesizeSound,
+	transcribeAudioFn = transcribeAudio,
+} = {}) {
+	if (typeof abortControllerFromRequest !== "function") {
+		throw new Error("createMediaRouter requires abortControllerFromRequest");
+	}
+	if (typeof abortControllerConstructor !== "function") {
+		throw new Error("createMediaRouter requires abortControllerConstructor");
+	}
+	if (typeof buildImageProxyHeaders !== "function") {
+		throw new Error("createMediaRouter requires buildImageProxyHeaders");
+	}
+	if (typeof deriveAtlassianImageCandidates !== "function") {
+		throw new Error("createMediaRouter requires deriveAtlassianImageCandidates");
+	}
+	if (typeof extractAtlassianImageCandidates !== "function") {
+		throw new Error("createMediaRouter requires extractAtlassianImageCandidates");
+	}
+	if (typeof fetchFn !== "function") {
+		throw new Error("createMediaRouter requires fetchFn");
+	}
+	if (typeof getString !== "function") {
+		throw new Error("createMediaRouter requires getString");
+	}
+	if (typeof now !== "function") {
+		throw new Error("createMediaRouter requires now");
+	}
+	if (typeof parseImageProxyTargetFn !== "function") {
+		throw new Error("createMediaRouter requires parseImageProxyTargetFn");
+	}
+	if (typeof readImageProxyPayload !== "function") {
+		throw new Error("createMediaRouter requires readImageProxyPayload");
+	}
+	if (typeof resolveSpeechPayload !== "function") {
+		throw new Error("createMediaRouter requires resolveSpeechPayload");
+	}
+	if (typeof synthesizeSoundFn !== "function") {
+		throw new Error("createMediaRouter requires synthesizeSoundFn");
+	}
+	if (typeof transcribeAudioFn !== "function") {
+		throw new Error("createMediaRouter requires transcribeAudioFn");
+	}
+
+	const router = express.Router();
+
+	router.post("/sound-generation", async (req, res) => {
+		try {
+			const requestBody =
+				req.body && typeof req.body === "object" ? { ...req.body } : {};
+			const { payload: normalizedInput, mode: extractionMode } =
+				resolveSpeechPayload(requestBody.input, {
+					maxChars: soundInputMaxChars,
+				});
+			if (normalizedInput) {
+				requestBody.input = normalizedInput;
+			}
+
+			console.info("[SOUND-GENERATION] Resolved speech payload", {
+				extractionMode: extractionMode || null,
+				hasInput: typeof requestBody.input === "string",
+				payloadLength:
+					typeof requestBody.input === "string" ? requestBody.input.length : 0,
+			});
+
+			const synthesisResult = await synthesizeSoundFn(requestBody);
+			const filename = `speech-${now()}.${synthesisResult.extension}`;
+
+			res.setHeader("Content-Type", synthesisResult.contentType);
+			res.setHeader("Content-Length", String(synthesisResult.audioBytes.length));
+			res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+			return res.status(200).send(synthesisResult.audioBytes);
+		} catch (error) {
+			console.error("Sound generation API error:", error);
+			const statusCode =
+				typeof error?.statusCode === "number" ? error.statusCode : 500;
+			return res.status(statusCode).json({
+				error:
+					statusCode >= 500
+						? "Internal server error"
+						: error instanceof Error
+							? error.message
+							: "Request failed",
+				details: error instanceof Error ? error.message : String(error),
+			});
+		}
+	});
+
+	router.post("/speech-transcription", async (req, res) => {
+		const { abortController, cleanup } = abortControllerFromRequest(req, res, {
+			onAbort: () => {
+				console.log("[SPEECH-TRANSCRIPTION] Client disconnected, aborting transcription");
+			},
+		});
+
+		try {
+			const { audio, language, mimeType, model, provider } = req.body || {};
+			if (!audio || typeof audio !== "string") {
+				return res.status(400).json({ error: "Base64 audio data is required" });
+			}
+
+			console.info("[SPEECH-TRANSCRIPTION] Transcribing audio", {
+				language: language || null,
+				mimeType: mimeType || "audio/webm",
+				audioLength: audio.length,
+				model: model || null,
+				provider: provider || `(preset: ${process.env.STT_PRESET || "none"})`,
+			});
+
+			const text = await transcribeAudioFn({
+				audio,
+				language,
+				mimeType,
+				model,
+				provider,
+				signal: abortController.signal,
+			});
+			return res.status(200).json({ text });
+		} catch (error) {
+			if (isAbortError(error) && (abortController.signal.aborted || req.aborted || res.destroyed)) {
+				return;
+			}
+
+			console.error("Speech transcription API error:", error);
+			const statusCode =
+				typeof error?.statusCode === "number" ? error.statusCode : 500;
+			return res.status(statusCode).json({
+				error:
+					statusCode >= 500
+						? "Internal server error"
+						: error instanceof Error
+							? error.message
+							: "Request failed",
+			});
+		} finally {
+			cleanup();
+		}
+	});
+
+	router.get("/image-proxy", async (req, res) => {
+		const rawSrc = Array.isArray(req.query.src) ? req.query.src[0] : req.query.src;
+		const { targetUrl, source, error } = parseImageProxyTargetFn(rawSrc);
+		if (error) {
+			return res.status(400).json({ error });
+		}
+
+		const abortController = new abortControllerConstructor();
+		const timeoutHandle = setTimeout(() => {
+			abortController.abort();
+		}, imageProxyTimeoutMs);
+
+		try {
+			const candidateQueue = [
+				targetUrl,
+				...(source === "atlassian"
+					? deriveAtlassianImageCandidates(targetUrl)
+					: []),
+			];
+			const attemptedUrls = new Set();
+			let lastStatus = null;
+
+			while (candidateQueue.length > 0 && attemptedUrls.size < 8) {
+				const currentUrl = candidateQueue.shift();
+				if (!currentUrl) {
+					continue;
+				}
+
+				const currentUrlString = currentUrl.toString();
+				if (attemptedUrls.has(currentUrlString)) {
+					continue;
+				}
+				attemptedUrls.add(currentUrlString);
+
+				const upstreamResponse = await fetchFn(currentUrlString, {
+					method: "GET",
+					headers: buildImageProxyHeaders(currentUrl),
+					redirect: "follow",
+					signal: abortController.signal,
+				});
+
+				if (!upstreamResponse.ok) {
+					lastStatus = upstreamResponse.status;
+					continue;
+				}
+
+				const contentType =
+					getString(upstreamResponse.headers.get("content-type")) ||
+					"application/octet-stream";
+
+				if (contentType.toLowerCase().startsWith("image/")) {
+					const payload = await readImageProxyPayload(upstreamResponse);
+					const upstreamCacheControl = getString(
+						upstreamResponse.headers.get("cache-control")
+					);
+
+					res.setHeader("Content-Type", contentType);
+					res.setHeader("Content-Length", String(payload.length));
+					res.setHeader(
+						"Cache-Control",
+						upstreamCacheControl || "public, max-age=300, stale-while-revalidate=300"
+					);
+
+					return res.status(200).send(payload);
+				}
+
+				if (source === "atlassian") {
+					const htmlText = await upstreamResponse.text();
+					for (const derivedUrl of extractAtlassianImageCandidates(
+						htmlText,
+						currentUrl
+					)) {
+						candidateQueue.push(derivedUrl);
+					}
+				}
+			}
+
+			return res.status(502).json({
+				error:
+					lastStatus !== null
+						? `Image fetch failed (${lastStatus})`
+						: "Upstream response is not an image",
+			});
+		} catch (error) {
+			if (error instanceof imageProxyResponseTooLargeError) {
+				return res.status(error.statusCode).json({
+					error: "Image response is too large",
+				});
+			}
+
+			return res.status(isAbortError(error) ? 504 : 502).json({
+				error: isAbortError(error) ? "Image fetch timed out" : "Image proxy failed",
+			});
+		} finally {
+			clearTimeout(timeoutHandle);
+		}
+	});
+
+	return router;
+}
+
+function registerMediaRoutes(app, dependencies) {
+	app.use("/api", createMediaRouter(dependencies));
+}
+
+module.exports = {
+	IMAGE_PROXY_TIMEOUT_MS,
+	SOUND_GENERATION_INPUT_MAX_CHARS,
+	createMediaRouter,
+	registerMediaRoutes,
+};

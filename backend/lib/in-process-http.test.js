@@ -23,6 +23,8 @@ const {
 
 const {
 	createInProcessRequest,
+	dispatchInProcessHttpRequest,
+	pipeWebResponseToExpressResponse,
 } = require("./in-process-http");
 
 test("createCapturedResponse captures JSON responses as a web Response", async () => {
@@ -89,4 +91,119 @@ test("createInProcessRequest exposes headers via get() and abort events via sign
 
 	assert.equal(aborted, true);
 	assert.equal(closed, true);
+});
+
+test("pipeWebResponseToExpressResponse copies status, headers, and body chunks", async () => {
+	const calls = [];
+	const chunks = [];
+	const response = {
+		status(statusCode) {
+			calls.push(["status", statusCode]);
+			return this;
+		},
+		setHeader(name, value) {
+			calls.push(["setHeader", name.toLowerCase(), value]);
+			return this;
+		},
+		write(chunk) {
+			chunks.push(Buffer.from(chunk));
+			return true;
+		},
+		end() {
+			calls.push(["end"]);
+			return this;
+		},
+	};
+	const webResponse = new Response("hello", {
+		status: 201,
+		headers: {
+			"Content-Length": "5",
+			"Content-Type": "text/plain",
+			"X-Test": "value",
+		},
+	});
+
+	await pipeWebResponseToExpressResponse(webResponse, response);
+
+	assert.deepEqual(calls, [
+		["status", 201],
+		["setHeader", "content-type", "text/plain"],
+		["setHeader", "x-test", "value"],
+		["end"],
+	]);
+	assert.equal(Buffer.concat(chunks).toString("utf8"), "hello");
+});
+
+test("pipeWebResponseToExpressResponse ends responses without a body", async () => {
+	const calls = [];
+	const response = {
+		status(statusCode) {
+			calls.push(["status", statusCode]);
+			return this;
+		},
+		setHeader(name, value) {
+			calls.push(["setHeader", name.toLowerCase(), value]);
+			return this;
+		},
+		write() {
+			calls.push(["write"]);
+			return true;
+		},
+		end() {
+			calls.push(["end"]);
+			return this;
+		},
+	};
+	const webResponse = new Response(null, {
+		status: 204,
+		headers: {
+			"X-Empty": "true",
+		},
+	});
+
+	await pipeWebResponseToExpressResponse(webResponse, response);
+
+	assert.deepEqual(calls, [
+		["status", 204],
+		["setHeader", "x-empty", "true"],
+		["end"],
+	]);
+});
+
+test("dispatchInProcessHttpRequest runs a handler and returns a web response", async () => {
+	const response = await dispatchInProcessHttpRequest({
+		body: { hello: "world" },
+		handleRequest: async (req, res) => {
+			assert.deepEqual(req.body, { hello: "world" });
+			assert.equal(req.get("x-test"), "value");
+			res.status(202).json({ ok: true });
+		},
+		headers: {
+			"X-Test": "value",
+		},
+	});
+
+	assert.equal(response.status, 202);
+	assert.deepEqual(await response.json(), { ok: true });
+});
+
+test("dispatchInProcessHttpRequest validates required dependencies", async () => {
+	await assert.rejects(
+		() => dispatchInProcessHttpRequest(),
+		/dispatchInProcessHttpRequest requires handleRequest/u,
+	);
+	await assert.rejects(
+		() => dispatchInProcessHttpRequest({
+			createRequest: null,
+			handleRequest: async () => {},
+		}),
+		/dispatchInProcessHttpRequest requires createRequest/u,
+	);
+	await assert.rejects(
+		() => dispatchInProcessHttpRequest({
+			createResponse: null,
+			handleRequest: async () => {},
+		}),
+		/dispatchInProcessHttpRequest requires createResponse/u,
+	);
 });

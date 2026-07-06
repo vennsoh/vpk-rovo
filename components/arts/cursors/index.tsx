@@ -1,7 +1,7 @@
 "use client";
 
-import { ClickyOverlay } from "@/components/projects/studio/components/clicky/clicky-overlay";
-import { useClicky } from "@/components/projects/studio/hooks/use-clicky";
+import { ClickyOverlay } from "@/components/projects/rovo-core/components/clicky/clicky-overlay";
+import { useClicky } from "@/components/projects/rovo-core/hooks/use-clicky";
 import { useRealtimeVoice } from "@/components/projects/studio/hooks/use-realtime-voice";
 import type { RovoUIMessage } from "@/lib/rovo-ui-messages";
 import { cn } from "@/lib/utils";

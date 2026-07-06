@@ -1,6 +1,15 @@
 ---
 name: vpk-symphony
 description: Repo-local VPK-rovo Symphony workflow for Linear issue execution, Codex Workpad updates, raw linear_graphql operations, git sync/commit/push/land flow, stuck-run debugging, and Playwright CLI browser evidence. Use whenever working on VPK-rovo Symphony issues, updating WORKFLOW.md or docs/SYMPHONY.md, diagnosing Symphony runs, syncing or landing Symphony PRs, or capturing Symphony UI evidence.
+purpose: Execute and debug VPK Symphony-managed Linear work with workpad discipline, git lifecycle rules, and issue-scoped browser evidence.
+owner: VPK
+category: orchestration
+inputs: Linear issue, Codex Workpad, Symphony docs, branch/PR state, browser evidence needs, and validation requirements.
+outputs: Updated workpad, implementation or investigation result, PR/landing state, screenshots/traces, and Symphony handoff notes.
+required_tools: shell, git, gh, pnpm, linear_graphql, Playwright CLI
+validation_command: pnpm run symphony
+generated_artifacts: Workpad updates, branches, PRs, and ignored output/playwright evidence when approved.
+common_failure_modes: Creating multiple active workpad comments, using normal browser tooling for Symphony evidence, skipping Linear freshness, or landing without guarded checks.
 ---
 
 # vpk-symphony

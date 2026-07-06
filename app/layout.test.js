@@ -117,6 +117,17 @@ test("RootLayout keeps the pre-hydration bootstrap out of the React script tree"
 	assert.doesNotMatch(ROOT_LAYOUT_SOURCE, /dangerouslySetInnerHTML=\{\{ __html: preHydrationScript \}\}/);
 });
 
+test("RootLayout mounts the runtime document title prefixer", () => {
+	assert.match(
+		ROOT_LAYOUT_SOURCE,
+		/import \{ DocumentTitlePrefix \} from "@\/components\/utils\/document-title-prefix";/,
+	);
+	assert.match(
+		ROOT_LAYOUT_SOURCE,
+		/<PreHydrationScript id="vpk-pre-hydration">\{preHydrationScript\}<\/PreHydrationScript>\s*<DocumentTitlePrefix \/>/,
+	);
+});
+
 test("RootLayout keeps the skip link above fixed shell chrome", () => {
 	assert.match(
 		ROOT_LAYOUT_SOURCE,

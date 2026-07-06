@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 const ROOT = join(__dirname, "..", "..");
 
@@ -11,8 +13,8 @@ function readProjectFile(...segments) {
 
 const COMPONENT_SOURCE = readProjectFile("components/ui-custom/chain-of-thought.tsx");
 const DEMO_SOURCE = readProjectFile("components/website/demos/ui-custom/chain-of-thought-demo.tsx");
-const DETAILS_SOURCE = readProjectFile("app/data/details/ui-custom.ts");
-const REGISTRY_SOURCE = readProjectFile("components/website/registry.ts");
+const DETAILS_SOURCE = readDetailCategorySource("ui-custom");
+const REGISTRY_SOURCE = readWebsiteRegistrySource();
 
 test("ChainOfThoughtScenario composes the primitive chain-of-thought parts", () => {
 	assert.match(COMPONENT_SOURCE, /export interface ChainOfThoughtScenarioStep/u);

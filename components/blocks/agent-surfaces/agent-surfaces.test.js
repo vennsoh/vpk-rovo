@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -9,7 +11,7 @@ function readProjectFile(relativePath) {
 
 const SCREEN = "components/blocks/agent-surfaces/components/agent-surfaces.tsx";
 const INDEX = "components/blocks/agent-surfaces/index.ts";
-const AGENT_BLOCK = "components/blocks/agent/components/agent.tsx";
+const AGENT_2_BLOCK = "components/blocks/agent-2/components/agent-2.tsx";
 
 test("Agent Surfaces is exposed as a website block", () => {
 	assert.match(
@@ -21,11 +23,11 @@ test("Agent Surfaces is exposed as a website block", () => {
 		/blockComponent\("agent-surfaces", "Agent Surfaces"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ AgentSurfaces \} from "@\/components\/blocks\/agent-surfaces";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"agent-surfaces": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/agent-surfaces-demo"\)/u,
 	);
 });
@@ -48,7 +50,7 @@ test("Agent Surfaces keeps default and extended surface rows", () => {
 });
 
 test("Agent block exposes Agent Surfaces through its compact section wrapper", () => {
-	const source = readProjectFile(AGENT_BLOCK);
+	const source = readProjectFile(AGENT_2_BLOCK);
 	assert.match(source, /import \{ AgentSurfaces \} from "@\/components\/blocks\/agent-surfaces";/u);
 	assert.match(source, /export type AgentCompactSurfacesPanelProps = ComponentProps<typeof AgentSurfaces>;/u);
 	assert.match(source, /return <AgentSurfaces \{\.\.\.props\} \/>;/u);

@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
+const { readDetailCategorySource } = require(process.cwd() + "/app/data/details/test-source.cjs");
+const { readWebsiteRegistrySource } = require(process.cwd() + "/components/website/registry/test-source.cjs");
 
 function readProjectFile(relativePath) {
 	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -17,11 +19,11 @@ test("Agent Templates is exposed as a website block", () => {
 		/blockComponent\("agent-templates", "Agent Templates"\)/u,
 	);
 	assert.match(
-		readProjectFile("app/data/details/blocks.ts"),
+		readDetailCategorySource("blocks"),
 		/import \{ AgentTemplatesDialog \} from "@\/components\/blocks\/agent-templates";/u,
 	);
 	assert.match(
-		readProjectFile("components/website/registry.ts"),
+		readWebsiteRegistrySource(),
 		/"agent-templates": dynamic\(\s*\(\) => import\("\.\/demos\/blocks\/agent-templates-demo"\)/u,
 	);
 });
@@ -39,6 +41,8 @@ test("Agent Templates renders the strategy dialog layout with entity-card cards"
 	const demoAgentsSource = readProjectFile("components/blocks/agent-templates/data/demo-template-agents.ts");
 	const defaultSidebarGroupsSource = readProjectFile("components/blocks/agent-templates/data/sidebar-groups.ts");
 	const studioShellSource = readProjectFile("components/projects/studio/components/rovo-app-shell.tsx");
+	const studioHomeStarterBentoSource = readProjectFile("components/projects/studio/components/rovo-app-home-starter-bento.tsx");
+	const studioTemplatePromptsSource = readProjectFile("components/projects/studio/lib/studio-template-prompts.ts");
 	const expandedCardSource = readProjectFile("components/ui-custom/entity-card/agent-expanded.tsx");
 
 	assert.doesNotMatch(source, /AgentBrowserDialog/u);
@@ -124,12 +128,16 @@ test("Agent Templates renders the strategy dialog layout with entity-card cards"
 	assert.match(studioShellSource, /agents=\{DEMO_AGENT_TEMPLATES\}/u);
 	assert.match(studioShellSource, /initialCategoryId=\{agentTemplatesInitialCategory\}/u);
 	assert.match(studioShellSource, /onSelectAgent=\{handleTemplateAgentSelect\}/u);
+	assert.match(studioShellSource, /from "@\/components\/projects\/studio\/lib\/studio-template-prompts";/u);
 	assert.match(studioShellSource, /agent\.templatePrompt \?\? buildFallbackTemplatePrompt\(agent\)/u);
 	assert.match(studioShellSource, /sessionAgents=\{DEMO_AGENT_TEMPLATES_SESSION\}/u);
-	assert.match(studioShellSource, /function HomeStarterHeroTile[\s\S]*<TWGAppstack[\s\S]*animated=\{false\}/u);
-	assert.match(studioShellSource, /className=\{cn\(BENTO_CAROUSEL_CONTAINER_CLASS, ROVO_APP_STUDIO_CONTENT_MAX_WIDTH_CLASS\)\}/u);
+	assert.match(studioHomeStarterBentoSource, /function HomeStarterHeroTile[\s\S]*<TWGAppstack[\s\S]*animated=\{false\}/u);
+	assert.match(studioHomeStarterBentoSource, /className=\{cn\(BENTO_CAROUSEL_CONTAINER_CLASS, ROVO_APP_STUDIO_CONTENT_MAX_WIDTH_CLASS\)\}/u);
 	assert.match(source, /initialCategoryId\?: AgentTemplatesCategoryId/u);
-	assert.match(source, /setActiveCategory\(initialCategoryId\)/u);
+	assert.match(source, /const \[activeCategoryState, setActiveCategoryState\] = useState\(\(\) => \(\{/u);
+	assert.match(source, /activeCategory: initialCategoryId,/u);
+	assert.match(source, /open && activeCategoryState\.initialCategoryId !== initialCategoryId/u);
+	assert.match(source, /setActiveCategoryState\(\(currentState\) => \(\{ \.\.\.currentState, activeCategory: categoryId \}\)\);/u);
 	// Demo agents carry the expanded-card detail the cards render.
 	assert.match(demoAgentsSource, /capabilities:/u);
 	assert.match(demoAgentsSource, /const SOURCE_SEQUENCE/u);
@@ -142,6 +150,7 @@ test("Agent Templates renders the strategy dialog layout with entity-card cards"
 	assert.match(demoAgentsSource, /function defaultCapabilities/u);
 	assert.match(demoAgentsSource, /templatePrompt:/u);
 	assert.match(demoAgentsSource, /Use the \$\{name\} template to create a Rovo agent/u);
+	assert.match(studioTemplatePromptsSource, /Use the \$\{agent\.name\} template to create a Rovo agent/u);
 	assert.match(demoAgentsSource, /ready for me to review before sending/u);
 	assert.match(demoAgentsSource, /const MAX_VISIBLE_TEMPLATE_COLLABORATORS = 4/u);
 	assert.match(demoAgentsSource, /function pickCollaborators\(offset: number, count: number\)/u);

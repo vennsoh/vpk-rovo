@@ -13,6 +13,13 @@ function normalizeHeaderEntries(input) {
 	return Object.entries(input);
 }
 
+function requireFunction(name, value) {
+	if (typeof value !== "function") {
+		throw new Error(`dispatchInProcessHttpRequest requires ${name}`);
+	}
+	return value;
+}
+
 function setHeaderValue(store, name, value) {
 	const normalizedName = String(name).toLowerCase();
 	if (Array.isArray(value)) {
@@ -199,7 +206,63 @@ function createCapturedResponse() {
 	return response;
 }
 
+async function pipeWebResponseToExpressResponse(webResponse, res) {
+	res.status(webResponse.status);
+	webResponse.headers.forEach((value, key) => {
+		if (key.toLowerCase() !== "content-length") {
+			res.setHeader(key, value);
+		}
+	});
+
+	if (!webResponse.body) {
+		res.end();
+		return;
+	}
+
+	const reader = webResponse.body.getReader();
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+			if (value) {
+				res.write(Buffer.from(value));
+			}
+		}
+	} finally {
+		reader.releaseLock();
+		res.end();
+	}
+}
+
+async function dispatchInProcessHttpRequest({
+	body,
+	createRequest = createInProcessRequest,
+	createResponse = createCapturedResponse,
+	handleRequest,
+	headers,
+	protocol = "http",
+	signal,
+} = {}) {
+	requireFunction("createRequest", createRequest);
+	requireFunction("createResponse", createResponse);
+	requireFunction("handleRequest", handleRequest);
+
+	const req = createRequest({
+		body,
+		headers,
+		protocol,
+		signal,
+	});
+	const res = createResponse();
+	await handleRequest(req, res);
+	return res.toWebResponse();
+}
+
 module.exports = {
 	createCapturedResponse,
 	createInProcessRequest,
+	dispatchInProcessHttpRequest,
+	pipeWebResponseToExpressResponse,
 };

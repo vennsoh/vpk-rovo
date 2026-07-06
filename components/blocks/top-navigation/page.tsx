@@ -20,7 +20,7 @@ import { RightNavigation } from "./components/right-navigation";
 import { CreateButton } from "./components/create-button";
 import { StudioSidebar } from "./components/studio-sidebar";
 import { useTopNavigation } from "./hooks/use-top-navigation";
-import { useSidebarResize } from "@/components/projects/studio/hooks/use-sidebar-resize";
+import { useSidebarResize } from "@/components/projects/rovo-core/hooks/use-sidebar-resize";
 import {
 	ROVO_APP_SEPARATOR_LINE_OFFSET_PX,
 	ROVO_APP_SIDEBAR_MAX_WIDTH_PX,

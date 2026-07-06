@@ -1,11 +1,28 @@
 const assert = require("node:assert/strict");
+const path = require("node:path");
 const test = require("node:test");
+const esbuild = require("esbuild");
+const { loadCjsModuleFromText } = require(path.join(process.cwd(), "scripts/lib/esbuild-cjs-loader.js"));
+
+function loadRovoAppInterruptionsModule() {
+	const result = esbuild.buildSync({
+		entryPoints: [path.join(process.cwd(), "lib/rovo-app-interruptions.ts")],
+		bundle: true,
+		format: "cjs",
+		logLevel: "silent",
+		platform: "node",
+		tsconfig: path.join(process.cwd(), "tsconfig.json"),
+		write: false,
+	});
+
+	return loadCjsModuleFromText(result.outputFiles[0].text, "rovo-app-interruptions.cjs");
+}
 
 const {
 	getRovoAppInterruptionLabel,
 	isRovoAppAssistantMessageInterruptible,
 	markLastRovoAppAssistantMessageInterrupted,
-} = require("../../../../lib/rovo-app-interruptions.ts");
+} = loadRovoAppInterruptionsModule();
 const { getMessageInterruption } = require("../../../../lib/rovo-ui-messages.ts");
 
 function createAssistantMessage(parts, metadata = undefined) {

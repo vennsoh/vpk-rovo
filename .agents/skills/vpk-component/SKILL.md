@@ -1,6 +1,15 @@
 ---
 name: vpk-component
 description: Harvest ADS and shadcn/Base UI components into VPK components, demos, docs metadata, and tests. Use for atlassian.design URLs, shadcn registry/docs components, ADS/shadcn to VPK mapping, visual enrichment, examples, and package/source parity. Use vpk-design for Figma.
+purpose: Translate upstream ADS, shadcn, and Base UI component references into VPK primitives, demos, docs metadata, and regression coverage.
+owner: VPK
+category: component-harvesting
+inputs: Upstream component docs or source, existing VPK primitive patterns, catalog metadata, demos, and visual parity requirements.
+outputs: VPK component updates, demo/catalog wiring, focused tests, and validation evidence.
+required_tools: shell, rg, pnpm, browser verification tools for UI changes
+validation_command: pnpm run lint && pnpm run typecheck
+generated_artifacts: none by default; approved component harvests may add component, demo, catalog, and test files.
+common_failure_modes: Renaming VPK props to upstream naming, bypassing existing primitives, missing catalog coverage, or skipping visual/a11y verification.
 ---
 
 # VPK Component Harvesting and Visual Enrichment
