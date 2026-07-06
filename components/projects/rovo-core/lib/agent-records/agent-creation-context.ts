@@ -130,10 +130,10 @@ const REQUIRED_AGENT_PROFILE_FIELDS: readonly string[] = [
 	"- name: short display name",
 	'- byline: one-line tagline (e.g. "Generated agent")',
 	"- description: 1–2 sentence summary of what the agent does",
-	"- instructions: structured Markdown beginning with ## Instructions; use paragraphs, bullet lists with bold labels, and optional ## Knowledge, ## Triggers, and ## Validation sections. Reference every chosen catalog item inline as an `@[category:id]` mention token — category is one of tool|skill|knowledge|subagent ONLY, and id MUST be one that appears in the [Catalog] projection AND in the matching array below.",
+	"- instructions: structured Markdown beginning with ## Instructions; use paragraphs, bullet lists with bold labels, and optional ## Knowledge, ## Triggers, and ## Validation sections. Reference every chosen catalog item inline as an `@[category:id]` mention token. Use tool|skill|knowledge|subagent for new tokens; preserve existing template `@[app:id]` tokens when adapting a tokenized template body. Tool/skill/subagent token ids must appear in the matching array below. Knowledge token ids are two-segment catalog ids such as `confluence:all`, while the knowledge array stores the bare app id such as `confluence`.",
 	'- tools: array of REAL tool ids drawn from the [Catalog] projection (e.g. ["jira", "confluence"]); use [] when none apply. Never invent ids or use display names.',
 	"- skills: array of REAL skill ids drawn from the [Catalog] projection; use [] when none apply.",
-	"- knowledge: array of REAL knowledge-app ids drawn from the [Catalog] projection; use [] when none apply.",
+	'- knowledge: array of REAL bare knowledge-app ids derived from the [Catalog] projection (e.g. ["confluence"], not ["confluence:all"]); use [] when none apply.',
 	"- subagents: array of REAL subagent ids drawn from the [Catalog] projection; use [] when none apply.",
 	"- conversationStarters: 3 starter prompts (strings)",
 	"- conversationStarterIcons: optional array (aligned with conversationStarters) of short icon keywords; omit when unsure",
@@ -147,10 +147,10 @@ const REQUIRED_AGENT_PROFILE_FIELDS: readonly string[] = [
 ];
 
 const CATALOG_SELECTION_RULE =
-	"Catalog rule: tools, skills, knowledge, and subagents MUST be selected from the [Catalog] projection below using its exact ids. Do not invent ids, rename them, or use display names. Every `@[category:id]` token in the instructions must reuse an id you placed in the matching array. Leave an array empty rather than guessing.";
+	"Catalog rule: tools, skills, knowledge, and subagents MUST be selected from the [Catalog] projection below. Use exact projection ids for tools, skills, and subagents. For knowledge arrays, use the bare app id from the selected knowledge projection id by removing the `:all` or `:<content>` suffix; use the full two-segment projection id in `@[knowledge:...]` tokens. Do not invent ids, rename them, or use display names. Leave an array empty rather than guessing.";
 
 const HONOR_NAMED_SOURCES_RULE =
-	"Honor named sources: every app/tool/knowledge source the user explicitly names in their brief (e.g. Gmail, Salesforce, Slack, Jira, Google Calendar, Atlassian Projects) MUST be wired up — place each matching catalog id in the tools and/or knowledge array and reference it inline as a mention token. Map each named source to its closest catalog id (e.g. a calendar → google-calendar, project tracking → projects/jira). Do not drop a source the user named.";
+	"Honor named sources: every app/tool/knowledge source the user explicitly names in their brief (e.g. Gmail, Salesforce, Slack, Jira, Google Calendar, Atlassian Projects) MUST be wired up — place each matching catalog id in the tools and/or knowledge array (knowledge arrays store the bare app id such as `confluence`, never the two-segment `confluence:all`) and reference it inline as a mention token (`@[knowledge:...]` tokens use the full two-segment id). Map each named source to its closest catalog id (e.g. a calendar → google-calendar, project tracking → projects/jira). Do not drop a source the user named.";
 
 const CLARIFICATION_DIMENSIONS =
 	"Dimensions to cover (ask about whichever the brief and template context leave unclear): purpose & scope; target users; knowledge/data sources; tone & persona; key tasks & workflows; triggers (when the agent should act); tools/integrations (which catalog tools, skills, knowledge, and subagents it connects to); guardrails (what it must not do).";
@@ -669,7 +669,7 @@ function formatTemplateContextBlock(template: StudioCreationTemplateContext): st
 	}
 	if (boundIds.length > 0) {
 		lines.push(
-			`- Bound catalog ids (reuse these exact ids in the matching arrays and as @[category:id] tokens): ${boundIds.join("; ")}`,
+			`- Bound catalog ids (reuse these exact ids in the matching arrays; for knowledge mention tokens use @[knowledge:<id>:all] or preserve existing template @[app:<id>] tokens): ${boundIds.join("; ")}`,
 		);
 	}
 	if (template.tokenizedBody && template.tokenizedBody.trim().length > 0) {

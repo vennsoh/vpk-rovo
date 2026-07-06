@@ -109,7 +109,7 @@ test("Card Glow duplicates avatars for the glow and renders a masked border ring
 	assert.match(DEMO_SOURCE, /scale: "var\(--card-glow-icon-scale\)"/);
 	assert.match(DEMO_SOURCE, /opacity-\[var\(--card-glow-icon-opacity\)\]/);
 	assert.match(DEMO_SOURCE, /group-hover\/card-glow:opacity-\[var\(--card-glow-icon-opacity\)\]/);
-	assert.match(DEMO_SOURCE, /function getCardBorderClassName/);
+	assert.match(DEMO_SOURCE, /const CARD_GLOW_THEME_STYLES: Record<CardGlowTheme, CardGlowThemeStyles> = \{/);
 	assert.match(DEMO_SOURCE, /const borderGlowStyle: CSSProperties = \{/);
 	assert.match(DEMO_SOURCE, /backdropFilter: borderFilter/);
 	assert.match(DEMO_SOURCE, /circle at /);
@@ -121,7 +121,8 @@ test("Card Glow duplicates avatars for the glow and renders a masked border ring
 	assert.match(DEMO_SOURCE, /"--card-glow-border-core": Math\.max\(1, config\.borderSpread \* 0\.3\)/);
 	assert.match(DEMO_SOURCE, /transparent calc\(var\(--card-glow-border-spread\) \* 1px\)/);
 	assert.match(DEMO_SOURCE, /"--card-glow-tile-accent": tile\.accentColor/);
-	assert.match(DEMO_SOURCE, /getCardBorderClassName\(config\.theme\)/);
+	assert.match(DEMO_SOURCE, /const themeStyles = CARD_GLOW_THEME_STYLES\[config\.theme\]/);
+	assert.match(DEMO_SOURCE, /themeStyles\.borderClassName/);
 	assert.match(DEMO_SOURCE, /absolute inset-0 z-\[1\] rounded-\[inherit\] border/);
 	assert.match(DEMO_SOURCE, /absolute inset-0 z-\[2\] overflow-hidden rounded-\[inherit\] border border-transparent/);
 	assert.match(DEMO_SOURCE, /<Avatar shape="hexagon" size="default">/);
@@ -129,10 +130,9 @@ test("Card Glow duplicates avatars for the glow and renders a masked border ring
 	assert.match(DEMO_SOURCE, /<AvatarFallback>\{tile\.title\.slice\(0, 2\)\.toUpperCase\(\)\}<\/AvatarFallback>/);
 	assert.match(DEMO_SOURCE, /text-sm font-semibold leading-5 text-text/);
 	assert.match(DEMO_SOURCE, /text-sm leading-5 text-text-subtle/);
-	assert.match(DEMO_SOURCE, /function getPreviewTextStyle/);
 	assert.match(DEMO_SOURCE, /"--ds-text": "#F7F8FA"/);
 	assert.match(DEMO_SOURCE, /"--ds-text-subtle": "rgb\(255 255 255 \/ 62%\)"/);
-	assert.match(DEMO_SOURCE, /style=\{\{ \.\.\.effectStyle, \.\.\.getPreviewTextStyle\(config\.theme\) \}\}/);
+	assert.match(DEMO_SOURCE, /style=\{\{ \.\.\.effectStyle, \.\.\.themeStyles\.previewTextStyle \}\}/);
 	assert.match(DEMO_SOURCE, /style=\{borderGlowStyle\}/);
 	assert.match(DEMO_SOURCE, /borderColor: "transparent"/);
 	assert.match(DEMO_SOURCE, /maskComposite: "exclude"/);
@@ -146,4 +146,8 @@ test("Card Glow duplicates avatars for the glow and renders a masked border ring
 	assert.doesNotMatch(DEMO_SOURCE, /hover:bg/);
 	assert.doesNotMatch(DEMO_SOURCE, /rounded-lg border p-4/);
 	assert.doesNotMatch(DEMO_SOURCE, /function getSubtleTextClassName/);
+	assert.doesNotMatch(DEMO_SOURCE, /function getPreviewThemeClassName/);
+	assert.doesNotMatch(DEMO_SOURCE, /function getCardThemeClassName/);
+	assert.doesNotMatch(DEMO_SOURCE, /function getCardBorderClassName/);
+	assert.doesNotMatch(DEMO_SOURCE, /function getPreviewTextStyle/);
 });

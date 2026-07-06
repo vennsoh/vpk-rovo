@@ -77,8 +77,22 @@ function normalizeDraftRecord(rawRecord) {
 	};
 }
 
-function sortDraftsNewestFirst(left, right) {
-	return Date.parse(right.updatedAt) - Date.parse(left.updatedAt);
+function compareDraftSortEntriesNewestFirst(left, right) {
+	if (!Number.isFinite(left.updatedAtMs) || !Number.isFinite(right.updatedAtMs)) {
+		return 0;
+	}
+
+	return right.updatedAtMs - left.updatedAtMs;
+}
+
+function sortDraftsNewestFirst(records) {
+	return records
+		.map((record) => ({
+			record,
+			updatedAtMs: Date.parse(record.updatedAt),
+		}))
+		.sort(compareDraftSortEntriesNewestFirst)
+		.map(({ record }) => record);
 }
 
 function buildDraftDedupeKey(record) {
@@ -109,10 +123,11 @@ function createHermesSkillDraftManager({ baseDir }) {
 				return [];
 			}
 
-			return parsed
-				.map(normalizeDraftRecord)
-				.filter(Boolean)
-				.sort(sortDraftsNewestFirst);
+			return sortDraftsNewestFirst(
+				parsed
+					.map(normalizeDraftRecord)
+					.filter(Boolean),
+			);
 		} catch (error) {
 			if (error?.code === "ENOENT") {
 				return [];
@@ -126,7 +141,7 @@ function createHermesSkillDraftManager({ baseDir }) {
 		await ensureDirs();
 		await fs.writeFile(
 			indexPath,
-			`${JSON.stringify(records.slice().sort(sortDraftsNewestFirst), null, 2)}\n`,
+			`${JSON.stringify(sortDraftsNewestFirst(records.slice()), null, 2)}\n`,
 			"utf8",
 		);
 	}

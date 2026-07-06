@@ -60,6 +60,10 @@ export const TEST_FILE_CLASSIFICATIONS = {
 		"components/blocks/work-item-widget/work-item-widget.test.js",
 	],
 	"source-contract": [
+		// Sidebar navigation-row keyboard-access reveal contract (focus-within
+		// keeps row actions reachable). Lives under components/ so include it
+		// explicitly.
+		"components/blocks/product-sidebar/components/navigation-item-actions.test.js",
 		"components/projects/rovo-core/lib/rovo-app-route-adapter.test.js",
 		"components/projects/rovo-core/hooks/use-rovo-app-artifact-panel-controller.test.js",
 		"components/projects/rovo-core/hooks/use-rovo-app-artifact-panel-effects.test.js",

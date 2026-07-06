@@ -16,6 +16,8 @@ export function NavigationItemWithHoverChevron({
 	onClick,
 }: Readonly<NavigationItemWithHoverChevronProps>) {
 	const [isHovered, setIsHovered] = useState(false);
+	const [isFocusedWithin, setIsFocusedWithin] = useState(false);
+	const isActionAreaVisible = isHovered || isFocusedWithin;
 
 	const primaryControlStyle = {
 		alignItems: "center",
@@ -45,6 +47,13 @@ export function NavigationItemWithHoverChevron({
 			}}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			onFocusCapture={() => setIsFocusedWithin(true)}
+			onBlurCapture={(event) => {
+				const nextTarget = event.relatedTarget;
+				if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+					setIsFocusedWithin(false);
+				}
+			}}
 		>
 			<button
 				type="button"
@@ -52,7 +61,7 @@ export function NavigationItemWithHoverChevron({
 				onClick={onClick}
 				style={primaryControlStyle}
 			>
-				{/* Icon - swaps to chevron on hover */}
+				{/* Icon - swaps to chevron while actions are available */}
 				<span
 					style={{
 						display: "flex",
@@ -63,7 +72,7 @@ export function NavigationItemWithHoverChevron({
 						marginLeft: token("space.025"),
 					}}
 				>
-					{isHovered ? (
+					{isActionAreaVisible ? (
 						isExpanded ? (
 							<ChevronDownIcon label="" color={token("color.icon.subtle")} size="small" />
 						) : (
@@ -91,8 +100,8 @@ export function NavigationItemWithHoverChevron({
 				</span>
 			</button>
 
-			{/* Right actions - only show on hover if hasActions */}
-			{hasActions && isHovered ? <NavigationItemActions label={label} /> : null}
+			{/* Right actions - shown on pointer hover or keyboard focus */}
+			{hasActions && isActionAreaVisible ? <NavigationItemActions label={label} /> : null}
 		</div>
 	);
 }

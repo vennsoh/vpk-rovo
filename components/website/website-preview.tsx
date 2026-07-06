@@ -38,9 +38,11 @@ function TextFallback({ name, importPath }: Readonly<{ name: string; importPath:
 	);
 }
 
-function WebsitePreviewWrapper({ Demo }: Readonly<{ Demo: ComponentType }>) {
+function WebsitePreviewWrapper({ Demo, slug }: Readonly<{ Demo: ComponentType; slug: string }>) {
+	const PreviewDemo = Demo as ComponentType<{ slug?: string }>;
+
 	return (
-		<Demo />
+		<PreviewDemo slug={slug} />
 	);
 }
 
@@ -56,7 +58,7 @@ function ResolvedWebsitePreview({
 		return <TextFallback name={name} importPath={importPath} />;
 	}
 
-	return <WebsitePreviewWrapper Demo={Demo} />;
+	return <WebsitePreviewWrapper Demo={Demo} slug={slug} />;
 }
 
 export function WebsitePreview(props: Readonly<WebsitePreviewProps>) {

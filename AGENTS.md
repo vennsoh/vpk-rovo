@@ -195,7 +195,7 @@ Use these commands when you need to verify the app build locally or prepare the
 static export used by deployment.
 
 - Verify the Next.js build locally: `pnpm run build`
-- Build the static export used in production deployment: `pnpm run build:export` (temporarily moves runtime-only App Router API and skills detail routes before invoking the export build)
+- Build the static export used in production deployment: `pnpm run build:export` (do not run `NEXT_OUTPUT=export pnpm run build` directly; the wrapper temporarily moves runtime-only App Router API and skills detail routes before invoking the export build)
 - Fast redeploy to Micros after `.deploy.local` exists: `pnpm run deploy:micros`
 
 ### Testing

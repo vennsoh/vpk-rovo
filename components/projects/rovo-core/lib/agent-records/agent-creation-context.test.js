@@ -175,7 +175,8 @@ test("both builders embed the catalog projection and the real-ids contract", asy
 		// Real-id arrays for all four config categories.
 		assert.match(text, /- tools: array of REAL tool ids/u, `${label} should require real tool ids`);
 		assert.match(text, /- skills: array of REAL skill ids/u, `${label} should require real skill ids`);
-		assert.match(text, /- knowledge: array of REAL knowledge-app ids/u, `${label} should require real knowledge ids`);
+		assert.match(text, /- knowledge: array of REAL bare knowledge-app ids/u, `${label} should require bare knowledge ids`);
+		assert.match(text, /not \["confluence:all"\]/u, `${label} should reject knowledge mention ids in the knowledge array`);
 		assert.match(text, /- subagents: array of REAL subagent ids/u, `${label} should require real subagent ids`);
 		// Conversation starters + triggers.
 		assert.match(text, /- conversationStarters: 3 starter prompts/u);
@@ -185,8 +186,11 @@ test("both builders embed the catalog projection and the real-ids contract", asy
 		assert.match(text, /- memoryMode: "on" or "off"/u, `${label} should require memoryMode`);
 		assert.match(text, /- reasoningMode: one of "quick-auto"/u, `${label} should require reasoningMode`);
 		assert.match(text, /- knowledgeMode: "all", "custom", or "none"/u, `${label} should require knowledgeMode`);
+		assert.match(text, /Knowledge token ids are two-segment catalog ids/u, `${label} should explain knowledge token ids`);
+		assert.match(text, /For knowledge arrays, use the bare app id/u, `${label} should map knowledge tokens to array ids`);
 		// Honor-named-sources rule (apps unification): every app the user names must be wired up.
 		assert.match(text, /Honor named sources:/u, `${label} should include the honor-named-sources rule`);
+		assert.match(text, /knowledge arrays store the bare app id such as `confluence`, never the two-segment `confluence:all`/u, `${label} honor-named-sources rule should keep knowledge arrays bare`);
 	}
 
 	// The initial turn uses the full catalog; the scoped continuation announces its scope.
@@ -264,12 +268,15 @@ test("template context surfaces bound ids and tokenized body when present", asyn
 		name: "Bug Triage",
 		toolIds: ["jira", "github"],
 		skillIds: ["triage-bugs"],
+		knowledgeIds: ["confluence"],
 		tokenizedBody: "## Instructions\nTriage with @[tool:jira].",
 	});
 
 	assert.match(text, /Bound catalog ids/u);
 	assert.match(text, /tools=\[jira, github\]/u);
 	assert.match(text, /skills=\[triage-bugs\]/u);
+	assert.match(text, /knowledge=\[confluence\]/u);
+	assert.match(text, /for knowledge mention tokens use @\[knowledge:<id>:all\]/u);
 	assert.match(text, /@\[tool:jira\]/u);
 });
 
