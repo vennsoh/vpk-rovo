@@ -11,6 +11,13 @@ this planning work.
 > claim (lint and typecheck pass locally), quantifies every hotspot with
 > exact line numbers and churn data, and revises the recommended sequencing.
 > Read the addendum together with each priority section before implementing.
+>
+> **2026-07-06:** An implementation of this plan was submitted as PR #1118
+> and independently re-verified — see "PR #1118 Independent Review" at the
+> bottom. Verdict: high-quality and faithful to the plan, but blocked on two
+> deterministic gate failures, two merge conflicts, and CI never having run.
+> All four were fixed on the `land-architecture-improvement-plan` landing
+> branch; the ordered fix checklist is in that section's §6.
 
 # Implementation Status Addendum (2026-07-06)
 
@@ -58,6 +65,12 @@ The implementation pass was verified with:
 - `corepack pnpm run verify:doc-scripts`
 - `corepack pnpm run verify:root-artifacts`
 - `git diff --check`
+
+> **Correction (2026-07-06, independent review):** at commit `b565d0f5` two of
+> these gates actually failed — `verify:file-size` (this plan file exceeded the
+> 1,000-line threshold without an allowlist entry) and `verify:doc-scripts`
+> (provider chain drift in `.agents/docs/architecture-overview.md`). Both are
+> fixed on the landing branch; see "PR #1118 Independent Review" below.
 
 ## 4. Remaining Work
 
@@ -1295,3 +1308,138 @@ Ratchet against these exact numbers:
 - Validation: lint ✅ exit 0, typecheck ✅ exit 0 (local, pnpm 11.1.2 pin).
 - Churn/3mo leaders: studio shell 206, registry 172, agent-creation-flow
   test 142, components.ts 113, component-manifest.ts 113.
+---
+
+# PR #1118 Independent Review (2026-07-06)
+
+An implementation of this plan was submitted as
+[eevennsoh/vpk-rovo#1118](https://github.com/eevennsoh/vpk-rovo/pull/1118)
+(1,174 files, +154,244 / −86,985, single commit `b565d0f5`, branched from
+`209a0389`). This section records an independent verification of that PR:
+the head was checked out into a local review worktree, dependencies were
+installed, and every gate was re-run rather than trusting the PR
+description. Nothing in this section is estimated.
+
+## 1. Verdict
+
+The implementation is real, high quality, and faithful to the plan. It must
+NOT merge as-is: two of its own new CI gates fail deterministically at the
+PR head, it has two merge conflicts against current `main`, and GitHub
+Actions never ran on the PR (empty status-check rollup). All are small,
+mechanical fixes — the ordered checklist is in §6.
+
+## 2. Independently Verified as Passing (run locally at PR head)
+
+| Gate | Result |
+| --- | --- |
+| `typecheck` | ✅ 0 errors |
+| `lint` | ✅ clean |
+| `verify:route-manifest` | ✅ 15/15 — 156 backend routes + 132 Next proxy targets in parity |
+| `verify:catalog` | ✅ 392 manifest entries, 0 warnings |
+| `verify:repo-map` / `verify:lazy-load` / `verify:api-surfaces` / `verify:source-guardrails` | ✅ |
+| `validate:agents` (3 agents) / `validate:skills` (14 skills) | ✅ |
+| `test:rovo-core` | ✅ 395/395 |
+| Full `test:unit:js` gate | ✅ exit 0, ~3,200 tests, 80 component tests CI-gated (was ~60) |
+
+Quality spot-checks that also passed:
+
+- **Behavior preservation.** `backend/server.js`: 16,340 → 89 lines. All 19
+  `stageTrace.mark()` telemetry names survive relocation — the full mark set
+  was diffed old-vs-new; none were renamed or dropped. The new
+  `backend/chat/chat-sdk-handler.contract.test.js` asserts SSE headers,
+  `STAGE_TRACE_ID_HEADER`, event ordering, and abort-signal propagation on
+  client disconnect — exactly the contract the Deep Review Addendum §3
+  required before extraction.
+- **Migrate-and-delete honored.** The 45 byte-identical rovo/studio files
+  are gone; `components/projects/rovo-core/` (253 files) is the single
+  owner; both route hooks are ~33-line adapters (options object + route
+  adapter, as recommended in §4 of the addendum). The 8 deleted test files
+  all have rovo-core successors — total test files went 549 → 776.
+- **Layering violation fixed.** `app/contexts/context-rovo-chat.tsx` no
+  longer imports Studio internals, and the ESLint `no-restricted-imports`
+  boundaries (rovo↮studio, shared→routes, ui→app) landed as specified in
+  addendum §7.3.
+- Registry is a 1-line shim over per-category modules; details files are
+  per-component with barrels; `studio/lib` retains only genuinely
+  studio-specific modules.
+
+## 3. Deterministic Gate Failures at PR Head (must fix)
+
+Both gates are part of the PR's own new `ci:pr`, so CI will fail once it
+runs. Both contradict the PR plan file's "Validation Evidence" list, which
+should be corrected at the same time.
+
+1. **`verify:file-size` fails.** `ARCHITECTURE_IMPROVEMENT_PLAN.md` is
+   1,297 lines — over the 1,000-line threshold and absent from
+   `scripts/file-size-allowlist.json`. Fix: run
+   `node scripts/verify-file-size-budget.js --update` (or add the entry
+   manually). Note: merging this review section will grow the file further,
+   so run the update after the final plan edit.
+2. **`verify:doc-scripts` fails.** `.agents/docs/architecture-overview.md`
+   (line ~64) documents the provider chain as
+   `ThemeWrapper → SidebarProvider → CreationModeProvider → RovoChatProvider`,
+   but `app/providers.tsx` is actually
+   `MotionConfig → ThemeWrapper → SidebarProvider → RovoChatProvider`.
+   One-line doc fix.
+
+## 4. Merge Conflicts vs Current Main (must resolve)
+
+19 commits landed on `main` after the branch point; exactly two files
+conflict:
+
+1. `scripts/run-js-unit-tests.mjs` — main added
+   `components/blocks/product-sidebar/components/navigation-item-actions.test.js`
+   to the CI allowlist (commit `c1811ff0`); the PR moved the allowlist into
+   `scripts/js-unit-test-manifest.mjs`. Resolution: keep the PR's structure
+   and add main's new entry to the new manifest file.
+2. `components/website/demos/visual/shaders-paper-demo.test.js` — main
+   added slug-routing assertions reading `website-preview.tsx`; the PR
+   switched source reading to the new `test-source.cjs` helpers. The
+   changes are orthogonal; keep both.
+
+## 5. Environment Findings (affects local validation, not the PR)
+
+- GitHub Actions produced no checks for the PR at review time. Investigate
+  in the repo's Actions tab before merge — an unreviewed-by-CI merge of a
+  1,174-file change defeats the purpose of the new gates.
+- The local machine used for this review currently has **no `~/.npmrc`**
+  with the `atlassian-npm` token and the main checkout's `node_modules` is
+  empty, so `pnpm install` fails on `@atlassian/logo-third-party` with a
+  404/no-auth error — the exact Priority 0 scenario. Restore the user-level
+  token before attempting local validation runs. (For this review the
+  package was stubbed inside the review worktree's `node_modules` only;
+  every gate failure traced to the stub was confirmed as environment
+  artifact, not a PR defect.)
+
+## 6. Ordered Fix Checklist
+
+> **Status:** items 1–4 were applied on the `land-architecture-improvement-plan`
+> branch during the landing pass (2026-07-06); items 5–6 are the merge gate.
+
+
+1. Fix `.agents/docs/architecture-overview.md` provider chain (§3.2).
+2. Merge/rebase onto current `main`, resolving the two conflicts per §4.
+3. Update the plan file's "Validation Evidence" section to note that
+   `verify:file-size` and `verify:doc-scripts` failed at `b565d0f5` and
+   were fixed post-review; optionally fold this review section into the PR
+   branch's copy of the plan.
+4. Run `node scripts/verify-file-size-budget.js --update` last, so the
+   allowlisted line count reflects the final plan file (§3.1).
+5. Re-run `pnpm run ci:pr` locally (requires the registry token, §5) and
+   confirm GitHub Actions actually executes on the updated PR.
+6. Merge only with green CI. No `--admin` merge — the gates are the point.
+
+## 7. Follow-ups After Merge (agreed with the PR's own §4)
+
+- Browser smoke checks for `/rovo`, `/studio`, `/components` — not
+  performed in this review (no `.env` on the review machine and the logo
+  stub would render nulls); do this before any production deploy.
+- Move the 4 test files in `components/projects/rovo/lib/` that exercise
+  root `lib/` sources (e.g. `rovo-app-interruptions.test.js`) next to their
+  sources.
+- Capture the performance baseline (`pnpm run perf:baseline`) before
+  enforcing strict route-size budgets.
+- The `agent` vs `agent-2` blocks decision (Deep Review Addendum §2.7)
+  remains open — it was correctly left out of this PR.
+- Continue graduating legacy-drift component tests (299 remain excluded)
+  through `scripts/js-unit-test-manifest.mjs`.

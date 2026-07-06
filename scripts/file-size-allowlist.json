@@ -2,14 +2,12 @@
 	"version": 1,
 	"threshold": 1000,
 	"growthBudgetPercent": 5,
-	"maxLines": {
-		"backend/server.js": 500
-	},
 	"files": {
 		".agents/skills/vpk-tidy/references/patterns.md": 1004,
 		"app/contexts/context-rovo-chat.tsx": 2303,
 		"app/tailwind-theme.css": 1011,
-		"backend/chat/rovo-stream.test.js": 1638,
+		"ARCHITECTURE_IMPROVEMENT_PLAN.md": 1445,
+		"backend/chat/rovo-stream.test.js": 1537,
 		"backend/lib/agents-rfp-demo-state.js": 1589,
 		"backend/lib/browser-workspace-manager.js": 1664,
 		"backend/lib/genui-google-tool-handler.js": 1199,
@@ -47,14 +45,13 @@
 		"components/projects/rovo/components/rovo-app-shell.tsx": 2573,
 		"components/projects/shared/components/floating-rovo-button.tsx": 1337,
 		"components/projects/shared/components/icon-registry.tsx": 1282,
-		"components/projects/shared/lib/generative-widget.test.js": 1088,
+		"components/projects/shared/lib/generative-widget.test.js": 1090,
 		"components/projects/shared/lib/generative-widget.ts": 2970,
 		"components/projects/shared/lib/question-card-widget.test.js": 1051,
 		"components/projects/sidebar-chat/page.tsx": 2059,
 		"components/projects/studio/components/rovo-app-agent-config-panel.tsx": 1826,
-		"components/projects/studio/components/rovo-app-agent-creation-flow.test.js": 1622,
+		"components/projects/studio/components/rovo-app-agent-creation-flow.test.js": 1669,
 		"components/projects/studio/components/rovo-app-shell.tsx": 4256,
-		"components/projects/studio/hooks/use-rovo-app.test.js": 1517,
 		"components/projects/studio/lib/demo-agent-builder.ts": 1480,
 		"components/ui-audio/waveform.tsx": 1720,
 		"components/ui-charts/funnel-chart.tsx": 1043,
@@ -79,5 +76,8 @@
 		"lib/json-render/catalog.ts": 1172,
 		"lib/json-render/registry.tsx": 2412,
 		"lib/rovo-ui-messages.ts": 1112
+	},
+	"maxLines": {
+		"backend/server.js": 500
 	}
 }
